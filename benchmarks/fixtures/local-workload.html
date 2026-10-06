@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'">
+  <title>Local deterministic browser benchmark</title>
+  <style>
+    body { font: 16px sans-serif; margin: 16px; }
+    #items { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+    .item { border: 1px solid #888; padding: 2px; }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const fragment = document.createDocumentFragment();
+      let checksum = 0;
+      for (let i = 0; i < 2000; ++i) {
+        const value = (i * 17) % 997;
+        checksum += value;
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.textContent = `${i}: ${value}`;
+        fragment.appendChild(item);
+      }
+      document.getElementById('items').appendChild(fragment);
+      // Force style/layout before declaring this synchronous workload complete.
+      void document.body.offsetHeight;
+      const result = document.getElementById('benchmark-result');
+      result.setAttribute('data-items', '2000');
+      result.setAttribute('data-checksum', String(checksum));
+      result.setAttribute('data-status', 'complete');
+      result.textContent = `complete: 2000 items, checksum ${checksum}`;
+    });
+  </script>
+</head>
+<body>
+  <h1>Deterministic local DOM workload</h1>
+  <output id="benchmark-result" data-status="pending">pending</output>
+  <div id="items"></div>
+</body>
+</html>

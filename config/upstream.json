@@ -1,0 +1,7 @@
+{
+  "chromium_version": "154.0.8037.97",
+  "chromium_revision": "b510e9d7cd3a2fbd78d0ddc42234103206c5f78d",
+  "chromium_url": "https://chromium.googlesource.com/chromium/src.git",
+  "depot_tools_revision": "ccecefb58648ac0a416756b0a4591ec8905a7f55",
+  "depot_tools_url": "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+}

@@ -1,0 +1,215 @@
+diff --git a/chrome/browser/prefs/browser_prefs.cc b/chrome/browser/prefs/browser_prefs.cc
+--- a/chrome/browser/prefs/browser_prefs.cc
++++ b/chrome/browser/prefs/browser_prefs.cc
+@@ -18,6 +18,7 @@
+ #include "build/android_buildflags.h"
+ #include "build/branding_buildflags.h"
+ #include "build/build_config.h"
++#include "browser/appearance/appearance_pref_store.h"
+ #include "chrome/browser/about_flags.h"
+ #include "chrome/browser/accessibility/accessibility_labels_service.h"
+ #include "chrome/browser/accessibility/invert_bubble_prefs.h"
+@@ -1801,6 +1802,7 @@
+   AnnouncementNotificationService::RegisterProfilePrefs(registry);
+   autofill::prefs::RegisterProfilePrefs(registry);
+   browsing_data::prefs::RegisterBrowserUserPrefs(registry);
++  browser::RegisterAppearanceProfilePrefs(registry);
+   capture_policy::RegisterProfilePrefs(registry);
+   certificate_transparency::prefs::RegisterPrefs(registry);
+   ChromeContentBrowserClient::RegisterProfilePrefs(registry);
+diff --git a/chrome/browser/prefs/BUILD.gn b/chrome/browser/prefs/BUILD.gn
+--- a/chrome/browser/prefs/BUILD.gn
++++ b/chrome/browser/prefs/BUILD.gn
+@@ -60,6 +60,7 @@
+   deps = [
+     ":prefs",
+     ":util",
++    "//browser:appearance_prefs",
+     "//chrome/browser:browser_process",
+     "//chrome/browser:browser_process_impl",
+     "//chrome/browser:chrome_content_browser_client",
+diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
+--- a/chrome/browser/ui/BUILD.gn
++++ b/chrome/browser/ui/BUILD.gn
+@@ -2470,6 +2470,25 @@
+     if (use_aura) {
+       deps += [ "//third_party/fontconfig" ]
+     }
++  }
++
++  # Keep implementation here: toolbar:impl depends only on the header target,
++  # never on ui itself. This preserves the existing dependency graph direction.
++  if (toolkit_views && !is_android) {
++    sources += [
++      "//browser/ui/customize_browser_dialog.cc",
++      "//browser/ui/native_appearance_controller.cc",
++    ]
++    deps += [
++      "//browser:appearance_prefs",
++      "//browser:customization_dialog_headers",
++      "//chrome/app:generated_resources",
++      "//chrome/app:generated_resources_grit",
++      "//chrome/browser/themes",
++      "//chrome/common",
++      "//components/bookmarks/common",
++      "//components/themes:prefs",
++    ]
+   }
+ 
+   if (toolkit_views) {
+diff --git a/chrome/browser/ui/views/toolbar/BUILD.gn b/chrome/browser/ui/views/toolbar/BUILD.gn
+--- a/chrome/browser/ui/views/toolbar/BUILD.gn
++++ b/chrome/browser/ui/views/toolbar/BUILD.gn
+@@ -169,6 +169,7 @@
+     ":toolbar",
+     "//base:i18n",
+     "//build:branding_buildflags",
++    "//browser:customization_dialog_headers",
+     "//cc/paint",
+     "//chrome/app:branded_strings",
+     "//chrome/app:branded_strings_grit",
+diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.h b/chrome/browser/ui/views/toolbar/toolbar_view.h
+--- a/chrome/browser/ui/views/toolbar/toolbar_view.h
++++ b/chrome/browser/ui/views/toolbar/toolbar_view.h
+@@ -66,6 +66,10 @@
+ class OverflowButton;
+ class PerformanceInterventionButton;
+ 
++namespace browser {
++class CustomizeBrowserDialog;
++}  // namespace browser
++
+ namespace views {
+ class FlexLayout;
+ class LabelButton;
+@@ -427,6 +431,7 @@
+ 
+   const raw_ptr<BrowserWindowInterface> browser_;
+   const raw_ptr<BrowserView> browser_view_;
++  std::unique_ptr<browser::CustomizeBrowserDialog> customization_dialog_;
+   base::WeakPtr<glic::GlicSplitButtonController> glic_split_button_controller_;
+ 
+   // ToolbarView may or may not serve as the `ToolbarButtonProvider` for a given
+diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.cc b/chrome/browser/ui/views/toolbar/toolbar_view.cc
+--- a/chrome/browser/ui/views/toolbar/toolbar_view.cc
++++ b/chrome/browser/ui/views/toolbar/toolbar_view.cc
+@@ -21,7 +21,9 @@
+ #include "base/strings/utf_string_conversions.h"
+ #include "base/trace_event/trace_event.h"
+ #include "build/build_config.h"
++#include "browser/ui/customize_browser_dialog.h"
+ #include "chrome/app/chrome_command_ids.h"
++#include "chrome/app/vector_icons/vector_icons.h"
+ #include "chrome/browser/actor/ui/actor_ui_metrics.h"
+ #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble.h"
+ #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble_controller.h"
+@@ -603,6 +605,30 @@
+     overflow_button_->SetVisible(false);
+   }
+ 
++  // A native product affordance, including when the rest of the toolbar is
++  // WebUI. ToolbarView owns both dialog and Widget; reopening reloads prefs.
++  auto customize_button = std::make_unique<ToolbarButton>(base::BindRepeating(
++      [](ToolbarView* toolbar) {
++        if (!toolbar->customization_dialog_ ||
++            toolbar->customization_dialog_->IsClosed()) {
++          auto* parent_widget = toolbar->browser_view_->GetWidget();
++          toolbar->customization_dialog_ =
++              std::make_unique<browser::CustomizeBrowserDialog>(
++                  *toolbar->browser_->GetProfile(),
++                  parent_widget->GetNativeWindow(),
++                  parent_widget->GetNativeView());
++        }
++        toolbar->customization_dialog_->Show();
++      },
++      base::Unretained(this)));
++  customize_button->SetID(browser::kCustomizeBrowserToolbarButtonId);
++  customize_button->SetVectorIcon(kSettingsIcon);
++  customize_button->SetTooltipText(
++      l10n_util::GetStringUTF16(IDS_BROWSER_FINAL_CUSTOMIZE_TITLE));
++  customize_button->GetViewAccessibility().SetName(
++      l10n_util::GetStringUTF16(IDS_BROWSER_FINAL_CUSTOMIZE_TITLE));
++  AddChildView(std::move(customize_button));
++
+   // WebUI app menu button handles these internally, so no need to set these
+   // properties here, and the control is added as part of the WebUI toolbar.
+   if (!features::IsWebUIAppMenuButtonEnabled()) {
+diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
+--- a/chrome/app/generated_resources.grd
++++ b/chrome/app/generated_resources.grd
+@@ -277,6 +277,7 @@
+   <release seq="1">
+     <!-- IMPORTANT: .grdp files must be in the same directory as this file -->
+     <messages fallback_to_english="true">
++      <part file="browser_final_customization_strings.grdp" />
+       <!-- Access Code Cast specific strings -->
+       <part file="access_code_cast_strings.grdp" />
+ 
+diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
+--- a/chrome/test/BUILD.gn
++++ b/chrome/test/BUILD.gn
+@@ -1887,6 +1887,7 @@
+     deps = [
+       ":browser_tests_runner",
+       ":platform_browser_tests",
++      "//browser:chromium_browser_tests",
+       ":test_support",
+       ":test_support_ui",
+       "//base",
+@@ -5188,6 +5189,7 @@
+     ":test_interfaces",
+     ":test_support",
+     ":test_support_unit",
++    "//browser:chromium_unit_tests",
+     "//base:base_stack_sampling_profiler_test_util",
+     "//base/i18n:test_support",
+     "//base/test:test_support",
+diff --git a/chrome/app/generated_resources.grd.gritdeps b/chrome/app/generated_resources.grd.gritdeps
+--- a/chrome/app/generated_resources.grd.gritdeps
++++ b/chrome/app/generated_resources.grd.gritdeps
+@@ -4,6 +4,7 @@
+ chrome/app/actor_strings.grdp
+ chrome/app/app_management_strings.grdp
+ chrome/app/bookmarks_strings.grdp
++chrome/app/browser_final_customization_strings.grdp
+ chrome/app/certificate_manager.grdp
+ chrome/app/chromeos_shared_strings.grdp
+ chrome/app/chromeos_strings.grdp
+diff --git a/chrome/app/browser_final_customization_strings.grdp b/chrome/app/browser_final_customization_strings.grdp
+new file mode 100644
+--- /dev/null
++++ b/chrome/app/browser_final_customization_strings.grdp
+@@ -0,0 +1,33 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- 0002-customization.patch installs this catalog beside generated_resources.grd
++     as required by that upstream GRD's part-location contract. -->
++<grit-part>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_TITLE" desc="Title and toolbar tooltip of Browser Final's native appearance dialog.">Customize Browser</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_DESCRIPTION" desc="Explains which native browser settings can be customized.">Choose a preset or change the theme, accent, and bookmarks bar.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PRESET_LABEL" desc="Accessible label for the preset selector.">Appearance preset</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_SAVED" desc="Preset selector entry that restores the configuration loaded when opening the dialog.">Saved configuration</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PRESET_DEFAULT" desc="Built-in default appearance preset.">Default</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PRESET_DARK" desc="Built-in dark appearance preset.">Dark</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PRESET_COMPACT" desc="Built-in compact appearance preset; its density is not yet implemented.">Compact (bookmarks bar on new tabs only)</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_THEME_LABEL" desc="Accessible label for the browser color scheme selector.">Theme mode</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_THEME_SYSTEM" desc="Browser color scheme that follows the operating system's light or dark mode.">Follow system light or dark mode</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_THEME_LIGHT" desc="Light browser color scheme.">Light</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_THEME_DARK" desc="Dark browser color scheme.">Dark</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_ACCENT_LABEL" desc="Label for an RGB hex accent color text field.">Accent color (#RRGGBB)</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_BOOKMARKS" desc="Checkbox controlling bookmark bar visibility on regular tabs. The bar remains visible on new tabs when unchecked.">Show bookmarks bar on all tabs</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_APPLY" desc="Button that applies and saves the selected appearance.">Apply</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_CANCEL" desc="Button that discards appearance edits without changing browser settings.">Cancel</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PREVIEW" desc="Button that updates a dialog-local illustrative preview without writing preferences.">Preview</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PREVIEW_NOTICE" desc="Makes the preview's limitations and transactional behavior explicit.">Illustrative preview only. The browser derives its palette from the accent color. Only Apply changes the browser and saves settings; Cancel discards edits. Applying an accent replaces an existing theme.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PREVIEW_ACCENT" desc="Text shown on the accent swatch in the illustrative preview.">Accent</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PREVIEW_BOOKMARKS" desc="Example bookmarks row shown in the illustrative preview of a regular tab.">Example bookmarks</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_UNIMPLEMENTED" desc="Explicitly states which preset fields currently have no effect on native Chromium.">Density, tab shape, background color, scaling, corner radius, animation, transparency, and sidebar settings are stored for compatibility but do not change native browser chrome.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_READY" desc="Initial status in a writable appearance dialog.">Changes are not saved until you choose Apply.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PREVIEW_READY" desc="Status after rendering an illustrative preview.">Preview updated. Browser settings are unchanged.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_READ_ONLY" desc="Explains refusal to customize incognito, guest, or system profiles.">Open a regular browsing window to customize appearance. Incognito and guest windows cannot save these settings.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_MANAGED" desc="Explains refusal when any affected appearance setting is controlled by policy, an extension, or a custodian.">Appearance changes are unavailable because a setting is managed or controlled by an extension.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_UNSUPPORTED" desc="Explains safe handling of appearance JSON from a different schema version.">The saved configuration uses an unsupported version. It has been left unchanged; this version cannot overwrite it.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_UNAVAILABLE" desc="Explains refusal when appearance services or registered preferences are missing.">Appearance settings are currently unavailable.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_INVALID_SAVED" desc="Explains a non-mutating fallback after reading malformed or oversized appearance JSON.">The saved configuration could not be read. Default values are shown. Apply will replace the invalid configuration; Cancel leaves it unchanged.</message>
++  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_INVALID_INPUT" desc="Error for invalid appearance input, including malformed RGB colors.">Enter a valid RGB accent color such as #4F6BED. No settings have been changed.</message>
++</grit-part>

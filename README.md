@@ -1,0 +1,77 @@
+# Browser Final
+
+An independent **native Chromium distribution** for Linux and Windows. The
+browser remains C++/Views, Blink, V8, Chromium networking and sandboxed processes.
+No Electron, system WebView shell, application server, or proprietary Google
+code is substituted for Chromium.
+
+## Current truth
+
+This is **development source, not a daily-driver release**. Chromium source,
+dependencies and hooks have been bootstrapped, the fork patches applied, and
+Linux release GN generation succeeded. The isolated identity/appearance tests
+have built and passed with Chromium's Clang/libc++ as well as standalone CMake.
+Full browser linking, window launch, browsing and Windows execution have not yet
+been verified. See `HANDOFF.md` for current build results and exact blockers.
+
+The nine focused Chromium PrefService tests also pass, including real disk-backed
+preference recreation, malformed/future data and managed/read-only write refusal.
+Custom native dialog/toolbar/pref-registration and MV3 browser-test sources compile
+cleanly, but UI and extension browser tests have not run.
+
+Implemented browser-specific source:
+- Separate branding and Linux/Windows profile-path patches.
+- Strict, bounded, versioned appearance preset import/export and three presets.
+- Chromium PrefService persistence and policy/private-profile guards.
+- Native Customize Browser toolbar/dialog integration: system/light/dark,
+  accent and bookmark visibility. Dialog preview is illustrative, not a live
+  modification of browser chrome. Other schema fields are explicitly data-only.
+- Pinned, safety-checked bootstrap, overlay integration and build scripts.
+- Automated tooling/config tests and a local headless benchmark harness.
+
+Upstream supplies ordinary browsing, profiles, DevTools and extensions; inheriting
+source is **not** evidence that these work in our distribution. Custom workspaces,
+privacy blocker, vertical-tab customization and other requested systems are not
+implemented. Package creation fails closed until distribution identity and
+security validation are complete.
+
+## Quick start (Linux)
+
+```sh
+python3 scripts/bootstrap.py tools --yes
+python3 scripts/bootstrap.py bootstrap --yes
+# Review upstream build/install-build-deps.py before any system installation.
+python3 scripts/bootstrap.py hooks --yes
+python3 scripts/integrate.py --check
+python3 scripts/integrate.py
+python3 scripts/build.py configure
+python3 scripts/build.py build -j 4
+python3 scripts/build.py run -- --ozone-platform=wayland
+```
+
+The existing machine already has the first four operations completed. Do not
+clone over the existing checkout. `python3 scripts/bootstrap.py --check` is
+read-only; consult `BUILD_LINUX.md` / `BUILD_WINDOWS.md` before proceeding.
+
+```sh
+python3 -B -m unittest discover -s tests -v
+python3 scripts/build.py test --test-target browser:browser_identity_appearance_unittests -j 4
+python3 scripts/build.py test --test-target browser:appearance_prefs_unittests -j 4
+cmake -S . -B .local/build/release -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build .local/build/release
+ctest --test-dir .local/build/release --output-on-failure
+```
+
+CMake checks **only the isolated library**, never builds the browser.
+
+## Layout
+
+`browser/` owned C++/GRIT/tests; `patches/` ordered upstream integration;
+`config/upstream.json` exact pins; `scripts/` Python stdlib tooling;
+`benchmarks/` local workload/runner; `tests/` tooling tests.
+`.local/chromium/src` and `.local/tools/depot_tools` are ignored, separate Git
+repositories inside this workspace. Outputs, development profiles, logs and raw
+measurements stay ignored. No supplied credentials belong in these files.
+
+Documentation: `ARCHITECTURE.md`, `SECURITY.md`, `EXTENSIONS.md`, `UPSTREAM.md`,
+`PERFORMANCE.md`, `CHANGELOG.md`, `TODO.md`, and `HANDOFF.md`.

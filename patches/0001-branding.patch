@@ -1,0 +1,140 @@
+diff --git a/chrome/app/theme/chromium/BRANDING b/chrome/app/theme/chromium/BRANDING
+--- a/chrome/app/theme/chromium/BRANDING
++++ b/chrome/app/theme/chromium/BRANDING
+@@ -1,10 +1,10 @@
+-COMPANY_FULLNAME=The Chromium Authors
+-COMPANY_SHORTNAME=The Chromium Authors
+-PRODUCT_FULLNAME=Chromium
+-PRODUCT_SHORTNAME=Chromium
+-PRODUCT_INSTALLER_FULLNAME=Chromium Installer
+-PRODUCT_INSTALLER_SHORTNAME=Chromium Installer
+-COPYRIGHT=Copyright @LASTCHANGE_YEAR@ The Chromium Authors. All rights reserved.
+-MAC_BUNDLE_ID=org.chromium.Chromium
++COMPANY_FULLNAME=Browser Final Contributors
++COMPANY_SHORTNAME=Browser Final
++PRODUCT_FULLNAME=Browser Final
++PRODUCT_SHORTNAME=Browser Final
++PRODUCT_INSTALLER_FULLNAME=Browser Final Installer
++PRODUCT_INSTALLER_SHORTNAME=Browser Final Installer
++COPYRIGHT=Copyright @LASTCHANGE_YEAR@ Browser Final Contributors. Based on Chromium.
++MAC_BUNDLE_ID=org.browserfinal.BrowserFinal
+ MAC_CREATOR_CODE=Cr24
+ MAC_TEAM_ID=
+diff --git a/chrome/common/chrome_paths_linux.cc b/chrome/common/chrome_paths_linux.cc
+--- a/chrome/common/chrome_paths_linux.cc
++++ b/chrome/common/chrome_paths_linux.cc
+@@ -95,7 +95,7 @@
+ #elif BUILDFLAG(GOOGLE_CHROME_BRANDING)
+   std::string data_dir_basename = "google-chrome";
+ #else
+-  std::string data_dir_basename = "chromium";
++  std::string data_dir_basename = "BrowserFinal";
+ #endif
+   *result = config_dir.Append(data_dir_basename + GetChannelSuffixForDataDir());
+   return true;
+diff --git a/chrome/common/chrome_paths_win.cc b/chrome/common/chrome_paths_win.cc
+--- a/chrome/common/chrome_paths_win.cc
++++ b/chrome/common/chrome_paths_win.cc
+@@ -42,7 +42,7 @@
+ bool GetDefaultUserDataDirectory(base::FilePath* result) {
+   if (!base::PathService::Get(base::DIR_LOCAL_APP_DATA, result))
+     return false;
+-  *result = result->Append(install_static::GetChromeInstallSubDirectory());
++  *result = result->Append(L"BrowserFinal");
+   *result = result->Append(chrome::kUserDataDirname);
+   return true;
+ }
+@@ -50,7 +50,7 @@
+ bool GetDefaultRoamingUserDataDirectory(base::FilePath* result) {
+   if (!base::PathService::Get(base::DIR_ROAMING_APP_DATA, result))
+     return false;
+-  *result = result->Append(install_static::GetChromeInstallSubDirectory());
++  *result = result->Append(L"BrowserFinal");
+   *result = result->Append(chrome::kUserDataDirname);
+   return true;
+ }
+diff --git a/chrome/app/chromium_strings.grd b/chrome/app/chromium_strings.grd
+--- a/chrome/app/chromium_strings.grd
++++ b/chrome/app/chromium_strings.grd
+@@ -294,15 +294,15 @@
+         </then>
+         <else>
+           <message name="IDS_PRODUCT_NAME" desc="The Chrome application name" translateable="false">
+-            Chromium
++            Browser Final
+           </message>
+           <message name="IDS_SHORT_PRODUCT_NAME" desc="The Chrome application short name." translateable="false">
+-            Chromium
++            Browser Final
+           </message>
+         </else>
+       </if>
+       <message name="IDS_APP_MENU_YOUR_CHROME_HEADER" desc="Header title for the Your Chromium section in the main App Menu">
+-        Your Chromium
++        Your Browser Final
+       </message>
+       <if expr="is_win">
+         <message name="IDS_SXS_SHORTCUT_NAME" desc="Unused in Chromium builds" translateable="false">
+@@ -312,15 +312,15 @@
+         <message name="IDS_SHORTCUT_NAME_DEV" desc="Unused in Chromium builds" translateable="false">
+         </message>
+         <message name="IDS_PRODUCT_DESCRIPTION" desc="Browser description">
+-          Chromium is a web browser that runs webpages and applications with lightning speed. It's fast, stable, and easy to use. Browse the web more safely with malware and phishing protection built into Chromium.
++          Browser Final is an independent web browser based on the open-source Chromium project.
+         </message>
+         <message name="IDS_WELCOME_TO_CHROME" desc="Welcoming text announced via screen readers the first time Chrome is launched at the conclusion of installation.">
+-          Welcome to Chromium; new browser window opened
++          Welcome to Browser Final; new browser window opened
+         </message>
+       </if>
+       <if expr="is_macosx or is_linux">
+         <message name="IDS_FIRST_RUN_DIALOG_WINDOW_TITLE" desc="Window title of First Run dialog on Mac and Linux, displayed in title bar">
+-          Welcome to Chromium
++          Welcome to Browser Final
+         </message>
+       </if>
+       <if expr="is_linux">
+@@ -364,7 +364,7 @@
+       </if>
+       <if expr="not is_macosx and not is_chromeos">
+         <message name="IDS_TASK_MANAGER_TITLE" desc="The title of the Task Manager window">
+-          Task Manager - Chromium
++          Task Manager - Browser Final
+         </message>
+       </if>
+       <message name="IDS_TASK_MANAGER_SEARCH_PLACEHOLDER" desc="The placeholder text for the Search bar in the Task Manager window">
+diff --git a/chrome/install_static/chromium_install_modes.h b/chrome/install_static/chromium_install_modes.h
+--- a/chrome/install_static/chromium_install_modes.h
++++ b/chrome/install_static/chromium_install_modes.h
+@@ -21,7 +21,7 @@
+ 
+ // The brand-specific product name to be included as a component of the install
+ // and user data directory paths.
+-inline constexpr wchar_t kProductPathName[] = L"Chromium";
++inline constexpr wchar_t kProductPathName[] = L"BrowserFinal";
+ 
+ // The brand-specific safe browsing client name.
+ inline constexpr char kSafeBrowsingName[] = "chromium";
+@@ -54,15 +54,15 @@
+         .logo_suffix = L"",  // No logo suffix for the primary install mode.
+         .app_guid =
+             L"",  // Empty app_guid since no integration with Google Update.
+-        .base_app_name = L"Chromium",              // A distinct base_app_name.
+-        .base_app_id = L"Chromium",                // A distinct base_app_id.
+-        .browser_prog_id_prefix = L"ChromiumHTM",  // Browser ProgID prefix.
++        .base_app_name = L"Browser Final",         // A distinct base_app_name.
++        .base_app_id = L"BrowserFinal",            // A distinct base_app_id.
++        .browser_prog_id_prefix = L"BrowserFinalHTM",  // Browser ProgID prefix.
+         .browser_prog_id_description =
+-            L"Chromium HTML Document",  // Browser ProgID description.
+-        .direct_launch_url_scheme = "chromium",
+-        .pdf_prog_id_prefix = L"ChromiumPDF",  // PDF ProgID prefix.
++            L"Browser Final HTML Document",  // Browser ProgID description.
++        .direct_launch_url_scheme = "browser-final",
++        .pdf_prog_id_prefix = L"BrowserFinalPDF",  // PDF ProgID prefix.
+         .pdf_prog_id_description =
+-            L"Chromium PDF Document",  // PDF ProgID description.
++            L"Browser Final PDF Document",  // PDF ProgID description.
+         .active_setup_guid =
+             L"{7D2B3E1D-D096-4594-9D8F-A6667F12E0AC}",  // Active Setup
+                                                         // GUID.

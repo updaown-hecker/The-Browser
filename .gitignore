@@ -1,0 +1,16 @@
+# Large upstream sources, generated output, profiles, raw machine-local data.
+.local/
+out/
+build/
+__pycache__/
+*.py[cod]
+*.log
+*.dmp
+*.core
+*.deb
+*.exe
+*.msi
+*.pdb
+.cache/
+# Original private/user instructions are not part of the distribution.
+PROMPT.txt
