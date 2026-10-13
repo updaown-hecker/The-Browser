@@ -1,8 +1,11 @@
 # Remaining work (not implemented claims)
 
 ## Immediate
-- Link and launch a minimally branded Linux browser; verify real navigation,
-  multi-tab operations, F11, DevTools, sandbox/GPU, downloads and renderer crashes.
+- Linux release link succeeded; Wayland process startup with the existing Chrome
+  sandbox helper and renderer/GPU seccomp observed. Verify the visible window,
+  real navigation, multi-tab operations, F11, DevTools, chrome://sandbox/GPU,
+  downloads and renderer crashes. Investigate the headless DOM timeout and
+  Wayland/Vulkan warning.
 - Execute native appearance browser tests, including restart, policy and incognito.
   The focused nine preference unit tests already pass; native sources compile.
 - Add/run ordinary browsing/profile/bookmark/download/session integration tests;

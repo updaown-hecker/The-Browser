@@ -28,6 +28,7 @@
 #include "ui/views/controls/label.h"
 #include "ui/views/controls/scroll_view.h"
 #include "ui/views/controls/textfield/textfield.h"
+#include "ui/views/controls/textfield/textfield_controller.h"
 #include "ui/views/layout/box_layout.h"
 #include "ui/views/view.h"
 #include "ui/views/widget/widget.h"
@@ -78,7 +79,8 @@ int AccessMessage(NativeAppearanceAccess access) {
 }  // namespace
 
 class CustomizeBrowserDialog::Delegate : public views::DialogDelegate,
-                                         public views::WidgetObserver {
+                                         public views::WidgetObserver,
+                                         public views::TextfieldController {
  public:
   explicit Delegate(Profile& profile) : controller_(profile) {
     const auto saved = controller_.Load();
@@ -122,16 +124,25 @@ class CustomizeBrowserDialog::Delegate : public views::DialogDelegate,
     theme_->SetID(kThemeComboboxId);
     theme_->GetViewAccessibility().SetName(
         String(IDS_BROWSER_FINAL_CUSTOMIZE_THEME_LABEL));
+    theme_->SetCallback(
+        base::BindRepeating(&Delegate::Preview, base::Unretained(this)));
     AddLabel(root, IDS_BROWSER_FINAL_CUSTOMIZE_ACCENT_LABEL);
     accent_ = root->AddChildView(std::make_unique<views::Textfield>());
     accent_->SetID(kAccentTextfieldId);
     accent_->SetDefaultWidthInChars(7);
     accent_->GetViewAccessibility().SetName(
         String(IDS_BROWSER_FINAL_CUSTOMIZE_ACCENT_LABEL));
+    accent_->SetController(this);
 
     bookmarks_ = root->AddChildView(std::make_unique<views::Checkbox>(
         String(IDS_BROWSER_FINAL_CUSTOMIZE_BOOKMARKS)));
     bookmarks_->SetID(kBookmarksCheckboxId);
+    bookmarks_->SetCallback(
+        base::BindRepeating(&Delegate::Preview, base::Unretained(this)));
+    vertical_tabs_ = root->AddChildView(
+        std::make_unique<views::Checkbox>(String(IDS_SWITCH_TO_VERTICAL_TAB)));
+    vertical_tabs_->SetID(kVerticalTabsCheckboxId);
+    vertical_tabs_->SetChecked(controller_.VerticalTabsEnabled());
     auto* preview_button =
         root->AddChildView(std::make_unique<views::MdTextButton>(
             base::BindRepeating(&Delegate::Preview, base::Unretained(this)),
@@ -163,6 +174,7 @@ class CustomizeBrowserDialog::Delegate : public views::DialogDelegate,
     theme_->SetEnabled(writable);
     accent_->SetEnabled(writable);
     bookmarks_->SetEnabled(writable);
+    vertical_tabs_->SetEnabled(writable);
     preview_button->SetEnabled(writable);
     SetButtonEnabled(ui::mojom::DialogButton::kOk, writable);
     PopulateControls();
@@ -177,14 +189,20 @@ class CustomizeBrowserDialog::Delegate : public views::DialogDelegate,
   void ObserveWidget(views::Widget* widget) { observation_.Observe(widget); }
 
  private:
+  void ContentsChanged(views::Textfield*, const std::u16string&) override {
+    Preview();
+  }
+
   void OnWidgetDestroying(views::Widget*) override {
     // The Widget owns the contents after Init; release all borrowed View
     // pointers before it destroys that tree, even when closed by its parent.
     observation_.Reset();
     presets_ = nullptr;
     theme_ = nullptr;
+    accent_->SetController(nullptr);
     accent_ = nullptr;
     bookmarks_ = nullptr;
+    vertical_tabs_ = nullptr;
     preview_ = nullptr;
     preview_mode_ = nullptr;
     preview_accent_ = nullptr;
@@ -202,6 +220,7 @@ class CustomizeBrowserDialog::Delegate : public views::DialogDelegate,
     const size_t index = presets_->GetSelectedIndex().value_or(0);
     staged_ = index == 0 ? saved_ : BuiltInAppearancePresets().at(index - 1);
     PopulateControls();
+    Preview();
   }
 
   AppearancePreset Draft() const {
@@ -264,7 +283,7 @@ class CustomizeBrowserDialog::Delegate : public views::DialogDelegate,
       return false;
     }
     // Recheck access at click time, including policy changes while open.
-    if (!controller_.Apply(draft)) {
+    if (!controller_.Apply(draft, vertical_tabs_->GetChecked())) {
       status_->SetText(String(AccessMessage(controller_.GetAccess())));
       return false;
     }
@@ -278,6 +297,7 @@ class CustomizeBrowserDialog::Delegate : public views::DialogDelegate,
   raw_ptr<views::Combobox> theme_ = nullptr;
   raw_ptr<views::Textfield> accent_ = nullptr;
   raw_ptr<views::Checkbox> bookmarks_ = nullptr;
+  raw_ptr<views::Checkbox> vertical_tabs_ = nullptr;
   raw_ptr<views::View> preview_ = nullptr;
   raw_ptr<views::Label> preview_mode_ = nullptr;
   raw_ptr<views::Label> preview_accent_ = nullptr;

@@ -35,7 +35,10 @@ class NativeAppearanceController : public ProfileObserver {
 
   AppearancePrefReadResult Load() const;
   NativeAppearanceAccess GetAccess() const;
-  bool Apply(const AppearancePreset& preset);
+  bool VerticalTabsEnabled() const;
+  // Tab layout uses the upstream profile preference, independently of presets.
+  bool Apply(const AppearancePreset& preset,
+             std::optional<bool> vertical_tabs = std::nullopt);
 
  private:
   void OnProfileWillBeDestroyed(Profile* profile) override;

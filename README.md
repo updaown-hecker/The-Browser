@@ -11,8 +11,9 @@ This is **development source, not a daily-driver release**. Chromium source,
 dependencies and hooks have been bootstrapped, the fork patches applied, and
 Linux release GN generation succeeded. The isolated identity/appearance tests
 have built and passed with Chromium's Clang/libc++ as well as standalone CMake.
-Full browser linking, window launch, browsing and Windows execution have not yet
-been verified. See `HANDOFF.md` for current build results and exact blockers.
+The Linux browser link succeeded. Wayland process startup with the installed
+Chrome sandbox helper and renderer/GPU seccomp were observed; visual UI, browsing
+and Windows execution remain unverified. See `HANDOFF.md` for current build results and exact blockers.
 
 The nine focused Chromium PrefService tests also pass, including real disk-backed
 preference recreation, malformed/future data and managed/read-only write refusal.
@@ -21,17 +22,21 @@ cleanly, but UI and extension browser tests have not run.
 
 Implemented browser-specific source:
 - Separate branding and Linux/Windows profile-path patches.
+- Branded built-in new-tab page with bookmarks/history/downloads/extensions/settings
+  shortcuts, retaining Chromium's search and most-visited components.
+- Owned Linux/Views icons and a user-local application-menu launcher.
 - Strict, bounded, versioned appearance preset import/export and three presets.
 - Chromium PrefService persistence and policy/private-profile guards.
 - Native Customize Browser toolbar/dialog integration: system/light/dark,
-  accent and bookmark visibility. Dialog preview is illustrative, not a live
+  accent, bookmark visibility and upstream vertical tab layout. Dialog preview
+  updates automatically as controls change; it is illustrative, not a live
   modification of browser chrome. Other schema fields are explicitly data-only.
 - Pinned, safety-checked bootstrap, overlay integration and build scripts.
 - Automated tooling/config tests and a local headless benchmark harness.
 
 Upstream supplies ordinary browsing, profiles, DevTools and extensions; inheriting
 source is **not** evidence that these work in our distribution. Custom workspaces,
-privacy blocker, vertical-tab customization and other requested systems are not
+privacy blocker, further vertical-tab customization and other requested systems are not
 implemented. Package creation fails closed until distribution identity and
 security validation are complete.
 
@@ -48,6 +53,21 @@ python3 scripts/build.py configure
 python3 scripts/build.py build -j 4
 python3 scripts/build.py run -- --ozone-platform=wayland
 ```
+
+For the branded development application on this host:
+
+```sh
+./browser-final
+# Optional: use X11 explicitly
+./browser-final --ozone-platform=x11
+# Install/update the user-local application menu entry
+python3 -B scripts/install_launcher.py
+```
+
+The application menu entry is **Browser Final**. The launcher selects Wayland
+when available, preserves explicit platform flags and the development profile,
+and uses the existing root-owned Chrome sandbox helper when available. It does
+not build the browser or change OS policy. See `BUILD_LINUX.md` for details.
 
 The existing machine already has the first four operations completed. Do not
 clone over the existing checkout. `python3 scripts/bootstrap.py --check` is

@@ -92,6 +92,7 @@ NativeAppearanceAccess NativeAppearanceController::GetAccess() const {
       prefs::kBrowserFollowsSystemThemeColors,
       bookmarks::prefs::kShowBookmarkBar,
       bookmarks::prefs::kBookmarkBarVisibilityState,
+      prefs::kVerticalTabsEnabled,
 #if BUILDFLAG(IS_LINUX)
       prefs::kSystemTheme,
 #endif
@@ -120,7 +121,13 @@ NativeAppearanceAccess NativeAppearanceController::GetAccess() const {
   return NativeAppearanceAccess::kAllowed;
 }
 
-bool NativeAppearanceController::Apply(const AppearancePreset& preset) {
+bool NativeAppearanceController::VerticalTabsEnabled() const {
+  return profile_ &&
+         profile_->GetPrefs()->GetBoolean(prefs::kVerticalTabsEnabled);
+}
+
+bool NativeAppearanceController::Apply(const AppearancePreset& preset,
+                                       std::optional<bool> vertical_tabs) {
   const auto accent = AppearanceAccentColor(preset);
   if (!accent || GetAccess() != NativeAppearanceAccess::kAllowed) {
     return false;
@@ -147,6 +154,9 @@ bool NativeAppearanceController::Apply(const AppearancePreset& preset) {
                     static_cast<int>(visibility));
   prefs->SetBoolean(bookmarks::prefs::kShowBookmarkBar,
                     preset.show_bookmarks_bar);
+  if (vertical_tabs.has_value()) {
+    prefs->SetBoolean(prefs::kVerticalTabsEnabled, *vertical_tabs);
+  }
   return true;
 }
 

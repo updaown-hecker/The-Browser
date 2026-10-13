@@ -1,0 +1,5 @@
+python3 scripts/build.py build -j 4
+
+## run
+
+ python3 scripts/build.py run -- --ozone-platform=wayland

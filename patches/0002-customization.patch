@@ -103,7 +103,7 @@ diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.cc b/chrome/browser/ui
  #include "chrome/browser/actor/ui/actor_ui_metrics.h"
  #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble.h"
  #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble_controller.h"
-@@ -603,6 +605,30 @@
+@@ -603,6 +605,32 @@
      overflow_button_->SetVisible(false);
    }
  
@@ -125,6 +125,8 @@ diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.cc b/chrome/browser/ui
 +      base::Unretained(this)));
 +  customize_button->SetID(browser::kCustomizeBrowserToolbarButtonId);
 +  customize_button->SetVectorIcon(kSettingsIcon);
++  customize_button->SetText(
++      l10n_util::GetStringUTF16(IDS_BROWSER_FINAL_CUSTOMIZE_TITLE));
 +  customize_button->SetTooltipText(
 +      l10n_util::GetStringUTF16(IDS_BROWSER_FINAL_CUSTOMIZE_TITLE));
 +  customize_button->GetViewAccessibility().SetName(

@@ -36,6 +36,7 @@ class CustomizeBrowserDialog {
   static constexpr int kBookmarksCheckboxId = 64005;
   static constexpr int kPreviewButtonId = 64006;
   static constexpr int kPreviewBookmarksId = 64007;
+  static constexpr int kVerticalTabsCheckboxId = 64008;
   views::Widget* widget_for_testing() { return widget_.get(); }
 
  private:

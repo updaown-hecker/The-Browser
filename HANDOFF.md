@@ -80,26 +80,65 @@ Not passed/not run:
 - Upstream OS dependency quick-check exits 1, reports broad missing dev/test/
   packaging dependencies. Sysroot-backed GN/config tests still work. Review the
   required list in terminal instead of silently installing everything.
-- Full browser link/launch, webpages, tabs, GPU/sandbox, extension runtime and
-  native appearance/extension in-process browser tests are **not verified**.
+- Full browser link succeeded (user supplied build output: 860 steps / 12m29s).
+  Wayland process startup and renderer/GPU seccomp observed with the installed
+  Chrome sandbox helper; visible UI, webpages/tabs, complete GPU/sandbox behavior,
+  extension runtime and native appearance/extension browser tests remain unverified.
 - Windows build/runtime/installer and all release packaging are unverified.
 
-## Active full release build (do not start another in this output)
+## Active product-surface implementation — October 12, 2026
 
-Targeted builds have finished and are successful. A bounded full `chrome` build
-is now running as background shell `sh_10f20732f001romsGsXtg1kYFI`:
+User requested a quick, visibly distinct development browser. Added branded
+built-in new-tab header/browser shortcuts using upstream search/most-visited,
+selected native Linux/Views icons, labeled Customize Browser toolbar control,
+automatic dialog-local preview updates, and a vertical-tabs checkbox using the
+upstream profile preference (independent of preset schema).
+
+Added root `browser-final` launcher and `scripts/launch.py`; installed the
+user-local KDE application entry via `scripts/install_launcher.py`. Selects
+Wayland in a Wayland session and the existing validated root-owned installed
+Chrome SUID helper when no explicit helper setting exists. No OS policy/default
+browser/profile migration changes. The menu entry is Browser Final; underlying
+development executable remains `chrome`.
+
+Full updated browser build is currently running, log
+`.local/logs/product-surface-build.log`. Initial GRIT/lint/header integration
+errors were corrected. One build was interrupted to incorporate final changes
+and increase jobs from 4 to 6 after observing sufficient available memory;
+no two GN builds run concurrently. Do not launch the partially updated resources
+until the link finishes. Runtime/native smoke scripts are ready but not yet run.
+
+Current checks: 87 Python tests passed; owned C++ clang-format checks passed;
+`gn check` passed for `//browser:*` and the changed new-tab implementation target.
+Final link and smoke results must replace this section before session completion.
+
+## Latest launch diagnosis — October 12, 2026
+
+No build is currently running. The user's full `chrome` build succeeded; the
+old bounded background build entry is superseded. Default launch aborted with
+“No usable sandbox!”: AppArmor restricts unprivileged user namespaces and the
+system Chrome exception does not cover the workspace binary.
+
+No OS policy, shell startup files, credentials, pins or installed user profiles
+were changed. Existing `/opt/google/chrome/chrome-sandbox` is root:root / 4755;
+the pinned upstream guide supports selecting it for a development launch:
 
 ```sh
-timeout --signal=INT --kill-after=30s 600s python3 -B scripts/build.py build -j 4
+CHROME_DEVEL_SANDBOX=/opt/google/chrome/chrome-sandbox python3 -B scripts/build.py run -- --ozone-platform=wayland
 ```
 
-Log `.local/logs/browser-release-build.log`. A timeout means incomplete validation,
-not a successful browser link or a diagnosed compiler defect. The 10-minute bound
-prevents an unattended unlimited build; artifacts are incremental and reusable.
-Wait for completion notification, inspect only relevant errors, and update this
-section before claiming a finished session. Other logs:
-`native-customization-build.log`, `upstream-hooks-build.log`,
-`appearance-prefs-tests.log`, `extension-tests-compile.log` under `.local/logs`.
+Launched with the isolated default development profile and `about:blank`. The
+browser ran during inspection, then exited normally with code 0; it is no longer
+running. Renderer namespace
+separation and `NoNewPrivs=1` / `Seccomp=2`, GPU `Seccomp=2` observed in `/proc`.
+No visual window/UI or page correctness claim. Logs include Wayland/Vulkan
+incompatibility warning, upstream GCM registration errors and GLib assertions. A separate isolated
+headless dump-DOM smoke test timed out after 40 seconds without DOM; its browser
+was stopped. No unsafe browser switch was used.
+
+Logs `.local/logs/wayland-launch.log`, `.local/logs/sandbox-launch-smoke.log`.
+Previous compile/test logs remain under `.local/logs`. This session changed docs
+only; no C++ rebuild or unit/browser test suite was needed or executed.
 
 ## Benchmark evidence
 
@@ -114,7 +153,7 @@ incomplete run as performance evidence.
 
 ## Exact normal commands / next actions
 
-From repository root, after the active build finishes:
+From repository root:
 
 ```sh
 python3 -B scripts/bootstrap.py --check
@@ -124,14 +163,14 @@ python3 -B scripts/build.py configure
 python3 -B scripts/build.py test --test-target browser:browser_identity_appearance_unittests -j 4
 python3 -B scripts/build.py test --test-target browser:appearance_prefs_unittests -j 4
 python3 -B scripts/build.py build -j 4
-python3 -B scripts/build.py run -- --ozone-platform=wayland
+CHROME_DEVEL_SANDBOX=/opt/google/chrome/chrome-sandbox python3 -B scripts/build.py run -- --ozone-platform=wayland
 python3 -B scripts/build.py test --test-target unit_tests -j 4 -- --gtest_filter='AppearancePrefStoreTest.*'
 python3 -B scripts/build.py test --test-target browser_tests -j 4 -- --gtest_filter='NativeAppearanceBrowserTest.*:NativeAppearancePolicyBrowserTest.*'
 python3 -B scripts/build.py test --test-target browser_tests -j 4 -- --gtest_filter='BrowserFinalExtensionTest.*'
 ```
 
-Highest value: finish the full release link/launch first
-branded native browser, execute custom persistence/policy tests and verify real
+Highest value: relaunch and verify visible UI and browsing on the Linux browser,
+execute custom persistence/policy browser tests and verify real
 browsing/extension/sandbox/GPU behavior. Then audit inherited services, implement
 actual design-token consumers/live preview/import-export, and proceed with native
 tabs/workspaces/sidebar/privacy vertical slices. Full roadmap is `TODO.md`.

@@ -25,10 +25,13 @@ keeping millions of upstream files out of this repository's version control.
   be overwritten. Off-the-record/system/guest writes are disallowed by callers.
 - `ui/`: Views dialog plus Profile-observing controller. Existing ThemeService
   setters apply accent/color scheme; both upstream bookmark-bar prefs are set.
+  The tab-layout checkbox writes upstream `vertical_tabs.enabled`, separately
+  from the appearance JSON schema. Chromium owns tab layout and session behavior.
   Recheck policy and extension/custodian control at Apply time. No preview rollback
-  which could lose an extension theme. Preview changes only the dialog.
-- `resources/`: GRIT strings (English fallback) and an owned SVG icon source.
-  SVG is not yet substituted into upstream platform icon resources.
+  which could lose an extension theme. Preset/theme/accent/bookmark edits update
+  the dialog preview automatically; Apply remains the only write operation.
+- `resources/`: GRIT strings (English fallback), owned SVG icon source and
+  librsvg-rendered 16/32/64 pixel PNG assets for native Linux/Views resources.
 
 The UI implementations compile in existing `//chrome/browser/ui:ui`; toolbar
 depends only on owned header targets. Pref registration uses a separate leaf
@@ -41,10 +44,19 @@ target. This avoids `toolbar -> custom UI -> browser UI -> toolbar` cycles.
 2. `0002-customization.patch`: pref registry, native toolbar/dialog sources and
    dependencies, GRIT catalog and test linkage. Preserve internal `chrome://`
    routing; never expose a custom privileged scheme to untrusted sites.
+3. `0003-product-surface.patch`: branded built-in new-tab header and browser
+   shortcuts around the upstream search UI; separate Linux desktop identity.
+   All links use existing trusted Chromium WebUI pages; no new message bridge.
+4. `0004-native-icons.patch`: replaces selected Linux/Views 1x/2x product icons
+   with renders of the owned icon. Windows and other platform assets remain
+   pending the platform identity audit.
 
 Binary output names remain upstream `chrome`/`chrome.exe` in this development
-slice; `browser-final` is the intended distribution basename, not an executable
-we have already built. Windows COM/Active Setup identifiers are still upstream
+slice. The root `browser-final` is an executable development launcher for the
+built Chromium binary, not a renamed or packaged browser binary. It selects
+the project development profile and a user-local desktop identity; it can use
+the existing verified root-owned installed Chrome SUID sandbox helper. It does
+not copy installed profiles or alter OS security policy. Windows COM/Active Setup identifiers are still upstream
 and **must be made unique consistently before installer creation**. Packaging is
 disabled rather than risking collisions with installed Chromium.
 
@@ -52,7 +64,9 @@ disabled rather than risking collisions with installed Chromium.
 
 Integrate design tokens with ColorProvider/LayoutProvider/native tab views before
 exposing density, radius or tab-shape controls. Reuse upstream vertical tabs and
-split-tab facilities where viable; evaluate their current feature flags and tests.
+split-tab facilities where viable; the current dialog already exposes the
+upstream vertical layout preference. More elaborate tab customization and split
+view still need their own implementation and validation.
 Workspace service should map stable session/tab/group IDs under a per-profile
 keyed service, not parallel unsafe persistence. Isolated WebContents for web
 panels must retain normal site permissions, no privileged WebUI bridge.

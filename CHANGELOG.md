@@ -1,5 +1,14 @@
 # Changelog
 
+## October 12, 2026 — development launch diagnosis
+
+- Recorded successful full Linux browser build from the user's terminal output.
+- Diagnosed AppArmor namespace restriction; verified Wayland process startup with
+  the existing installed Chrome sandbox helper without OS policy changes.
+- Observed renderer namespace isolation and renderer/GPU seccomp; visual UI and
+  browsing remain unverified. Recorded headless DOM timeout and Wayland warning.
+- Documented the command-scoped sandbox-helper launch in Linux build instructions.
+
 ## 0.1.0-dev — first development session
 
 - Inspected empty repository and KDE neon toolchain/resources; preserved prompt.

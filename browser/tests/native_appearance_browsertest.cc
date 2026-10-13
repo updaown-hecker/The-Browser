@@ -12,6 +12,7 @@
 #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
 #include "chrome/browser/ui/views/frame/browser_view.h"
 #include "chrome/browser/ui/views/toolbar/toolbar_view.h"
+#include "chrome/common/pref_names.h"
 #include "chrome/test/base/in_process_browser_test.h"
 #include "components/bookmarks/common/bookmark_bar_visibility_state.h"
 #include "components/bookmarks/common/bookmark_pref_names.h"
@@ -91,6 +92,20 @@ IN_PROC_BROWSER_TEST_F(NativeAppearanceBrowserTest,
       static_cast<int>(bookmarks::BookmarkBarVisibilityState::kOnlyShowOnNtp),
       profile->GetPrefs()->GetInteger(
           bookmarks::prefs::kBookmarkBarVisibilityState));
+}
+
+IN_PROC_BROWSER_TEST_F(NativeAppearanceBrowserTest,
+                       TabLayoutUsesUpstreamProfilePreference) {
+  auto* profile = browser()->GetProfile();
+  NativeAppearanceController controller(*profile);
+  ASSERT_TRUE(controller.Apply(AppearancePreset::Dark(), true));
+  EXPECT_TRUE(controller.VerticalTabsEnabled());
+  EXPECT_TRUE(profile->GetPrefs()->GetBoolean(prefs::kVerticalTabsEnabled));
+  // Selecting a preset through a non-dialog caller preserves the tab layout.
+  ASSERT_TRUE(controller.Apply(AppearancePreset::Default()));
+  EXPECT_TRUE(controller.VerticalTabsEnabled());
+  ASSERT_TRUE(controller.Apply(AppearancePreset::Default(), false));
+  EXPECT_FALSE(controller.VerticalTabsEnabled());
 }
 
 IN_PROC_BROWSER_TEST_F(NativeAppearanceBrowserTest,

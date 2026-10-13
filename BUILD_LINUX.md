@@ -41,8 +41,22 @@ python3 scripts/build.py run -- --ozone-platform=x11
 
 The run wrapper always supplies an isolated `out/linux-release/development-profile`
 unless explicitly overridden. Do not point development binaries at daily profiles.
-Native output remains `out/linux-release/chrome`. No production browser executable
-or package is claimed until this link and launch have passed.
+Native output remains `out/linux-release/chrome`. The Linux link has passed and Wayland process startup was observed, but visual
+UI and browsing remain unverified; no production package is claimed.
+
+## Branded development launcher
+
+After a successful build, run `./browser-final` from this checkout, or choose
+**Browser Final** in KDE's application menu. `python3 -B scripts/install_launcher.py`
+installs the user-local menu entry with the owned icon; it does not set a default
+browser, install a production package or modify system policy. The development
+profile remains `out/linux-release/development-profile`.
+
+The launcher uses the existing root-owned installed Chrome sandbox helper when
+no explicit `CHROME_DEVEL_SANDBOX` is configured. Empty helper settings are
+rejected. Wayland is selected when the session advertises it; an explicit
+`--ozone-platform=x11` is preserved. On other hosts, sandbox setup remains a
+prerequisite if unprivileged namespaces are restricted.
 
 ## Checks
 
@@ -55,7 +69,22 @@ python3 scripts/build.py test --test-target browser_tests -j 4 -- --gtest_filter
 python3 scripts/build.py test --test-target browser_tests -j 4 -- --gtest_filter='BrowserFinalExtensionTest.*'
 ```
 
-The last two need a substantial Chromium build; UI browser tests also need a
+Additional actual-browser smoke checks (disposable profiles, local fixtures):
+
+```sh
+python3 -B scripts/runtime_smoke.py
+python3 -B scripts/native_smoke.py
+```
+
+The runtime smoke uses the pinned Chromium Node runtime and a loopback-only,
+random DevTools port to check the built-in new-tab page, local navigation/tabs,
+downloads, a local MV3 extension, and `chrome://sandbox`. The native smoke uses
+this host's GI/AT-SPI accessibility library and Wayland display to operate the
+actual appearance dialog, save an accent/tab layout, reopen it, and refuse an
+invalid color. Logs/results/screenshots stay ignored under `.local/`. These
+checks are narrower than full inherited or native in-process browser tests.
+
+The last two browser-test commands above need a substantial Chromium build; UI browser tests also need a
 usable display. The in-process tests must not be replaced with manifest parsing
 or compilation-only claims. Full inherited browser/security regression coverage
 is a release gate, not just the custom gtest filter.
@@ -83,6 +112,39 @@ Ubuntu-derived AppArmor/user-namespace restrictions can prevent custom builds
 from starting securely. Diagnose the denial and configure a reviewed package
 policy; never use `--no-sandbox`, disable system security globally, or run as root.
 Check `chrome://sandbox`, `chrome://gpu`, `chrome://version` after first launch.
+
+### This host: “No usable sandbox!” after a successful build
+
+On October 12, 2026, `kernel.apparmor_restrict_unprivileged_userns=1` and the
+system Chrome AppArmor exception covered `/opt/google/chrome/chrome`, not this
+workspace binary. The default run aborted before UI initialization. Rebuilding
+Chromium does not resolve this host sandbox setup.
+
+The pinned upstream `docs/security/apparmor-userns-restrictions.md` documents
+using an existing installed Chrome SUID helper for development builds. This host
+has `/opt/google/chrome/chrome-sandbox`, owned by root with mode 4755. Use a
+command-scoped environment variable (no shell startup or OS policy changes):
+
+```sh
+CHROME_DEVEL_SANDBOX=/opt/google/chrome/chrome-sandbox python3 -B scripts/build.py run -- --ozone-platform=wayland
+```
+
+This uses the installed sandbox helper, not Chrome profiles or credentials.
+Chromium validates the helper and fails if its setup/API is unsuitable. Do not
+set the variable to an empty string; upstream treats that as disabling the SUID
+sandbox. If the helper is absent on another host, review the pinned upstream
+sandbox installation instructions or an exact-path AppArmor policy with the
+administrator before making a system change.
+
+Validation: the browser remained running with Wayland, renderer namespace
+separation, renderer `NoNewPrivs=1` / `Seccomp=2`, and GPU `Seccomp=2` observed in
+`/proc`. This is limited process-level evidence, not a full sandbox audit or
+visual UI test. A separate headless `--dump-dom` smoke test timed out after 40
+seconds without returning DOM; its test browser was stopped. Wayland logs include
+an incompatibility warning for Vulkan and upstream GCM registration errors.
+The Wayland launch later exited with code 0; GLib assertions were also logged.
+Logs: `.local/logs/wayland-launch.log` and
+`.local/logs/sandbox-launch-smoke.log`.
 
 Packaging currently refuses with “Release not ready.” Do not distribute raw
 unvalidated upstream packages. Required gates are listed in `TODO.md`.

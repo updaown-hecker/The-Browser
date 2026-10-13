@@ -1,0 +1,166 @@
+diff --git a/chrome/browser/resources/new_tab_page/app.html b/chrome/browser/resources/new_tab_page/app.html
+--- a/chrome/browser/resources/new_tab_page/app.html
++++ b/chrome/browser/resources/new_tab_page/app.html
+@@ -28,13 +28,20 @@
+         </ntp-iframe>
+         `
+     ) : ''}
+-  <!-- TODO(crbug.com/40743294): Instead of ?hidden="\${!this.logoEnabled_}" it would
+-       be nicer to use Lit's conditional rendering. However, that breaks
+-       StartupBrowserCreatorPickerNoParamsTest.ShowPickerWhenAlreadyLaunched on
+-       the msan builder. See crbug.com/40743659. -->
+-  <ntp-logo id="logo" ?single-colored="${this.singleColoredLogo_}"
+-      .theme="${this.theme_}" ?hidden="${!this.logoEnabled_}">
+-  </ntp-logo>
++  <header id="browserFinalBrand">
++    <span id="browserFinalMark" aria-hidden="true">B</span>
++    <div>
++      <h1>$i18n{browserFinalName}</h1>
++      <p>$i18n{browserFinalTagline}</p>
++    </div>
++  </header>
++  <nav id="browserFinalNavigation" aria-label="$i18n{browserFinalNavigation}">
++    <a href="chrome://bookmarks/">$i18n{browserFinalBookmarks}</a>
++    <a href="chrome://history/">$i18n{browserFinalHistory}</a>
++    <a href="chrome://downloads/">$i18n{browserFinalDownloads}</a>
++    <a href="chrome://extensions/">$i18n{browserFinalExtensions}</a>
++    <a href="chrome://settings/">$i18n{browserFinalSettings}</a>
++  </nav>
+   ${this.ntpRealboxNextEnabled_ ? html`
+     <div id="scrim"
+         @click="${this.onScrimClick_}"
+diff --git a/chrome/browser/resources/new_tab_page/app.css b/chrome/browser/resources/new_tab_page/app.css
+--- a/chrome/browser/resources/new_tab_page/app.css
++++ b/chrome/browser/resources/new_tab_page/app.css
+@@ -491,3 +491,75 @@
+     -webkit-mask-image: url(icons/link.svg);
+   }
+ }
++
++/* Browser Final's identity surrounds the upstream search and shortcut UI. */
++#browserFinalBrand {
++  align-items: center;
++  color: var(--color-new-tab-page-primary-foreground);
++  display: flex;
++  gap: 20px;
++  margin: clamp(24px, 7vh, 76px) 24px 28px;
++  max-width: 640px;
++}
++
++#browserFinalMark {
++  align-items: center;
++  background: linear-gradient(135deg, #4f6bed, #8b5cf6);
++  border-radius: 24px;
++  box-shadow: 0 12px 32px rgb(79 107 237 / 20%);
++  color: white;
++  display: flex;
++  flex: 0 0 80px;
++  font-size: 42px;
++  font-weight: 700;
++  height: 80px;
++  justify-content: center;
++}
++
++#browserFinalBrand h1 {
++  font-size: clamp(26px, 4vw, 38px);
++  font-weight: 600;
++  letter-spacing: -1px;
++  margin: 0 0 8px;
++}
++
++#browserFinalBrand p {
++  font-size: 14px;
++  line-height: 1.6;
++  margin: 0;
++  opacity: 0.8;
++}
++
++#browserFinalNavigation {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 8px;
++  justify-content: center;
++  margin: 0 20px 28px;
++  max-width: 640px;
++}
++
++#browserFinalNavigation a {
++  background: var(--color-new-tab-page-background);
++  border: 1px solid var(--color-new-tab-page-primary-foreground);
++  border-radius: 100px;
++  color: var(--color-new-tab-page-primary-foreground);
++  font-size: 13px;
++  padding: 10px 18px;
++  text-decoration: none;
++}
++
++#browserFinalNavigation a:hover {
++  text-decoration: underline;
++}
++
++#browserFinalNavigation a:focus-visible {
++  outline: 3px solid var(--cr-focus-outline-color);
++  outline-offset: 3px;
++}
++
++:host([show-composebox_]) #browserFinalBrand,
++:host([show-composebox_]) #browserFinalNavigation,
++:host([show-voice-search-scrim_]) #browserFinalNavigation {
++  visibility: hidden;
++}
+diff --git a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc b/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
+--- a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
++++ b/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
+@@ -205,6 +205,21 @@
+     bool session_allows_drag_and_drop) {
+   content::WebUIDataSource* source = content::WebUIDataSource::CreateAndAdd(
+       profile, chrome::kChromeUINewTabPageHost);
++
++  static constexpr webui::LocalizedString kBrowserFinalStrings[] = {
++      {"browserFinalName", IDS_PRODUCT_NAME},
++      {"browserFinalTagline", IDS_BROWSER_FINAL_CUSTOMIZE_DESCRIPTION},
++      {"browserFinalNavigation", IDS_PRODUCT_NAME},
++      {"browserFinalBookmarks", IDS_BOOKMARK_MANAGER_TITLE},
++      {"browserFinalHistory", IDS_HISTORY_MENU},
++      {"browserFinalDownloads", IDS_DOWNLOAD_HISTORY_TITLE},
++      {"browserFinalExtensions", IDS_EXTENSIONS_SUBMENU},
++      {"browserFinalSettings", IDS_SETTINGS},
++  };
++  source->AddLocalizedStrings(kBrowserFinalStrings);
++  std::u16string history_label = l10n_util::GetStringUTF16(IDS_HISTORY_MENU);
++  base::ReplaceChars(history_label, u"&", u"", &history_label);
++  source->AddString("browserFinalHistory", history_label);
+ 
+   ui::Accelerator undo_accelerator(ui::VKEY_Z, ui::EF_PLATFORM_ACCELERATOR);
+   source->AddString("undoDescription", l10n_util::GetStringFUTF16(
+diff --git a/chrome/common/channel_info_posix.cc b/chrome/common/channel_info_posix.cc
+--- a/chrome/common/channel_info_posix.cc
++++ b/chrome/common/channel_info_posix.cc
+@@ -148,7 +148,7 @@
+   if (name.has_value() && !name.value().empty()) {
+     return name.value();
+   }
+-  return "chromium-browser.desktop";
++  return "browser-final-dev.desktop";
+ #endif
+ }
+ #endif  // BUILDFLAG(IS_LINUX)
+diff --git a/chrome/browser/resources/new_tab_page/app.ts b/chrome/browser/resources/new_tab_page/app.ts
+--- a/chrome/browser/resources/new_tab_page/app.ts
++++ b/chrome/browser/resources/new_tab_page/app.ts
+@@ -48,7 +48,6 @@
+ import {CustomizeChromeSection} from './customize_chrome.mojom-webui.js';
+ import {CustomizeDialogPage} from './customize_dialog_types.js';
+ import type {IframeElement} from './iframe.js';
+-import type {LogoElement} from './logo.js';
+ import {recordBoolean, recordDuration, recordEnumeration, recordLinearValue, recordLoadDuration, recordSparseValueWithPersistentHash} from './metrics_utils.js';
+ import {ParentTrustedDocumentProxy} from './modules/microsoft_auth_frame_connector.js';
+ import type {PageCallbackRouter, PageHandlerRemote, Theme} from './new_tab_page.mojom-webui.js';
+@@ -176,7 +175,6 @@
+   $: {
+     customizeButtons: CustomizeButtonsElement,
+     oneGoogleBarClipPath: HTMLElement,
+-    logo: LogoElement,
+     searchbox: NtpSearchboxElement,
+     composebox: NtpComposeboxElement,
+     undoToast: CrToastElement,
