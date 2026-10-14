@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import os
+import shutil
 import stat
+import subprocess
 import sys
 from pathlib import Path
 
@@ -33,7 +35,7 @@ def installed_sandbox_helper(path: Path) -> bool:
 def main(argv=None) -> int:
     arguments = list(sys.argv[1:] if argv is None else argv)
     if sys.platform.startswith("linux"):
-        os.environ["CHROME_DESKTOP"] = "browser-final-dev.desktop"
+        os.environ["CHROME_DESKTOP"] = "blynx-dev.desktop"
         helper = Path("/opt/google/chrome/chrome-sandbox")
         if "CHROME_DEVEL_SANDBOX" not in os.environ and installed_sandbox_helper(helper):
             os.environ["CHROME_DEVEL_SANDBOX"] = str(helper)
@@ -44,7 +46,19 @@ def main(argv=None) -> int:
             value.split("=", 1)[0] == "--ozone-platform" for value in arguments
         ):
             arguments.insert(0, "--ozone-platform=wayland")
-    return build_main(["run", "--", *arguments])
+    result = build_main(["run", "--", *arguments])
+    # KDE application-menu launches have no terminal to display a start error.
+    if result and (os.environ.get("DESKTOP_STARTUP_ID") or os.environ.get("XDG_ACTIVATION_TOKEN")):
+        notifier = shutil.which("notify-send")
+        if notifier:
+            try:
+                subprocess.run([
+                    notifier, "--app-name=Blynx", "Blynx could not start",
+                    "The development build may be incomplete. Run ./blynx in the project terminal to see the exact error.",
+                ], check=False, timeout=3)
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+    return result
 
 
 if __name__ == "__main__":

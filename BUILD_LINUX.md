@@ -41,13 +41,17 @@ python3 scripts/build.py run -- --ozone-platform=x11
 
 The run wrapper always supplies an isolated `out/linux-release/development-profile`
 unless explicitly overridden. Do not point development binaries at daily profiles.
-Native output remains `out/linux-release/chrome`. The Linux link has passed and Wayland process startup was observed, but visual
-UI and browsing remain unverified; no production package is claimed.
+Native output remains `out/linux-release/chrome`. The Linux link and targeted runtime/native UI smoke checks pass; no production
+package is claimed. See HANDOFF.md for their precise coverage.
 
 ## Branded development launcher
 
-After a successful build, run `./browser-final` from this checkout, or choose
-**Browser Final** in KDE's application menu. `python3 -B scripts/install_launcher.py`
+The launcher checks a successful-build receipt against the current integration,
+GN arguments and runtime artifacts. If an interrupted build leaves mismatched
+resources, finish `python3 -B scripts/build.py build -j 4` before launching.
+
+After a successful build, run `./blynx` from this checkout, or choose
+**Blynx** in KDE's application menu. `python3 -B scripts/install_launcher.py`
 installs the user-local menu entry with the owned icon; it does not set a default
 browser, install a production package or modify system policy. The development
 profile remains `out/linux-release/development-profile`.
@@ -80,8 +84,8 @@ The runtime smoke uses the pinned Chromium Node runtime and a loopback-only,
 random DevTools port to check the built-in new-tab page, local navigation/tabs,
 downloads, a local MV3 extension, and `chrome://sandbox`. The native smoke uses
 this host's GI/AT-SPI accessibility library and Wayland display to operate the
-actual appearance dialog, save an accent/tab layout, reopen it, and refuse an
-invalid color. Logs/results/screenshots stay ignored under `.local/`. These
+actual appearance dialog, select a preset, save an accent/tab layout, restart,
+and verify Cancel preserves the saved configuration. Logs/results/screenshots stay ignored under `.local/`. These
 checks are narrower than full inherited or native in-process browser tests.
 
 The last two browser-test commands above need a substantial Chromium build; UI browser tests also need a
@@ -139,10 +143,13 @@ administrator before making a system change.
 Validation: the browser remained running with Wayland, renderer namespace
 separation, renderer `NoNewPrivs=1` / `Seccomp=2`, and GPU `Seccomp=2` observed in
 `/proc`. This is limited process-level evidence, not a full sandbox audit or
-visual UI test. A separate headless `--dump-dom` smoke test timed out after 40
+visual UI test. The initial headless `--dump-dom` smoke test timed out after 40
 seconds without returning DOM; its test browser was stopped. Wayland logs include
 an incompatibility warning for Vulkan and upstream GCM registration errors.
 The Wayland launch later exited with code 0; GLib assertions were also logged.
+Later DevTools-based runtime smoke checks successfully exercised actual pages
+and recorded `chrome://sandbox` Seccomp-BPF status; the earlier dump-DOM timeout
+is not the current browsing result.
 Logs: `.local/logs/wayland-launch.log` and
 `.local/logs/sandbox-launch-smoke.log`.
 

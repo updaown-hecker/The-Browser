@@ -22,7 +22,7 @@ IN_PROC_BROWSER_TEST_F(BrowserFinalExtensionTest,
   extensions::TestExtensionDir directory;
   directory.WriteManifest(R"({
     "manifest_version": 3,
-    "name": "Browser Final local MV3 regression",
+    "name": "Blynx local MV3 regression",
     "version": "1.0",
     "permissions": ["storage"],
     "background": {"service_worker": "worker.js"}

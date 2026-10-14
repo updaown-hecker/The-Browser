@@ -5,9 +5,9 @@ revision. The tag/hash were resolved from official googlesource and match the
 installed Chrome engine version used for the baseline. Pinning is reproducibility,
 not a claim that this will remain the newest secure release.
 
-Keep the small Browser Final repository separate from the ignored full upstream
+Keep the small Blynx repository separate from the ignored full upstream
 Git checkout. No massive source tree, generated output, profile or dependency
-cache belongs in Browser Final commits. Track owned components and ordered patch
+cache belongs in Blynx commits. Track owned components and ordered patch
 files; keep unmodified upstream license/source attribution intact.
 
 ## Security-release workflow

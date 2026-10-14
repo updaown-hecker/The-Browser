@@ -15,6 +15,7 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import List, Optional, Sequence
 
@@ -220,7 +221,67 @@ def build_target(paths: ToolPaths, target: str, jobs: Optional[int], dry_run: bo
     if jobs is not None:
         command.extend(["-j", str(jobs)])
     command.append(target)
-    return run_command(command, paths.source_root, dry_run, repo_root=paths.repo_root)
+    record_browser = not dry_run and detect_platform() == "linux" and target in {"chrome", "chrome:chrome"}
+    if record_browser:
+        receipt = paths.build_root / BROWSER_BUILD_RECEIPT
+        if receipt.is_symlink():
+            raise ToolError("Refusing a symlinked browser build receipt.")
+        receipt.unlink(missing_ok=True)
+    result = run_command(command, paths.source_root, dry_run, repo_root=paths.repo_root)
+    if record_browser:
+        _write_browser_build_receipt(paths)
+    return result
+
+
+BROWSER_BUILD_RECEIPT = ".browser-final-build.json"
+BROWSER_RUNTIME_FILES = (
+    "chrome", "resources.pak", "chrome_100_percent.pak", "chrome_200_percent.pak",
+    "locales/en-US.pak",
+)
+
+
+def _browser_build_state(paths: ToolPaths) -> dict:
+    artifacts = {}
+    for relative in BROWSER_RUNTIME_FILES:
+        path = paths.build_root / relative
+        if path.is_symlink() or not path.is_file():
+            raise ToolError("Missing or symlinked browser runtime artifact: {}".format(path))
+        info = path.stat()
+        artifacts[relative] = {"size": info.st_size, "mtime_ns": info.st_mtime_ns}
+    return {
+        "version": 1,
+        "integration": hashlib.sha256((paths.source_root / ".browser-final-overlay.json").read_bytes()).hexdigest(),
+        "args": hashlib.sha256((paths.build_root / "args.gn").read_bytes()).hexdigest(),
+        "artifacts": artifacts,
+    }
+
+
+def _write_browser_build_receipt(paths: ToolPaths) -> None:
+    # GN writes resource packs before the final link. Publish readiness only
+    # after a successful chrome build, so launches cannot mix old code/new PAKs.
+    state = _browser_build_state(paths)
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=paths.build_root,
+                                     prefix=".browser-final-build-", suffix=".tmp", delete=False) as output:
+        temporary = Path(output.name)
+        json.dump(state, output, indent=2, sort_keys=True)
+        output.write("\n")
+    try:
+        temporary.replace(paths.build_root / BROWSER_BUILD_RECEIPT)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def _require_completed_browser_build(paths: ToolPaths) -> None:
+    instruction = "Finish `python3 -B scripts/build.py build -j 4` before launching Blynx."
+    receipt = paths.build_root / BROWSER_BUILD_RECEIPT
+    try:
+        if receipt.is_symlink() or not receipt.is_file():
+            raise ValueError("no completed browser build receipt")
+        record = json.loads(receipt.read_text(encoding="utf-8"))
+        if record != _browser_build_state(paths):
+            raise ValueError("browser executable, resource packs, integration or GN arguments changed")
+    except (OSError, ValueError, ToolError) as error:
+        raise ToolError("Browser build is incomplete or its resources are stale: {}. {}".format(error, instruction)) from error
 
 
 def run_browser(
@@ -244,6 +305,9 @@ def run_browser(
             "Browser executable not found at {}. Build it first with "
             "`python scripts/build.py build`.".format(executable_path)
         )
+    if not dry_run and platform_name == "linux" and executable_path.resolve() == (paths.build_root / "chrome").resolve():
+        _require_integration(paths)
+        _require_completed_browser_build(paths)
     command = [str(executable_path)]
     # Never let a development launch accidentally reuse the user's installed
     # Chromium profile. An explicit profile argument remains the user's choice.

@@ -2,7 +2,7 @@
 <!-- 0002-customization.patch installs this catalog beside generated_resources.grd
      as required by that upstream GRD's part-location contract. -->
 <grit-part>
-  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_TITLE" desc="Title and toolbar tooltip of Browser Final's native appearance dialog.">Customize Browser</message>
+  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_TITLE" desc="Title and toolbar tooltip of Blynx's native appearance dialog.">Customize Blynx</message>
   <message name="IDS_BROWSER_FINAL_CUSTOMIZE_DESCRIPTION" desc="Explains which native browser settings can be customized.">Choose a preset or change the theme, accent, and bookmarks bar.</message>
   <message name="IDS_BROWSER_FINAL_CUSTOMIZE_PRESET_LABEL" desc="Accessible label for the preset selector.">Appearance preset</message>
   <message name="IDS_BROWSER_FINAL_CUSTOMIZE_SAVED" desc="Preset selector entry that restores the configuration loaded when opening the dialog.">Saved configuration</message>

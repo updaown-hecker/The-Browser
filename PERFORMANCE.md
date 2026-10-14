@@ -1,7 +1,7 @@
 # Performance measurements
 
-No Browser Final executable has completed full release validation yet. There is
-**no Browser Final vs Chrome/Brave comparison** and no speed or memory advantage
+No Blynx executable has completed full release validation yet. There is
+**no Blynx vs Chrome/Brave comparison** and no speed or memory advantage
 claim. Release GN configuration is optimized/non-component but not a signed,
 official PGO release. Do not optimize security checks away.
 
@@ -36,7 +36,7 @@ each mode. Raw: `.local/benchmarks/run-k4b5f136/results.json`.
 | Warm | 273 ms | 268–337 ms |
 
 Wide first-run variation confirms this busy workstation's noise. These values
-are a harness baseline, not a Browser Final result or OS-cache-cold measurement.
+are a harness baseline, not a Blynx result or OS-cache-cold measurement.
 
 An earlier Chrome+Brave run was externally interrupted while Brave's headless
 dump hung; it did not produce a complete measurement set. Its scoped leftover

@@ -19,13 +19,13 @@ except ImportError:
 class Fixture(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/download":
-            body = b"Browser Final download passed\n"
+            body = b"Blynx download passed\n"
             self.send_response(200)
             self.send_header("Content-Type", "text/plain")
             self.send_header("Content-Disposition", 'attachment; filename="smoke.txt"')
         else:
             body = (b"<title>Second local page</title><p>Navigation passed</p>" if self.path == "/next" else
-                    b'<title>Browser Final local smoke</title><p id="result"></p>'
+                    b'<title>Blynx local smoke</title><p id="result"></p>'
                     b'<script>document.querySelector("#result").textContent="JavaScript executed"</script>'
                     b'<a id="next" href="/next">Next</a><a id="download" href="/download">Download</a>')
             self.send_response(200)

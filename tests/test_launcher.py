@@ -33,7 +33,7 @@ class LauncherTest(unittest.TestCase):
         ) as run:
             self.assertEqual(launch.main(["--ozone-platform=wayland", "about:blank"]), 0)
             self.assertEqual(os.environ["CHROME_DEVEL_SANDBOX"], "/opt/google/chrome/chrome-sandbox")
-            self.assertEqual(os.environ["CHROME_DESKTOP"], "browser-final-dev.desktop")
+            self.assertEqual(os.environ["CHROME_DESKTOP"], "blynx-dev.desktop")
             run.assert_called_once_with(["run", "--", "--ozone-platform=wayland", "about:blank"])
 
     def test_explicit_helper_is_preserved_and_empty_helper_is_rejected(self):

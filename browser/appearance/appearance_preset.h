@@ -51,8 +51,8 @@ struct AppearancePreset final {
   static constexpr std::size_t kMaximumJsonBytes = 4096;
 
   std::uint32_t schema_version = kCurrentSchemaVersion;
-  std::string preset_id = "default";  // 1-32 ASCII identifier bytes.
-  std::string display_name = "Browser Final Default";  // 1-64 UTF-8 bytes.
+  std::string preset_id = "default";           // 1-32 ASCII identifier bytes.
+  std::string display_name = "Blynx Default";  // 1-64 UTF-8 bytes.
   AppearanceTheme theme = AppearanceTheme::kSystem;
   AppearanceDensity density = AppearanceDensity::kComfortable;
   AppearanceTabStyle tab_style = AppearanceTabStyle::kRounded;

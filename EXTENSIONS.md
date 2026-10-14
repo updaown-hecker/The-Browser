@@ -3,15 +3,20 @@
 Use the upstream desktop extension architecture and `chrome://extensions`, not
 an incompatible custom extension system. No browser-specific disabling of
 Manifest V3, sandbox boundaries, permission prompts or CRX verification is added.
-No “100% compatible” claim is made. This distribution has not yet passed a real
-extension installation/API/runtime test.
+No “100% compatible” claim is made. The local MV3 smoke test passes service-worker messaging, storage and
+disable/re-enable persistence. This is limited unpacked-extension evidence.
 
 `browser/tests/extensions_browsertest.cc` now exercises a real unpacked MV3
 service worker, local storage round-trip and disable/re-enable through Chromium's
-test harness. It compiles with Chromium Clang but has not yet been executed;
+test harness. It compiles with Chromium Clang but the full gtest has not yet been executed;
 compilation is not a compatibility
 result. Run `browser_tests --gtest_filter='BrowserFinalExtensionTest.*'` after
 building the full test binary.
+
+`python3 -B scripts/runtime_smoke.py` loads the owned local MV3 fixture in a
+disposable profile and checks runtime message/storage round trips, then disables
+and re-enables it through the upstream extensions page. Store installation,
+other extensions and the broader API matrix remain unverified.
 
 ## Chrome Web Store investigation
 

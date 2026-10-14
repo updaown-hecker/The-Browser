@@ -37,7 +37,7 @@ diff --git a/chrome/browser/resources/new_tab_page/app.css b/chrome/browser/reso
    }
  }
 +
-+/* Browser Final's identity surrounds the upstream search and shortcut UI. */
++/* Blynx's identity surrounds the upstream search and shortcut UI. */
 +#browserFinalBrand {
 +  align-items: center;
 +  color: var(--color-new-tab-page-primary-foreground);
@@ -111,11 +111,10 @@ diff --git a/chrome/browser/resources/new_tab_page/app.css b/chrome/browser/reso
 diff --git a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc b/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
 --- a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
 +++ b/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
-@@ -205,6 +205,21 @@
-     bool session_allows_drag_and_drop) {
+@@ -206,6 +206,22 @@
    content::WebUIDataSource* source = content::WebUIDataSource::CreateAndAdd(
        profile, chrome::kChromeUINewTabPageHost);
-+
+
 +  static constexpr webui::LocalizedString kBrowserFinalStrings[] = {
 +      {"browserFinalName", IDS_PRODUCT_NAME},
 +      {"browserFinalTagline", IDS_BROWSER_FINAL_CUSTOMIZE_DESCRIPTION},
@@ -126,13 +125,24 @@ diff --git a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc b/chrome/br
 +      {"browserFinalExtensions", IDS_EXTENSIONS_SUBMENU},
 +      {"browserFinalSettings", IDS_SETTINGS},
 +  };
-+  source->AddLocalizedStrings(kBrowserFinalStrings);
-+  std::u16string history_label = l10n_util::GetStringUTF16(IDS_HISTORY_MENU);
-+  base::ReplaceChars(history_label, u"&", u"", &history_label);
-+  source->AddString("browserFinalHistory", history_label);
- 
++  for (const auto& message : kBrowserFinalStrings) {
++    std::u16string label = l10n_util::GetStringUTF16(message.id);
++    base::ReplaceChars(label, u"&", u"", &label);
++    source->AddString(message.name, label);
++  }
++
    ui::Accelerator undo_accelerator(ui::VKEY_Z, ui::EF_PLATFORM_ACCELERATOR);
    source->AddString("undoDescription", l10n_util::GetStringFUTF16(
+                                            IDS_UNDO_DESCRIPTION,
+@@ -399,7 +415,7 @@
+       {"colorPickerLabel", IDS_NTP_CUSTOMIZE_COLOR_PICKER_LABEL},
+       {"hueSliderTitle", IDS_NTP_CUSTOMIZE_COLOR_HUE_SLIDER_TITLE},
+       {"hueSliderAriaLabel", IDS_NTP_CUSTOMIZE_COLOR_HUE_SLIDER_ARIA_LABEL},
+-      {"customizeButton", IDS_NTP_CUSTOMIZE_BUTTON_LABEL},
++      {"customizeButton", IDS_BROWSER_FINAL_CUSTOMIZE_TITLE},
+       {"customizeThisPage", IDS_NTP_CUSTOM_BG_CUSTOMIZE_NTP_LABEL},
+
+       // Wallpaper search.
 diff --git a/chrome/common/channel_info_posix.cc b/chrome/common/channel_info_posix.cc
 --- a/chrome/common/channel_info_posix.cc
 +++ b/chrome/common/channel_info_posix.cc
@@ -141,7 +151,7 @@ diff --git a/chrome/common/channel_info_posix.cc b/chrome/common/channel_info_po
      return name.value();
    }
 -  return "chromium-browser.desktop";
-+  return "browser-final-dev.desktop";
++  return "blynx-dev.desktop";
  #endif
  }
  #endif  // BUILDFLAG(IS_LINUX)
@@ -164,3 +174,15 @@ diff --git a/chrome/browser/resources/new_tab_page/app.ts b/chrome/browser/resou
      searchbox: NtpSearchboxElement,
      composebox: NtpComposeboxElement,
      undoToast: CrToastElement,
+diff --git a/chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_ui.cc b/chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_ui.cc
+--- a/chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_ui.cc
++++ b/chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_ui.cc
+@@ -101,7 +101,7 @@
+   static constexpr webui::LocalizedString kLocalizedStrings[] = {
+       // Side panel strings.
+       {"backButton", IDS_ACCNAME_BACK},
+-      {"title", IDS_SIDE_PANEL_CUSTOMIZE_CHROME_TITLE},
++      {"title", IDS_BROWSER_FINAL_CUSTOMIZE_TITLE},
+       // Header strings.
+       {"appearanceHeader", IDS_NTP_CUSTOMIZE_APPEARANCE_LABEL},
+       {"cardsHeader", IDS_NTP_CUSTOMIZE_MENU_MODULES_LABEL},

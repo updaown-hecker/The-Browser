@@ -72,9 +72,10 @@ try {
   await page.send('Emulation.setDeviceMetricsOverride', {
     width: 1280, height: 800, deviceScaleFactor: 1, mobile: false,
   });
-  await waitFor(page, `document.querySelector('ntp-app')?.shadowRoot?.querySelector('#browserFinalBrand')?.textContent.includes('Browser Final')`);
+  await waitFor(page, `document.querySelector('ntp-app')?.shadowRoot?.querySelector('#browserFinalBrand')?.textContent.includes('Blynx')`);
   const links = await evaluate(page, `Array.from(document.querySelector('ntp-app').shadowRoot.querySelectorAll('#browserFinalNavigation a'), a => ({text: a.textContent.trim(), href: a.href}))`);
   assert.equal(links.length, 5);
+  assert(links.every(link => !link.text.includes('&')), 'Menu accelerator characters leaked into new-tab labels');
   assert.deepEqual(links.map(link => link.href), [
     'chrome://bookmarks/', 'chrome://history/', 'chrome://downloads/',
     'chrome://extensions/', 'chrome://settings/',
@@ -82,6 +83,15 @@ try {
   report.checks.push('branded new-tab header and five browser shortcuts');
   await waitFor(page, `!!document.querySelector('ntp-app').shadowRoot.querySelector('ntp-searchbox')`);
   report.checks.push('upstream new-tab search component present');
+  for (let index = 0; index < 3; ++index) {
+    const extra = await browser.send('Target.createTarget', {url: 'chrome://newtab/'});
+    const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+    const extraPage = await connect(list.find(target => target.id === extra.targetId).webSocketDebuggerUrl);
+    sockets.push(extraPage);
+    await waitFor(extraPage, `document.querySelector('ntp-app')?.shadowRoot?.querySelector('#browserFinalBrand')?.textContent.includes('Blynx')`);
+    await browser.send('Target.closeTarget', {targetId: extra.targetId});
+  }
+  report.checks.push('three additional new tabs render and close without a browser crash');
   const screenshot = await page.send('Page.captureScreenshot');
   await fs.writeFile(`${output}/new-tab.png`, Buffer.from(screenshot.data, 'base64'));
   await evaluate(page, `document.querySelector('ntp-app').shadowRoot.querySelector('#browserFinalNavigation a').click()`);
@@ -89,7 +99,7 @@ try {
   report.checks.push('bookmark shortcut navigates to native bookmark WebUI');
 
   await page.send('Page.navigate', {url: fixture});
-  await waitFor(page, `document.title === 'Browser Final local smoke'`);
+  await waitFor(page, `document.title === 'Blynx local smoke'`);
   assert.equal(await evaluate(page, 'document.querySelector("#result").textContent'), 'JavaScript executed');
   await evaluate(page, 'document.querySelector("#next").click()');
   await waitFor(page, `document.title === 'Second local page'`);
@@ -104,13 +114,13 @@ try {
   });
   await fs.rm(`${output}/downloads/smoke.txt`, {force: true});
   await page.send('Page.navigate', {url: fixture});
-  await waitFor(page, `document.title === 'Browser Final local smoke'`);
+  await waitFor(page, `document.title === 'Blynx local smoke'`);
   await evaluate(page, 'document.querySelector("#download").click()');
   const deadline = Date.now() + 15000;
   let downloaded = false;
   while (Date.now() < deadline) {
     try {
-      downloaded = (await fs.readFile(`${output}/downloads/smoke.txt`, 'utf8')) === 'Browser Final download passed\n';
+      downloaded = (await fs.readFile(`${output}/downloads/smoke.txt`, 'utf8')) === 'Blynx download passed\n';
       if (downloaded) break;
     } catch {}
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -121,11 +131,11 @@ try {
   await page.send('Page.navigate', {url: 'chrome://extensions/'});
   await waitFor(page, `!!globalThis.chrome?.developerPrivate?.getExtensionsInfo`);
   const extensions = await evaluate(page, `chrome.developerPrivate.getExtensionsInfo({includeDisabled: true, includeTerminated: true})`);
-  const extension = extensions.find(item => item.name === 'Browser Final local smoke extension');
+  const extension = extensions.find(item => item.name === 'Blynx local smoke extension');
   assert(extension, 'Local unpacked MV3 extension was not loaded');
   assert.equal(extension.state, 'ENABLED');
   await page.send('Page.navigate', {url: `chrome-extension://${extension.id}/check.html`});
-  await waitFor(page, `document.title === 'Browser Final extension smoke'`);
+  await waitFor(page, `document.title === 'Blynx extension smoke'`);
   const firstReply = await evaluate(page, `chrome.runtime.sendMessage({operation: 'roundtrip', value: 42})`);
   assert.equal(firstReply.value, 42);
   report.checks.push('unpacked MV3 worker messages and storage round-trip');
@@ -136,7 +146,7 @@ try {
   assert.equal(state.state, 'DISABLED');
   await evaluate(page, `chrome.management.setEnabled('${extension.id}', true)`);
   await page.send('Page.navigate', {url: `chrome-extension://${extension.id}/check.html`});
-  await waitFor(page, `document.title === 'Browser Final extension smoke'`);
+  await waitFor(page, `document.title === 'Blynx extension smoke'`);
   const stored = await evaluate(page, `chrome.storage.local.get('smokeValue')`);
   assert.equal(stored.smokeValue, 42);
   const secondReply = await evaluate(page, `chrome.runtime.sendMessage({operation: 'roundtrip', value: 84})`);

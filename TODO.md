@@ -1,20 +1,18 @@
 # Remaining work (not implemented claims)
 
 ## Immediate
-- Linux release link succeeded; Wayland process startup with the existing Chrome
-  sandbox helper and renderer/GPU seccomp observed. Verify the visible window,
-  real navigation, multi-tab operations, F11, DevTools, chrome://sandbox/GPU,
-  downloads and renderer crashes. Investigate the headless DOM timeout and
-  Wayland/Vulkan warning.
-- Execute native appearance browser tests, including restart, policy and incognito.
-  The focused nine preference unit tests already pass; native sources compile.
-- Add/run ordinary browsing/profile/bookmark/download/session integration tests;
-  execute the now-compiled MV3 worker/storage/disable-enable browser test and
-  tests; validate direct Web Store behavior without impersonation/bypass.
+- Completed: Linux link, branded new-tab rendering, local navigation/tabs/download,
+  local MV3 worker/storage/disable-enable and sandbox-status smoke checks.
+- Complete broader browsing/profile/bookmark/session, F11, DevTools, GPU/media,
+  renderer-crash and accessibility tests; investigate Wayland/Vulkan warnings.
+- Execute full native appearance policy/incognito browser tests. Targeted native
+  Apply/restart/Cancel and upstream tab-layout checks are covered by smoke tests.
+- Validate direct Web Store behavior and permissions/profile separation without
+  impersonation or bypass; the full MV3 gtest remains unexecuted.
 
 ## Daily browsing and customization
 - Audit inherited behavior first. Polish owned settings/about/new-tab branding
-  and replace upstream icon resources with the owned icon artwork.
+  and cover remaining platform icon resources; selected Linux/Views icons are owned.
 - Native immediate live preview and safe import/export file UI; consume actual
   centralized tokens for density, scaling, radius, spacing, motion and colors.
 - Native vertical tabs positions, DnD/groups/pinning/audio/keyboard/collapsed mode;

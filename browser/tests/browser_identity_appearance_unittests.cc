@@ -24,9 +24,8 @@ void Expect(bool condition, std::string_view message) {
 
 void TestProductIdentityAndPaths() {
   const browser::ProductIdentity identity = browser::GetProductIdentity();
-  Expect(identity.product_name == "Browser Final", "product name is stable");
-  Expect(identity.executable_name == "browser-final",
-         "executable name is stable");
+  Expect(identity.product_name == "Blynx", "product name is stable");
+  Expect(identity.executable_name == "blynx", "executable name is stable");
   Expect(identity.application_data_directory_name == "BrowserFinal",
          "application data directory is stable");
   Expect(identity.profile_directory_name == "Default",
@@ -315,28 +314,23 @@ void TestBoundsAndMalformedValues() {
         std::string("\"interface_scale\":") + std::string(invalid_number)));
     Expect(!result.ok(), "invalid JSON numeric grammar is rejected");
   }
-  ExpectImportError(
-      ReplaceOnce(valid, "\"display_name\":\"Browser Final Default\"",
-                  "\"display_name\":\"bad\\nname\""),
-      Error::kInvalidString);
-  ExpectImportError(
-      ReplaceOnce(valid, "\"display_name\":\"Browser Final Default\"",
-                  "\"display_name\":\"bad\\uD800name\""),
-      Error::kMalformedJson);
-  ExpectImportError(
-      ReplaceOnce(valid, "\"display_name\":\"Browser Final Default\"",
-                  "\"display_name\":\"bad\\uDC00name\""),
-      Error::kMalformedJson);
-  ExpectImportError(
-      ReplaceOnce(valid, "\"display_name\":\"Browser Final Default\"",
-                  "\"display_name\":\"bad\\qname\""),
-      Error::kMalformedJson);
+  ExpectImportError(ReplaceOnce(valid, "\"display_name\":\"Blynx Default\"",
+                                "\"display_name\":\"bad\\nname\""),
+                    Error::kInvalidString);
+  ExpectImportError(ReplaceOnce(valid, "\"display_name\":\"Blynx Default\"",
+                                "\"display_name\":\"bad\\uD800name\""),
+                    Error::kMalformedJson);
+  ExpectImportError(ReplaceOnce(valid, "\"display_name\":\"Blynx Default\"",
+                                "\"display_name\":\"bad\\uDC00name\""),
+                    Error::kMalformedJson);
+  ExpectImportError(ReplaceOnce(valid, "\"display_name\":\"Blynx Default\"",
+                                "\"display_name\":\"bad\\qname\""),
+                    Error::kMalformedJson);
   std::string invalid_utf8 = "\"display_name\":\"";
   invalid_utf8.append("\xC0\xAF");
   invalid_utf8.push_back('"');
   ExpectImportError(
-      ReplaceOnce(valid, "\"display_name\":\"Browser Final Default\"",
-                  invalid_utf8),
+      ReplaceOnce(valid, "\"display_name\":\"Blynx Default\"", invalid_utf8),
       Error::kInvalidString);
 
   for (std::size_t length = 0; length < valid.size(); ++length) {
@@ -409,7 +403,7 @@ class CommaDecimalPoint final : public std::numpunct<char> {
 void TestUnicodeAndLocaleIndependence() {
   const std::string valid = ValidPresetJson();
   const auto unicode = browser::ImportAppearancePreset(
-      ReplaceOnce(valid, "\"display_name\":\"Browser Final Default\"",
+      ReplaceOnce(valid, "\"display_name\":\"Blynx Default\"",
                   "\"display_name\":\"Caf\\u00E9 \\uD83D\\uDE80\""));
   Expect(unicode.ok(), "valid unicode escape and surrogate pair import");
   if (unicode.ok()) {

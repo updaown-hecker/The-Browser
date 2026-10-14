@@ -18,7 +18,8 @@ struct ProductIdentity final {
   std::string_view profile_directory_name;
 
   static constexpr ProductIdentity Defaults() noexcept {
-    return {"Browser Final", "browser-final", "BrowserFinal", "Default"};
+    // Preserve the existing on-disk root across the product rename.
+    return {"Blynx", "blynx", "BrowserFinal", "Default"};
   }
 };
 

@@ -1,4 +1,4 @@
-# Browser Final
+# Blynx
 
 An independent **native Chromium distribution** for Linux and Windows. The
 browser remains C++/Views, Blink, V8, Chromium networking and sandboxed processes.
@@ -11,14 +11,15 @@ This is **development source, not a daily-driver release**. Chromium source,
 dependencies and hooks have been bootstrapped, the fork patches applied, and
 Linux release GN generation succeeded. The isolated identity/appearance tests
 have built and passed with Chromium's Clang/libc++ as well as standalone CMake.
-The Linux browser link succeeded. Wayland process startup with the installed
-Chrome sandbox helper and renderer/GPU seccomp were observed; visual UI, browsing
-and Windows execution remain unverified. See `HANDOFF.md` for current build results and exact blockers.
+The Linux browser links successfully. Actual-browser smoke checks cover the branded
+new-tab page, local JavaScript/navigation, multiple tabs, downloads, a local MV3
+extension and sandbox status. Native dialog checks exercise Apply, saved settings
+after restart and Cancel. Windows execution and release packaging remain unverified.
+See `HANDOFF.md` for exact results and limitations.
 
-The nine focused Chromium PrefService tests also pass, including real disk-backed
-preference recreation, malformed/future data and managed/read-only write refusal.
-Custom native dialog/toolbar/pref-registration and MV3 browser-test sources compile
-cleanly, but UI and extension browser tests have not run.
+The nine focused Chromium PrefService tests also pass, including disk-backed
+preference recreation and managed/read-only write refusal. Full native policy,
+incognito and inherited browser regression suites have not been executed.
 
 Implemented browser-specific source:
 - Separate branding and Linux/Windows profile-path patches.
@@ -27,7 +28,7 @@ Implemented browser-specific source:
 - Owned Linux/Views icons and a user-local application-menu launcher.
 - Strict, bounded, versioned appearance preset import/export and three presets.
 - Chromium PrefService persistence and policy/private-profile guards.
-- Native Customize Browser toolbar/dialog integration: system/light/dark,
+- Native Customize Blynx toolbar/dialog integration: system/light/dark,
   accent, bookmark visibility and upstream vertical tab layout. Dialog preview
   updates automatically as controls change; it is illustrative, not a live
   modification of browser chrome. Other schema fields are explicitly data-only.
@@ -57,14 +58,16 @@ python3 scripts/build.py run -- --ozone-platform=wayland
 For the branded development application on this host:
 
 ```sh
-./browser-final
+./blynx
 # Optional: use X11 explicitly
-./browser-final --ozone-platform=x11
+./blynx --ozone-platform=x11
 # Install/update the user-local application menu entry
 python3 -B scripts/install_launcher.py
 ```
 
-The application menu entry is **Browser Final**. The launcher selects Wayland
+The application menu entry is **Blynx**. The previous `browser-final` command
+remains a compatibility alias; legacy `BrowserFinal` disk paths and internal
+preference identifiers are preserved so existing development data stays in place. The launcher selects Wayland
 when available, preserves explicit platform flags and the development profile,
 and uses the existing root-owned Chrome sandbox helper when available. It does
 not build the browser or change OS policy. See `BUILD_LINUX.md` for details.

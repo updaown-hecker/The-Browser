@@ -52,7 +52,7 @@ target. This avoids `toolbar -> custom UI -> browser UI -> toolbar` cycles.
    pending the platform identity audit.
 
 Binary output names remain upstream `chrome`/`chrome.exe` in this development
-slice. The root `browser-final` is an executable development launcher for the
+slice. The root `blynx` is an executable development launcher for the
 built Chromium binary, not a renamed or packaged browser binary. It selects
 the project development profile and a user-local desktop identity; it can use
 the existing verified root-owned installed Chrome SUID sandbox helper. It does

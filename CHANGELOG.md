@@ -1,5 +1,18 @@
 # Changelog
 
+## October 13, 2026 — Blynx development browser
+
+- Renamed public product branding, new-tab heading, native customization and
+  application-menu entry to Blynx; added `./blynx` while preserving legacy profile
+  paths and launcher compatibility.
+- Fixed the toolbar API compilation failure that left new resources paired with
+  an old executable. Added successful-build readiness checks before launching.
+- Added branded new-tab shortcuts, selected native icons, dialog preview and
+  the upstream vertical-tab preference control.
+- Added actual-browser navigation/tab/download/MV3/sandbox smoke checks and native
+  Apply/restart/Cancel checks. Exact outcomes are recorded in HANDOFF.md.
+- Release packaging and full cross-platform/security validation remain pending.
+
 ## October 12, 2026 — development launch diagnosis
 
 - Recorded successful full Linux browser build from the user's terminal output.
