@@ -8,14 +8,13 @@ code is substituted for Chromium.
 ## Current truth
 
 This is **development source, not a daily-driver release**. Chromium source,
-dependencies and hooks have been bootstrapped, the fork patches applied, and
-Linux release GN generation succeeded. The isolated identity/appearance tests
-have built and passed with Chromium's Clang/libc++ as well as standalone CMake.
-The Linux browser links successfully. Actual-browser smoke checks cover the branded
-new-tab page, local JavaScript/navigation, multiple tabs, downloads, a local MV3
-extension and sandbox status. Native dialog checks exercise Apply, saved settings
-after restart and Cancel. Windows execution and release packaging remain unverified.
-See `HANDOFF.md` for exact results and limitations.
+dependencies and hooks have been bootstrapped, the five fork patches are
+integrated, and the Linux release browser links successfully. The isolated
+identity/appearance tests pass with Chromium's Clang/libc++ and standalone CMake.
+Actual-browser smoke checks cover the Blynx new-tab canvas, `blynx://` routing,
+Settings Apply/Cancel, local JavaScript/navigation, multiple tabs, downloads, a
+local MV3 extension and sandbox status. Windows execution and release packaging
+remain unverified. See `HANDOFF.md` for exact results and limitations.
 
 The nine focused Chromium PrefService tests also pass, including disk-backed
 preference recreation and managed/read-only write refusal. Full native policy,
@@ -23,15 +22,19 @@ incognito and inherited browser regression suites have not been executed.
 
 Implemented browser-specific source:
 - Separate branding and Linux/Windows profile-path patches.
-- Branded built-in new-tab page with bookmarks/history/downloads/extensions/settings
-  shortcuts, retaining Chromium's search and most-visited components.
+- Designed new-tab canvas using the Blynx eye logo, Aurora/Midnight/Paper
+  backgrounds and optional shortcuts; retains Chromium search and most-visited.
+- `blynx://` navigation aliases and branded address-bar display, with legacy
+  `chrome://` links accepted. Original internal origins/permissions stay intact.
+- `blynx://webstore` opens the official Chrome Web Store; it is not a separate
+  Blynx marketplace and installation compatibility remains unverified.
 - Owned Linux/Views icons and a user-local application-menu launcher.
 - Strict, bounded, versioned appearance preset import/export and three presets.
 - Chromium PrefService persistence and policy/private-profile guards.
-- Native Customize Blynx toolbar/dialog integration: system/light/dark,
-  accent, bookmark visibility and upstream vertical tab layout. Dialog preview
-  updates automatically as controls change; it is illustrative, not a live
-  modification of browser chrome. Other schema fields are explicitly data-only.
+- Settings → Appearance contains Blynx theme, accent, bookmarks, vertical-tab
+  layout and new-tab canvas controls with Apply/Cancel and profile/policy guards.
+  The former toolbar popup is removed. Upstream settings also provide fonts,
+  zoom, hover-card options, tab layout and other ordinary browser preferences.
 - Pinned, safety-checked bootstrap, overlay integration and build scripts.
 - Automated tooling/config tests and a local headless benchmark harness.
 
@@ -97,4 +100,5 @@ repositories inside this workspace. Outputs, development profiles, logs and raw
 measurements stay ignored. No supplied credentials belong in these files.
 
 Documentation: `ARCHITECTURE.md`, `SECURITY.md`, `EXTENSIONS.md`, `UPSTREAM.md`,
-`PERFORMANCE.md`, `CHANGELOG.md`, `TODO.md`, and `HANDOFF.md`.
+`PERFORMANCE.md`, `CHANGELOG.md`, `TODO.md`, and `HANDOFF.md`. The current
+session status and exact commands/results are maintained in `HANDOFF.md`.

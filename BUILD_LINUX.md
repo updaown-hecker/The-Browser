@@ -41,8 +41,11 @@ python3 scripts/build.py run -- --ozone-platform=x11
 
 The run wrapper always supplies an isolated `out/linux-release/development-profile`
 unless explicitly overridden. Do not point development binaries at daily profiles.
-Native output remains `out/linux-release/chrome`. The Linux link and targeted runtime/native UI smoke checks pass; no production
-package is claimed. See HANDOFF.md for their precise coverage.
+Native output remains `out/linux-release/chrome`. The Linux link and targeted
+runtime/native UI smoke checks pass; no production package is claimed. The latest
+incremental browser build regenerated the successful-build receipt after the
+final new-tab compatibility fix. See `HANDOFF.md` for precise coverage and the
+one broad-test timeout.
 
 ## Branded development launcher
 
@@ -84,14 +87,20 @@ The runtime smoke uses the pinned Chromium Node runtime and a loopback-only,
 random DevTools port to check the built-in new-tab page, local navigation/tabs,
 downloads, a local MV3 extension, and `chrome://sandbox`. The native smoke uses
 this host's GI/AT-SPI accessibility library and Wayland display to operate the
-actual appearance dialog, select a preset, save an accent/tab layout, restart,
-and verify Cancel preserves the saved configuration. Logs/results/screenshots stay ignored under `.local/`. These
+actual Settings page, save accent/tab/canvas choices, reject invalid colors and
+verify Cancel and page reload preserve the saved configuration. The native run
+also inspects the visible vertical strip and branded address bar through AT-SPI. Logs/results/screenshots stay ignored under `.local/`. These
 checks are narrower than full inherited or native in-process browser tests.
 
 The last two browser-test commands above need a substantial Chromium build; UI browser tests also need a
 usable display. The in-process tests must not be replaced with manifest parsing
 or compilation-only claims. Full inherited browser/security regression coverage
 is a release gate, not just the custom gtest filter.
+
+The targeted identity/appearance executable and nine PrefService tests passed in
+the current checkout. A full `unit_tests` target was started once and timed out
+after 10 minutes while compiling unrelated upstream tests; it did not report a
+test failure. Retry it from the existing output when broad coverage is useful.
 
 Standalone library fallback (not the browser):
 ```sh

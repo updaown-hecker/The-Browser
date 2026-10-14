@@ -12,6 +12,9 @@ namespace browser {
 // Profile-local, deliberately not syncable. Empty means never configured.
 inline constexpr char kAppearanceJsonPref[] = "browser_final.appearance_json";
 
+inline constexpr char kNewTabStylePref[] = "blynx.new_tab_style";
+inline constexpr char kNewTabLinksPref[] = "blynx.new_tab_links";
+
 void RegisterAppearanceProfilePrefs(PrefRegistrySimple* registry);
 
 enum class AppearancePrefAccess { kWritableProfile, kReadOnlyProfile };

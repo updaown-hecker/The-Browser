@@ -27,7 +27,7 @@ def main() -> int:
         return 2
     root = Path(__file__).resolve().parents[1]
     launcher = root / "blynx"
-    icon = root / "browser/resources/product-icon.svg"
+    icon = root / "browser/resources/icons/blynx-taskbar.png"
     if not launcher.is_file() or not os.access(launcher, os.X_OK):
         raise ValueError("The workspace blynx launcher is missing or not executable.")
     applications = Path(os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local/share"))) / "applications"

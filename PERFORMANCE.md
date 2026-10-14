@@ -51,3 +51,9 @@ information and Speedometer with licensed/local fixture where suitable. Repeat
 candidate and installed baselines under matching power/load/toolchain conditions;
 store raw measurements before a conclusion. Profile Chromium services/UI work
 before adding lazy loading, discard policies or rendering optimizations.
+
+## Current session note
+
+No new Blynx benchmark was run in the redesign follow-up. The Chrome-only local
+baseline above remains the only performance evidence; do not infer an advantage
+from the successful build or smoke tests.

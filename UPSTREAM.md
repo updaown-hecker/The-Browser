@@ -41,3 +41,12 @@ APIs/ownership, ThemeService/policy names, bookmark visibility migration, GRIT
 part/resource-ID bookkeeping and test targets. Branding paths and Windows install
 metadata also need review. The native rendering/network/security engine should
 normally remain untouched; do not scatter fork-specific changes through it.
+
+## Current integration state
+
+As of October 13, 2026, Chromium `154.0.8037.97` at the pinned revision has all
+five patches applied and 34 owned overlay files installed. The read-only
+integration preflight passes. The redesign's final patch adjustment preserves a
+hidden upstream `ntp-logo` compatibility element so inherited TypeScript tests
+continue to type-check while the visible Blynx mark remains custom. No upstream
+source commit was created by this workspace.

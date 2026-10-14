@@ -38,9 +38,9 @@ class Fixture(http.server.BaseHTTPRequestHandler):
         pass
 
 
-def main():
+def main(native=False):
     root = Path(__file__).resolve().parents[1]
-    output = root / ".local/runtime-smoke"
+    output = root / (".local/native-smoke" if native else ".local/runtime-smoke")
     output.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
     helper = Path("/opt/google/chrome/chrome-sandbox")
@@ -55,7 +55,8 @@ def main():
         with (output / "browser.log").open("w") as log:
             browser = subprocess.Popen([
                 str(source / "out/linux-release/chrome"), "--user-data-dir=" + profile,
-                "--headless", "--no-first-run", "--remote-debugging-port=0",
+                *( ["--ozone-platform=wayland", "--force-renderer-accessibility"] if native else ["--headless"] ),
+                "--no-first-run", "--remote-debugging-port=0",
                 "--load-extension=" + str(root / "browser/tests/runtime_extension"),
                 "--disable-background-networking", "about:blank",
             ], env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
@@ -71,7 +72,10 @@ def main():
                 result = subprocess.run([
                     str(node), str(root / "tests/runtime_smoke.mjs"), port,
                     "http://127.0.0.1:" + str(server.server_port) + "/", str(output),
-                ], timeout=150, check=False)
+                ], timeout=210, check=False)
+                if result.returncode == 0 and native:
+                    from native_smoke import check_native_chrome
+                    check_native_chrome(browser.pid, output)
                 return result.returncode
             finally:
                 if browser.poll() is None:

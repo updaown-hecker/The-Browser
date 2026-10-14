@@ -1,188 +1,9 @@
-diff --git a/chrome/browser/prefs/browser_prefs.cc b/chrome/browser/prefs/browser_prefs.cc
---- a/chrome/browser/prefs/browser_prefs.cc
-+++ b/chrome/browser/prefs/browser_prefs.cc
-@@ -18,6 +18,7 @@
- #include "build/android_buildflags.h"
- #include "build/branding_buildflags.h"
- #include "build/build_config.h"
-+#include "browser/appearance/appearance_pref_store.h"
- #include "chrome/browser/about_flags.h"
- #include "chrome/browser/accessibility/accessibility_labels_service.h"
- #include "chrome/browser/accessibility/invert_bubble_prefs.h"
-@@ -1801,6 +1802,7 @@
-   AnnouncementNotificationService::RegisterProfilePrefs(registry);
-   autofill::prefs::RegisterProfilePrefs(registry);
-   browsing_data::prefs::RegisterBrowserUserPrefs(registry);
-+  browser::RegisterAppearanceProfilePrefs(registry);
-   capture_policy::RegisterProfilePrefs(registry);
-   certificate_transparency::prefs::RegisterPrefs(registry);
-   ChromeContentBrowserClient::RegisterProfilePrefs(registry);
-diff --git a/chrome/browser/prefs/BUILD.gn b/chrome/browser/prefs/BUILD.gn
---- a/chrome/browser/prefs/BUILD.gn
-+++ b/chrome/browser/prefs/BUILD.gn
-@@ -60,6 +60,7 @@
-   deps = [
-     ":prefs",
-     ":util",
-+    "//browser:appearance_prefs",
-     "//chrome/browser:browser_process",
-     "//chrome/browser:browser_process_impl",
-     "//chrome/browser:chrome_content_browser_client",
-diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
---- a/chrome/browser/ui/BUILD.gn
-+++ b/chrome/browser/ui/BUILD.gn
-@@ -2470,6 +2470,25 @@
-     if (use_aura) {
-       deps += [ "//third_party/fontconfig" ]
-     }
-+  }
-+
-+  # Keep implementation here: toolbar:impl depends only on the header target,
-+  # never on ui itself. This preserves the existing dependency graph direction.
-+  if (toolkit_views && !is_android) {
-+    sources += [
-+      "//browser/ui/customize_browser_dialog.cc",
-+      "//browser/ui/native_appearance_controller.cc",
-+    ]
-+    deps += [
-+      "//browser:appearance_prefs",
-+      "//browser:customization_dialog_headers",
-+      "//chrome/app:generated_resources",
-+      "//chrome/app:generated_resources_grit",
-+      "//chrome/browser/themes",
-+      "//chrome/common",
-+      "//components/bookmarks/common",
-+      "//components/themes:prefs",
-+    ]
-   }
- 
-   if (toolkit_views) {
-diff --git a/chrome/browser/ui/views/toolbar/BUILD.gn b/chrome/browser/ui/views/toolbar/BUILD.gn
---- a/chrome/browser/ui/views/toolbar/BUILD.gn
-+++ b/chrome/browser/ui/views/toolbar/BUILD.gn
-@@ -169,6 +169,7 @@
-     ":toolbar",
-     "//base:i18n",
-     "//build:branding_buildflags",
-+    "//browser:customization_dialog_headers",
-     "//cc/paint",
-     "//chrome/app:branded_strings",
-     "//chrome/app:branded_strings_grit",
-diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.h b/chrome/browser/ui/views/toolbar/toolbar_view.h
---- a/chrome/browser/ui/views/toolbar/toolbar_view.h
-+++ b/chrome/browser/ui/views/toolbar/toolbar_view.h
-@@ -66,6 +66,10 @@
- class OverflowButton;
- class PerformanceInterventionButton;
- 
-+namespace browser {
-+class CustomizeBrowserDialog;
-+}  // namespace browser
-+
- namespace views {
- class FlexLayout;
- class LabelButton;
-@@ -427,6 +431,7 @@
- 
-   const raw_ptr<BrowserWindowInterface> browser_;
-   const raw_ptr<BrowserView> browser_view_;
-+  std::unique_ptr<browser::CustomizeBrowserDialog> customization_dialog_;
-   base::WeakPtr<glic::GlicSplitButtonController> glic_split_button_controller_;
- 
-   // ToolbarView may or may not serve as the `ToolbarButtonProvider` for a given
-diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.cc b/chrome/browser/ui/views/toolbar/toolbar_view.cc
---- a/chrome/browser/ui/views/toolbar/toolbar_view.cc
-+++ b/chrome/browser/ui/views/toolbar/toolbar_view.cc
-@@ -21,7 +21,9 @@
- #include "base/strings/utf_string_conversions.h"
- #include "base/trace_event/trace_event.h"
- #include "build/build_config.h"
-+#include "browser/ui/customize_browser_dialog.h"
- #include "chrome/app/chrome_command_ids.h"
-+#include "chrome/app/vector_icons/vector_icons.h"
- #include "chrome/browser/actor/ui/actor_ui_metrics.h"
- #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble.h"
- #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble_controller.h"
-@@ -603,6 +605,33 @@
-     overflow_button_->SetVisible(false);
-   }
- 
-+  // A native product affordance, including when the rest of the toolbar is
-+  // WebUI. ToolbarView owns both dialog and Widget; reopening reloads prefs.
-+  auto customize_button = std::make_unique<ToolbarButton>(base::BindRepeating(
-+      [](ToolbarView* toolbar) {
-+        if (!toolbar->customization_dialog_ ||
-+            toolbar->customization_dialog_->IsClosed()) {
-+          auto* parent_widget = toolbar->browser_view_->GetWidget();
-+          toolbar->customization_dialog_ =
-+              std::make_unique<browser::CustomizeBrowserDialog>(
-+                  *toolbar->browser_->GetProfile(),
-+                  parent_widget->GetNativeWindow(),
-+                  parent_widget->GetNativeView());
-+        }
-+        toolbar->customization_dialog_->Show();
-+      },
-+      base::Unretained(this)));
-+  customize_button->SetID(browser::kCustomizeBrowserToolbarButtonId);
-+  customize_button->SetVectorIcon(kSettingsIcon);
-+  customize_button->SetHighlight(
-+      l10n_util::GetStringUTF16(IDS_BROWSER_FINAL_CUSTOMIZE_TITLE),
-+      std::nullopt);
-+  customize_button->SetTooltipText(
-+      l10n_util::GetStringUTF16(IDS_BROWSER_FINAL_CUSTOMIZE_TITLE));
-+  customize_button->GetViewAccessibility().SetName(
-+      l10n_util::GetStringUTF16(IDS_BROWSER_FINAL_CUSTOMIZE_TITLE));
-+  AddChildView(std::move(customize_button));
-+
-   // WebUI app menu button handles these internally, so no need to set these
-   // properties here, and the control is added as part of the WebUI toolbar.
-   if (!features::IsWebUIAppMenuButtonEnabled()) {
-diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
---- a/chrome/app/generated_resources.grd
-+++ b/chrome/app/generated_resources.grd
-@@ -277,6 +277,7 @@
-   <release seq="1">
-     <!-- IMPORTANT: .grdp files must be in the same directory as this file -->
-     <messages fallback_to_english="true">
-+      <part file="browser_final_customization_strings.grdp" />
-       <!-- Access Code Cast specific strings -->
-       <part file="access_code_cast_strings.grdp" />
- 
-diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
---- a/chrome/test/BUILD.gn
-+++ b/chrome/test/BUILD.gn
-@@ -1887,6 +1887,7 @@
-     deps = [
-       ":browser_tests_runner",
-       ":platform_browser_tests",
-+      "//browser:chromium_browser_tests",
-       ":test_support",
-       ":test_support_ui",
-       "//base",
-@@ -5188,6 +5189,7 @@
-     ":test_interfaces",
-     ":test_support",
-     ":test_support_unit",
-+    "//browser:chromium_unit_tests",
-     "//base:base_stack_sampling_profiler_test_util",
-     "//base/i18n:test_support",
-     "//base/test:test_support",
-diff --git a/chrome/app/generated_resources.grd.gritdeps b/chrome/app/generated_resources.grd.gritdeps
---- a/chrome/app/generated_resources.grd.gritdeps
-+++ b/chrome/app/generated_resources.grd.gritdeps
-@@ -4,6 +4,7 @@
- chrome/app/actor_strings.grdp
- chrome/app/app_management_strings.grdp
- chrome/app/bookmarks_strings.grdp
-+chrome/app/browser_final_customization_strings.grdp
- chrome/app/certificate_manager.grdp
- chrome/app/chromeos_shared_strings.grdp
- chrome/app/chromeos_strings.grdp
 diff --git a/chrome/app/browser_final_customization_strings.grdp b/chrome/app/browser_final_customization_strings.grdp
 new file mode 100644
+index 0000000..6e017af
 --- /dev/null
 +++ b/chrome/app/browser_final_customization_strings.grdp
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,46 @@
 +<?xml version="1.0" encoding="utf-8"?>
 +<!-- 0002-customization.patch installs this catalog beside generated_resources.grd
 +     as required by that upstream GRD's part-location contract. -->
@@ -215,4 +36,174 @@ new file mode 100644
 +  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_UNAVAILABLE" desc="Explains refusal when appearance services or registered preferences are missing.">Appearance settings are currently unavailable.</message>
 +  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_INVALID_SAVED" desc="Explains a non-mutating fallback after reading malformed or oversized appearance JSON.">The saved configuration could not be read. Default values are shown. Apply will replace the invalid configuration; Cancel leaves it unchanged.</message>
 +  <message name="IDS_BROWSER_FINAL_CUSTOMIZE_INVALID_INPUT" desc="Error for invalid appearance input, including malformed RGB colors.">Enter a valid RGB accent color such as #4F6BED. No settings have been changed.</message>
++  <message name="IDS_BLYNX_SETTINGS_TITLE" desc="Blynx browser settings title UI label.">Blynx Settings</message>
++  <message name="IDS_BLYNX_APPEARANCE_TITLE" desc="Blynx browser appearance title UI label.">Make Blynx yours</message>
++  <message name="IDS_BLYNX_APPEARANCE_DESCRIPTION" desc="Blynx browser appearance description UI label.">A calmer space for everything you do online. Choose your palette, tabs, and new-tab canvas.</message>
++  <message name="IDS_BLYNX_NEWTAB_TITLE" desc="Blynx browser newtab title UI label.">New-tab canvas</message>
++  <message name="IDS_BLYNX_NEWTAB_AURORA" desc="Blynx browser newtab aurora UI label.">Aurora</message>
++  <message name="IDS_BLYNX_NEWTAB_MIDNIGHT" desc="Blynx browser newtab midnight UI label.">Midnight</message>
++  <message name="IDS_BLYNX_NEWTAB_PAPER" desc="Blynx browser newtab paper UI label.">Paper</message>
++  <message name="IDS_BLYNX_NEWTAB_LINKS" desc="Blynx browser newtab links UI label.">Show browser shortcuts</message>
++  <message name="IDS_BLYNX_SETTINGS_SAVED" desc="Blynx browser settings saved UI label.">Saved. Open a new tab to see your canvas.</message>
++  <message name="IDS_BLYNX_SETTINGS_ERROR" desc="Blynx browser settings error UI label.">Changes could not be saved. Check the accent color and whether these settings are managed.</message>
++  <message name="IDS_BLYNX_SETTINGS_READ_ONLY" desc="Blynx browser settings read only UI label.">These settings cannot be changed in this profile or are managed.</message>
++  <message name="IDS_BLYNX_NEWTAB_TAGLINE" desc="Blynx browser newtab tagline UI label.">Find your focus. Make room for what matters.</message>
++  <message name="IDS_BLYNX_EXTENSION_STORE" desc="Blynx browser extension store UI label.">Extensions · Chrome Web Store</message>
 +</grit-part>
+diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
+index d718a56..35c7095 100644
+--- a/chrome/app/generated_resources.grd
++++ b/chrome/app/generated_resources.grd
+@@ -277,6 +277,7 @@ are declared in tools/grit/grit_args.gni.
+   <release seq="1">
+     <!-- IMPORTANT: .grdp files must be in the same directory as this file -->
+     <messages fallback_to_english="true">
++      <part file="browser_final_customization_strings.grdp" />
+       <!-- Access Code Cast specific strings -->
+       <part file="access_code_cast_strings.grdp" />
+
+diff --git a/chrome/app/generated_resources.grd.gritdeps b/chrome/app/generated_resources.grd.gritdeps
+index 9aa7b11..217a8c7 100644
+--- a/chrome/app/generated_resources.grd.gritdeps
++++ b/chrome/app/generated_resources.grd.gritdeps
+@@ -4,6 +4,7 @@ chrome/app/access_code_cast_strings.grdp
+ chrome/app/actor_strings.grdp
+ chrome/app/app_management_strings.grdp
+ chrome/app/bookmarks_strings.grdp
++chrome/app/browser_final_customization_strings.grdp
+ chrome/app/certificate_manager.grdp
+ chrome/app/chromeos_shared_strings.grdp
+ chrome/app/chromeos_strings.grdp
+diff --git a/chrome/browser/prefs/BUILD.gn b/chrome/browser/prefs/BUILD.gn
+index 2122b05..30f9058 100644
+--- a/chrome/browser/prefs/BUILD.gn
++++ b/chrome/browser/prefs/BUILD.gn
+@@ -60,6 +60,7 @@ source_set("impl") {
+   deps = [
+     ":prefs",
+     ":util",
++    "//browser:appearance_prefs",
+     "//chrome/browser:browser_process",
+     "//chrome/browser:browser_process_impl",
+     "//chrome/browser:chrome_content_browser_client",
+diff --git a/chrome/browser/prefs/browser_prefs.cc b/chrome/browser/prefs/browser_prefs.cc
+index 085b77c..458a13a 100644
+--- a/chrome/browser/prefs/browser_prefs.cc
++++ b/chrome/browser/prefs/browser_prefs.cc
+@@ -18,6 +18,7 @@
+ #include "build/android_buildflags.h"
+ #include "build/branding_buildflags.h"
+ #include "build/build_config.h"
++#include "browser/appearance/appearance_pref_store.h"
+ #include "chrome/browser/about_flags.h"
+ #include "chrome/browser/accessibility/accessibility_labels_service.h"
+ #include "chrome/browser/accessibility/invert_bubble_prefs.h"
+@@ -1801,6 +1802,7 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry,
+   AnnouncementNotificationService::RegisterProfilePrefs(registry);
+   autofill::prefs::RegisterProfilePrefs(registry);
+   browsing_data::prefs::RegisterBrowserUserPrefs(registry);
++  browser::RegisterAppearanceProfilePrefs(registry);
+   capture_policy::RegisterProfilePrefs(registry);
+   certificate_transparency::prefs::RegisterPrefs(registry);
+   ChromeContentBrowserClient::RegisterProfilePrefs(registry);
+diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
+index 0ab25c6..dffe83c 100644
+--- a/chrome/browser/ui/BUILD.gn
++++ b/chrome/browser/ui/BUILD.gn
+@@ -2472,6 +2472,27 @@ static_library("ui") {
+     }
+   }
+
++  # Keep implementation here: toolbar:impl depends only on the header target,
++  # never on ui itself. This preserves the existing dependency graph direction.
++  if (toolkit_views && !is_android) {
++    sources += [
++      "//browser/ui/customize_browser_dialog.cc",
++      "//browser/ui/internal_page_alias.cc",
++      "//browser/ui/internal_page_alias.h",
++      "//browser/ui/native_appearance_controller.cc",
++    ]
++    deps += [
++      "//browser:appearance_prefs",
++      "//browser:customization_dialog_headers",
++      "//chrome/app:generated_resources",
++      "//chrome/app:generated_resources_grit",
++      "//chrome/browser/themes",
++      "//chrome/common",
++      "//components/bookmarks/common",
++      "//components/themes:prefs",
++    ]
++  }
++
+   if (toolkit_views) {
+     sources += [
+       "views/autofill/at_memory_promo_bubble_view.cc",
+diff --git a/chrome/browser/ui/views/toolbar/BUILD.gn b/chrome/browser/ui/views/toolbar/BUILD.gn
+index 25eaf42..1ea297f 100644
+--- a/chrome/browser/ui/views/toolbar/BUILD.gn
++++ b/chrome/browser/ui/views/toolbar/BUILD.gn
+@@ -169,6 +169,7 @@ source_set("impl") {
+     ":toolbar",
+     "//base:i18n",
+     "//build:branding_buildflags",
++    "//browser:customization_dialog_headers",
+     "//cc/paint",
+     "//chrome/app:branded_strings",
+     "//chrome/app:branded_strings_grit",
+diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.cc b/chrome/browser/ui/views/toolbar/toolbar_view.cc
+index c824f20..41f3ec2 100644
+--- a/chrome/browser/ui/views/toolbar/toolbar_view.cc
++++ b/chrome/browser/ui/views/toolbar/toolbar_view.cc
+@@ -21,7 +21,9 @@
+ #include "base/strings/utf_string_conversions.h"
+ #include "base/trace_event/trace_event.h"
+ #include "build/build_config.h"
++#include "browser/ui/customize_browser_dialog.h"
+ #include "chrome/app/chrome_command_ids.h"
++#include "chrome/app/vector_icons/vector_icons.h"
+ #include "chrome/browser/actor/ui/actor_ui_metrics.h"
+ #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble.h"
+ #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble_controller.h"
+diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.h b/chrome/browser/ui/views/toolbar/toolbar_view.h
+index 51f0301..e384bc9 100644
+--- a/chrome/browser/ui/views/toolbar/toolbar_view.h
++++ b/chrome/browser/ui/views/toolbar/toolbar_view.h
+@@ -66,6 +66,10 @@ class ToolbarDivider;
+ class OverflowButton;
+ class PerformanceInterventionButton;
+
++namespace browser {
++class CustomizeBrowserDialog;
++}  // namespace browser
++
+ namespace views {
+ class FlexLayout;
+ class LabelButton;
+@@ -427,6 +431,7 @@ class ToolbarView : public views::AccessiblePaneView,
+
+   const raw_ptr<BrowserWindowInterface> browser_;
+   const raw_ptr<BrowserView> browser_view_;
++  std::unique_ptr<browser::CustomizeBrowserDialog> customization_dialog_;
+   base::WeakPtr<glic::GlicSplitButtonController> glic_split_button_controller_;
+
+   // ToolbarView may or may not serve as the `ToolbarButtonProvider` for a given
+diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
+index abc2dc9..721ab77 100644
+--- a/chrome/test/BUILD.gn
++++ b/chrome/test/BUILD.gn
+@@ -1887,6 +1887,7 @@ if (!is_android) {
+     deps = [
+       ":browser_tests_runner",
+       ":platform_browser_tests",
++      "//browser:chromium_browser_tests",
+       ":test_support",
+       ":test_support_ui",
+       "//base",
+@@ -5188,6 +5189,7 @@ test("unit_tests") {
+     ":test_interfaces",
+     ":test_support",
+     ":test_support_unit",
++    "//browser:chromium_unit_tests",
+     "//base:base_stack_sampling_profiler_test_util",
+     "//base/i18n:test_support",
+     "//base/test:test_support",

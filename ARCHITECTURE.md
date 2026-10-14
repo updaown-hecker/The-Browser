@@ -84,3 +84,27 @@ This is the upstream web-compatibility behavior, **not permission to impersonate
 Google Chrome to services**. No branded-build flag, borrowed API credentials or
 store allowlist bypass. Google sign-in/sync, Widevine and proprietary codecs are
 not promised; distribution must audit each external service separately.
+
+## Public internal addresses and Settings
+
+Blynx registers a standard navigation alias, not another trusted WebUI origin.
+The browser URL handler canonicalizes `blynx://` into `chrome://` before upstream
+policy, extension/new-tab and WebUI handlers. The tab observer brands only the
+virtual URL of successfully committed Chromium internal documents. Actual
+origins, bindings, isolated processes and resource URLs remain upstream. Ordinary
+HTTP(S), extension and chrome-untrusted origins are not branded as trusted pages.
+The `webstore` alias opens the official HTTPS Chrome Web Store.
+
+Owned `BlynxSettingsHandler` is attached only to trusted Settings and applies
+bounded validated appearance JSON through the existing native controller. New-tab
+style/shortcut preferences are per-profile PrefService values, constrained to
+known canvases and guarded before writes. The Lit card stages changes until Apply;
+Cancel reloads the saved state. Invalid input does not partially mutate settings.
+The old dialog implementation remains for isolated tests but is not exposed by
+the toolbar or new-tab Customize action. Canvas artwork is local; uploaded logo
+and generated taskbar asset live in `browser/resources/icons/`.
+
+The final redesign build keeps an upstream `ntp-logo` element hidden in the NTP
+DOM for inherited TypeScript/test compatibility while the visible Blynx eye mark
+is rendered separately. This preserves upstream theme/test object shape without
+restoring the old visible logo or toolbar popup.

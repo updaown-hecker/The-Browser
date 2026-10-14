@@ -35,24 +35,12 @@ namespace browser {
 
 using NativeAppearanceBrowserTest = InProcessBrowserTest;
 
-IN_PROC_BROWSER_TEST_F(NativeAppearanceBrowserTest, ToolbarOpensNativeDialog) {
+IN_PROC_BROWSER_TEST_F(NativeAppearanceBrowserTest,
+                       ToolbarHasNoCustomizationPopup) {
   auto* browser_view = BrowserView::GetBrowserViewForBrowser(browser());
   ASSERT_TRUE(browser_view);
-  auto* button = static_cast<views::Button*>(
+  EXPECT_FALSE(
       browser_view->toolbar()->GetViewByID(kCustomizeBrowserToolbarButtonId));
-  ASSERT_TRUE(button);
-  const auto parent = browser_view->GetWidget()->GetNativeView();
-  views::test::ButtonTestApi(button).NotifyDefaultMouseClick();
-  bool found = false;
-  for (const auto& widget : views::Widget::GetAllOwnedWidgets(parent)) {
-    if (widget->GetContentsView()->GetViewByID(
-            CustomizeBrowserDialog::kPresetComboboxId)) {
-      found = true;
-      widget->widget_delegate()->AsDialogDelegate()->CancelDialog();
-      break;
-    }
-  }
-  EXPECT_TRUE(found);
 }
 
 IN_PROC_BROWSER_TEST_F(NativeAppearanceBrowserTest,

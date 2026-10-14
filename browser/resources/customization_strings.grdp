@@ -30,4 +30,17 @@
   <message name="IDS_BROWSER_FINAL_CUSTOMIZE_UNAVAILABLE" desc="Explains refusal when appearance services or registered preferences are missing.">Appearance settings are currently unavailable.</message>
   <message name="IDS_BROWSER_FINAL_CUSTOMIZE_INVALID_SAVED" desc="Explains a non-mutating fallback after reading malformed or oversized appearance JSON.">The saved configuration could not be read. Default values are shown. Apply will replace the invalid configuration; Cancel leaves it unchanged.</message>
   <message name="IDS_BROWSER_FINAL_CUSTOMIZE_INVALID_INPUT" desc="Error for invalid appearance input, including malformed RGB colors.">Enter a valid RGB accent color such as #4F6BED. No settings have been changed.</message>
+  <message name="IDS_BLYNX_SETTINGS_TITLE" desc="Blynx browser settings title UI label.">Blynx Settings</message>
+  <message name="IDS_BLYNX_APPEARANCE_TITLE" desc="Blynx browser appearance title UI label.">Make Blynx yours</message>
+  <message name="IDS_BLYNX_APPEARANCE_DESCRIPTION" desc="Blynx browser appearance description UI label.">A calmer space for everything you do online. Choose your palette, tabs, and new-tab canvas.</message>
+  <message name="IDS_BLYNX_NEWTAB_TITLE" desc="Blynx browser newtab title UI label.">New-tab canvas</message>
+  <message name="IDS_BLYNX_NEWTAB_AURORA" desc="Blynx browser newtab aurora UI label.">Aurora</message>
+  <message name="IDS_BLYNX_NEWTAB_MIDNIGHT" desc="Blynx browser newtab midnight UI label.">Midnight</message>
+  <message name="IDS_BLYNX_NEWTAB_PAPER" desc="Blynx browser newtab paper UI label.">Paper</message>
+  <message name="IDS_BLYNX_NEWTAB_LINKS" desc="Blynx browser newtab links UI label.">Show browser shortcuts</message>
+  <message name="IDS_BLYNX_SETTINGS_SAVED" desc="Blynx browser settings saved UI label.">Saved. Open a new tab to see your canvas.</message>
+  <message name="IDS_BLYNX_SETTINGS_ERROR" desc="Blynx browser settings error UI label.">Changes could not be saved. Check the accent color and whether these settings are managed.</message>
+  <message name="IDS_BLYNX_SETTINGS_READ_ONLY" desc="Blynx browser settings read only UI label.">These settings cannot be changed in this profile or are managed.</message>
+  <message name="IDS_BLYNX_NEWTAB_TAGLINE" desc="Blynx browser newtab tagline UI label.">Find your focus. Make room for what matters.</message>
+  <message name="IDS_BLYNX_EXTENSION_STORE" desc="Blynx browser extension store UI label.">Extensions · Chrome Web Store</message>
 </grit-part>

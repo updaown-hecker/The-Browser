@@ -10,8 +10,8 @@ pins, OS policy, credentials and existing profiles. No Electron/WebView shell.
 KDE neon 24.04 x86-64, KDE Wayland, Ryzen 7 5700, 31 GiB RAM. Existing repository
 commits are preserved; session changes are unstaged. Never stage `.local/`,
 PROMPT.txt, secrets, browser data or crash dumps. No OS security change or package
-installation was made. Owned code is `browser/`; four reviewed patches in
-`patches/series`; pins in `config/`. Integration installs 24 owned files and records
+installation was made. Owned code is `browser/`; five reviewed patches in
+`patches/series`; pins in `config/`. Integration installs 34 owned files and records
 hashes in `.local/chromium/src/.browser-final-overlay.json`.
 
 Pinned Chromium 154.0.8037.97 / `b510e9d7cd3a2fbd78d0ddc42234103206c5f78d`,
@@ -23,22 +23,34 @@ Never run two builds in this output concurrently.
 
 ## Product behavior and identity
 
-- Blynx product strings, native customization labels, built-in new-tab header and
-  application menu entry. New-tab shortcuts open upstream bookmarks/history/
-  downloads/extensions/settings; upstream search and most-visited remain.
-- Own B icon in selected native Linux/Views resources and the desktop entry.
-- Root `./blynx` launcher; `browser-final` remains a compatibility alias.
-  User-local `blynx-dev.desktop` installed. Old owned menu entry is hidden but
-  redirects pinned legacy shortcuts. No default-browser change.
-- Existing development profile `out/linux-release/development-profile`, legacy
+The October 13 redesign follows the user's supplied eye logo and request for a
+more distinct browser. Public product name remains Blynx.
+
+- Designed local new-tab canvas: original eye logo, Aurora/Midnight/Paper
+  backgrounds, optional browser shortcuts and upstream search/most-visited.
+- Generated transparent taskbar icon plus 16/32/64 native PNG derivatives.
+  Source/reference/prompt are documented in `browser/resources/icons/README.md`.
+- Settings → Appearance now contains Blynx theme/accent/bookmarks/vertical-tab/
+  canvas controls. Apply uses the existing guarded native controller; Cancel
+  discards staged changes. The old toolbar popup is removed; new-tab Customize
+  opens Settings. Old dialog source remains for isolated tests, not the user flow.
+- `blynx://` is a standard navigation alias, canonicalized to `chrome://` before
+  upstream policy/extension/WebUI handlers. Successful internal documents display
+  a branded virtual URL; actual trusted origins and permissions remain upstream.
+  HTTP(S), chrome-extension, chrome-untrusted and error pages are not branded.
+- `blynx://webstore` and `chrome://webstore` open the official external Chrome Web
+  Store. No external-store identity substitution or install-verifier change.
+- Root `./blynx` launcher; `browser-final` remains a compatibility alias. Menu
+  entry `blynx-dev.desktop` uses the generated icon; old owned pinned shortcut
+  redirects. No default-browser change or profile migration.
+- Development profile `out/linux-release/development-profile`, legacy
   `BrowserFinal` disk roots, `browser_final.appearance_json`, GRIT/internal IDs and
-  receipt filenames remain stable. No profile migration or daily-profile access.
-- Strict <=4 KiB versioned appearance schema, system/light/dark presets,
-  PrefService persistence, policy/private-profile/future-schema write guards.
-- Native Views toolbar/dialog: accent, theme, bookmark bar, upstream vertical-tab
-  preference. Controls update a dialog-local illustrative preview, not live
-  browser chrome. Apply/Cancel use upstream services. Other schema fields remain
-  data-only; no workspaces/privacy blocker/custom credential system implemented.
+  receipt filenames stay stable. New canvas prefs are `blynx.new_tab_style` and
+  `blynx.new_tab_links`, per-profile and not syncable.
+- Strict <=4 KiB versioned appearance schema and policy/private-profile/future-
+  schema guards remain. Only implemented controls are exposed in Settings;
+  density/scaling/etc. remain data-only. No workspaces, privacy blocker, sync
+  service, password encryption or updater is newly implemented.
 
 ## Blank new-tab diagnosis and launch safeguards
 
@@ -78,7 +90,7 @@ Passed before final rename:
 
 Final Blynx results (October 13):
 - Full browser build succeeded: 508 steps / 3m03s, log
-  `.local/logs/blynx-brand-build.log`. No browser build remains active.
+  `.local/logs/blynx-brand-build.log`. This was the completed rename build, preceding the current redesign.
 - All 90 Python tests passed after rename; desktop entries passed
   `desktop-file-validate`; KDE application cache refreshed.
 - Chromium identity/appearance executable rebuilt and passed after rename.
@@ -104,6 +116,29 @@ packaging packages; sysroot-backed browser builds work without blanket installs.
 Chrome-only benchmark baseline remains in PERFORMANCE.md; no Blynx advantage
 has been measured. Packaging deliberately fails closed pending validation.
 
+## Redesign build and validation — completed for this slice
+
+The full redesign browser build succeeded in
+`.local/logs/blynx-redesign-build5.log` (1076 steps). A final compatibility fix
+keeps the upstream `ntp-logo` element hidden in the NTP DOM so inherited
+TypeScript tests retain their typed `app.$.logo` surface; the visible Blynx eye
+mark remains custom. The final integration was applied and an incremental
+12-step browser rebuild succeeded. The current readiness receipt is
+`.local/chromium/src/out/linux-release/.browser-final-build.json`; launching
+`./blynx` is now guarded by that receipt and is allowed on this host.
+
+The updated runtime and native smoke tests were rerun after that final rebuild:
+both passed with 19 DevTools checks, 22 combined native checks, no page errors,
+and Seccomp-BPF reported enabled. The prior renamed-build results above remain
+historical, but the current redesign results are in the ignored
+`.local/runtime-smoke/results.json` and `.local/native-smoke/results.json`.
+
+The broad `unit_tests` target was attempted twice. The focused nine-test
+PrefService executable passed; the full target timed out after 10 minutes while
+compiling unrelated upstream tests (937 actions completed, no test failure was
+reported). Full `browser_tests`, Windows validation, packaging and inherited
+security/regression suites remain unexecuted.
+
 ## Commands and next work
 
 ```sh
@@ -121,6 +156,8 @@ python3 -B scripts/build.py test --test-target browser:appearance_prefs_unittest
 
 Full browser_tests filters: `NativeAppearanceBrowserTest.*`,
 `NativeAppearancePolicyBrowserTest.*`, `BrowserFinalExtensionTest.*`. Building
-that executable is substantial. Next implement/test genuine native design-token
-consumers, live preview/import-export and tabs/workspaces/sidebar slices, while
-expanding browsing/security/extension coverage. See TODO.md for remaining work.
+that executable is substantial. The next session should first retry the full
+`unit_tests` target from the existing GN output if broad coverage is desired,
+then implement/test genuine native design-token consumers, live preview/import-
+export and tabs/workspaces/sidebar slices while expanding browsing/security/
+extension coverage. See `TODO.md` for remaining work.

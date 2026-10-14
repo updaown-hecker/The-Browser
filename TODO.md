@@ -5,21 +5,26 @@
   local MV3 worker/storage/disable-enable and sandbox-status smoke checks.
 - Complete broader browsing/profile/bookmark/session, F11, DevTools, GPU/media,
   renderer-crash and accessibility tests; investigate Wayland/Vulkan warnings.
+  The focused Blynx runtime/native smoke and DevTools checks are complete; they do
+  not replace these inherited regression suites.
 - Execute full native appearance policy/incognito browser tests. Targeted native
   Apply/restart/Cancel and upstream tab-layout checks are covered by smoke tests.
 - Validate direct Web Store behavior and permissions/profile separation without
   impersonation or bypass; the full MV3 gtest remains unexecuted.
+- Retry the full `unit_tests` build/filter from the existing GN output; the first
+  attempt timed out after 10 minutes while compiling unrelated upstream tests.
 
 ## Daily browsing and customization
 - Audit inherited behavior first. Polish owned settings/about/new-tab branding
   and cover remaining platform icon resources; selected Linux/Views icons are owned.
-- Native immediate live preview and safe import/export file UI; consume actual
+- Settings live preview and safe import/export file UI; consume actual
   centralized tokens for density, scaling, radius, spacing, motion and colors.
 - Native vertical tabs positions, DnD/groups/pinning/audio/keyboard/collapsed mode;
   evaluate upstream vertical/split tab infrastructure instead of duplicating it.
 - Per-profile persistent workspaces; modular isolated side panels; command palette,
   tab search, shortcut conflict editing and optional gestures.
-- Search/new-tab widgets/wallpaper controls without network/advertising dependencies.
+- Completed initial local new-tab canvases/shortcut controls and eye branding.
+  Add custom wallpaper file selection, widget visibility and further search controls.
 - Test existing secure passwords/autofill, import/export safeguards, media/codecs,
   accessibility/localization and platform privacy permissions.
 

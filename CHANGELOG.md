@@ -1,5 +1,26 @@
 # Changelog
 
+## October 13, 2026 — redesign follow-up validation
+
+- Completed the redesign Chromium rebuild after preserving the hidden upstream
+  NTP logo compatibility element required by inherited TypeScript tests.
+- Re-ran integration preflight, 90 Python tests, CMake, targeted Chromium tests,
+  DevTools runtime smoke and native Wayland/AT-SPI smoke successfully.
+- Recorded the broad `unit_tests` timeout as an unfinished validation task rather
+  than treating partial compilation as a pass.
+
+## October 13, 2026 — Blynx interface redesign
+
+- Adopted the supplied eye logo and generated a matching taskbar icon.
+- Designed Aurora/Midnight/Paper new-tab canvases with optional browser shortcuts.
+- Moved appearance customization into Settings with guarded Apply/Cancel;
+  removed the native toolbar popup and routed new-tab Customize to Settings.
+- Added public `blynx://` aliases and branded internal address-bar display while
+  retaining the upstream trusted origins and legacy `chrome://` navigation.
+- Added the `webstore` route to the official external Chrome Web Store.
+- Runtime validation results are recorded in HANDOFF.md after the rebuilt browser
+  passes the new Settings/routing checks.
+
 ## October 13, 2026 — Blynx development browser
 
 - Renamed public product branding, new-tab heading, native customization and

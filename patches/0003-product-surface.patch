@@ -1,129 +1,197 @@
+diff --git a/chrome/browser/resources/new_tab_page/app.css b/chrome/browser/resources/new_tab_page/app.css
+index 37919e3..5ed11f9 100644
+--- a/chrome/browser/resources/new_tab_page/app.css
++++ b/chrome/browser/resources/new_tab_page/app.css
+@@ -491,3 +491,80 @@ ntp-lens-upload-dialog {
+     -webkit-mask-image: url(icons/link.svg);
+   }
+ }
++
++
++/* Blynx canvas: no remote artwork, respects keyboard focus/reduced motion. */
++#content:is(.aurora, .midnight, .paper) { box-sizing: border-box;
++ min-height: 100vh;
++ padding-top: clamp(60px, 12vh, 140px);
++ padding-bottom: 90px;
++ color: #f4f1eb;
++ background: radial-gradient(ellipse at 20% 5%, #294548 0, transparent 55%), radial-gradient(ellipse at 90% 90%, #373040 0, transparent 55%), #151c21;
++ --color-new-tab-page-primary-foreground: #f4f1eb;
++ --color-new-tab-page-secondary-foreground: #c5cdce;
++ --color-new-tab-page-most-visited-foreground: #f4f1eb; }
++
++#content.midnight { background: radial-gradient(ellipse at 70% 0, #26364b, transparent 65%), #10151e; }
++
++#content.paper { background: radial-gradient(ellipse at 10% 0, #e2e9df, transparent 65%), #f6f3ed;
++ color: #222d2d;
++ --color-new-tab-page-primary-foreground: #222d2d;
++ --color-new-tab-page-secondary-foreground: #536565;
++ --color-new-tab-page-most-visited-foreground: #222d2d; }
++
++#browserFinalBrand { align-items: center;
++ display: flex;
++ flex-direction: column;
++ gap: 18px;
++ margin: 0 24px 32px;
++ text-align: center;
++ max-width: 660px; }
++
++#browserFinalMark { width: 80px;
++ height: 80px;
++ border-radius: 50%;
++ filter: drop-shadow(0 10px 24px rgb(0 0 0 / 22%)); }
++
++#browserFinalBrand h1 { font-size: clamp(36px, 5vw, 48px);
++ font-weight: 500;
++ letter-spacing: -1.8px;
++ margin: 0 0 12px; }
++
++#browserFinalBrand p { font-size: 15px;
++ line-height: 1.7;
++ margin: 0;
++ opacity: .72; }
++
++#browserFinalNavigation { display: flex;
++ flex-wrap: wrap;
++ gap: 8px;
++ justify-content: center;
++ margin: 0 20px 28px;
++ max-width: 700px; }
++
++#browserFinalNavigation[hidden] { display: none; }
++
++#browserFinalNavigation a { border: 1px solid rgb(170 180 180 / 24%);
++ background: rgb(150 160 160 / 7%);
++ border-radius: 12px;
++ color: inherit;
++ font-size: 12px;
++ padding: 11px 17px;
++ text-decoration: none;
++ transition: background 160ms, transform 160ms; }
++
++#browserFinalNavigation a:hover { background: rgb(150 160 160 / 18%);
++ transform: translateY(-2px); }
++
++#browserFinalNavigation a:focus-visible { outline: 3px solid #91c5bf;
++ outline-offset: 3px; }
++
++#oneGoogleBar,
++ #oneGoogleBarStackingContext { display: none; }
++
++#content #searchbox { margin-bottom: 24px; }
++
++:host([show-composebox_]) #browserFinalBrand,
++ :host([show-composebox_]) #browserFinalNavigation,
++ :host([show-voice-search-scrim_]) #browserFinalNavigation { visibility: hidden; }
++@media (prefers-reduced-motion: reduce) { #browserFinalNavigation a { transition: none; } }
 diff --git a/chrome/browser/resources/new_tab_page/app.html b/chrome/browser/resources/new_tab_page/app.html
+index 9e591fb..f330725 100644
 --- a/chrome/browser/resources/new_tab_page/app.html
 +++ b/chrome/browser/resources/new_tab_page/app.html
-@@ -28,13 +28,20 @@
+@@ -1,7 +1,7 @@
+ <!-- #html_wrapper_imports_start
+ import {SubmitButtonIconType} from '//resources/cr_components/composebox/composebox.js';
+ #html_wrapper_imports_end -->
+-<div id="content"
++<div id="content" class="${this.blynxStyle_}"
+   ?ntp-threads-rail-open="${this.showComposebox_ && this.enableThreadsRail_}">
+   ${this.lazyRender_ && this.microsoftModuleEnabled_ ? html`
+     <iframe id="microsoftAuth" src="${this.microsoftAuthIframePath_}"></iframe>
+@@ -27,14 +27,27 @@ import {SubmitButtonIconType} from '//resources/cr_components/composebox/compose
+             allow="camera ${this.oneGoogleBarIframeOrigin_}; display-capture ${this.oneGoogleBarIframeOrigin_}"> <!-- presubmit: ignore-long-line -->
          </ntp-iframe>
          `
-     ) : ''}
+-    ) : ''}
 -  <!-- TODO(crbug.com/40743294): Instead of ?hidden="\${!this.logoEnabled_}" it would
 -       be nicer to use Lit's conditional rendering. However, that breaks
 -       StartupBrowserCreatorPickerNoParamsTest.ShowPickerWhenAlreadyLaunched on
 -       the msan builder. See crbug.com/40743659. -->
 -  <ntp-logo id="logo" ?single-colored="${this.singleColoredLogo_}"
--      .theme="${this.theme_}" ?hidden="${!this.logoEnabled_}">
+-      .theme="${this.theme_}" ?hidden="\${!this.logoEnabled_}">
 -  </ntp-logo>
++      ) : ''}
++  <!-- Keep Chromium's logo element as a hidden compatibility surface for
++       inherited NTP behavior and tests; Blynx renders its own mark above. -->
++  <ntp-logo id="logo" ?single-colored="${this.singleColoredLogo_}"
++      .theme="${this.theme_}" hidden>
++  </ntp-logo>
 +  <header id="browserFinalBrand">
-+    <span id="browserFinalMark" aria-hidden="true">B</span>
++    <img id="browserFinalMark" src="blynx-mark.png" alt="" width="80" height="80">
 +    <div>
 +      <h1>$i18n{browserFinalName}</h1>
 +      <p>$i18n{browserFinalTagline}</p>
 +    </div>
 +  </header>
-+  <nav id="browserFinalNavigation" aria-label="$i18n{browserFinalNavigation}">
-+    <a href="chrome://bookmarks/">$i18n{browserFinalBookmarks}</a>
-+    <a href="chrome://history/">$i18n{browserFinalHistory}</a>
-+    <a href="chrome://downloads/">$i18n{browserFinalDownloads}</a>
-+    <a href="chrome://extensions/">$i18n{browserFinalExtensions}</a>
-+    <a href="chrome://settings/">$i18n{browserFinalSettings}</a>
++  <nav ?hidden="${!this.blynxLinks_}" id="browserFinalNavigation" aria-label="$i18n{browserFinalNavigation}">
++    <a href="blynx://bookmarks/">$i18n{browserFinalBookmarks}</a>
++    <a href="blynx://history/">$i18n{browserFinalHistory}</a>
++    <a href="blynx://downloads/">$i18n{browserFinalDownloads}</a>
++    <a href="blynx://extensions/">$i18n{browserFinalExtensions}</a>
++    <a href="blynx://settings/">$i18n{browserFinalSettings}</a>
++    <a href="blynx://webstore/">$i18n{blynxExtensionStore}</a>
 +  </nav>
    ${this.ntpRealboxNextEnabled_ ? html`
      <div id="scrim"
          @click="${this.onScrimClick_}"
-diff --git a/chrome/browser/resources/new_tab_page/app.css b/chrome/browser/resources/new_tab_page/app.css
---- a/chrome/browser/resources/new_tab_page/app.css
-+++ b/chrome/browser/resources/new_tab_page/app.css
-@@ -491,3 +491,75 @@
-     -webkit-mask-image: url(icons/link.svg);
+diff --git a/chrome/browser/resources/new_tab_page/app.ts b/chrome/browser/resources/new_tab_page/app.ts
+index 0a1b1f0..fe7bb41 100644
+--- a/chrome/browser/resources/new_tab_page/app.ts
++++ b/chrome/browser/resources/new_tab_page/app.ts
+@@ -200,6 +198,8 @@ export class AppElement extends AppElementBase {
+
+   static override get properties() {
+     return {
++      blynxStyle_: {type: String},
++      blynxLinks_: {type: Boolean},
+       // =======================================================================
+       // Public properties
+       // =======================================================================
+@@ -1123,14 +1123,11 @@ export class AppElement extends AppElementBase {
+     this.showLensUploadDialog_ = false;
    }
- }
+
++  protected accessor blynxStyle_ = loadTimeData.getString('blynxStyle');
++  protected accessor blynxLinks_ = loadTimeData.getBoolean('blynxLinks');
 +
-+/* Blynx's identity surrounds the upstream search and shortcut UI. */
-+#browserFinalBrand {
-+  align-items: center;
-+  color: var(--color-new-tab-page-primary-foreground);
-+  display: flex;
-+  gap: 20px;
-+  margin: clamp(24px, 7vh, 76px) 24px 28px;
-+  max-width: 640px;
-+}
-+
-+#browserFinalMark {
-+  align-items: center;
-+  background: linear-gradient(135deg, #4f6bed, #8b5cf6);
-+  border-radius: 24px;
-+  box-shadow: 0 12px 32px rgb(79 107 237 / 20%);
-+  color: white;
-+  display: flex;
-+  flex: 0 0 80px;
-+  font-size: 42px;
-+  font-weight: 700;
-+  height: 80px;
-+  justify-content: center;
-+}
-+
-+#browserFinalBrand h1 {
-+  font-size: clamp(26px, 4vw, 38px);
-+  font-weight: 600;
-+  letter-spacing: -1px;
-+  margin: 0 0 8px;
-+}
-+
-+#browserFinalBrand p {
-+  font-size: 14px;
-+  line-height: 1.6;
-+  margin: 0;
-+  opacity: 0.8;
-+}
-+
-+#browserFinalNavigation {
-+  display: flex;
-+  flex-wrap: wrap;
-+  gap: 8px;
-+  justify-content: center;
-+  margin: 0 20px 28px;
-+  max-width: 640px;
-+}
-+
-+#browserFinalNavigation a {
-+  background: var(--color-new-tab-page-background);
-+  border: 1px solid var(--color-new-tab-page-primary-foreground);
-+  border-radius: 100px;
-+  color: var(--color-new-tab-page-primary-foreground);
-+  font-size: 13px;
-+  padding: 10px 18px;
-+  text-decoration: none;
-+}
-+
-+#browserFinalNavigation a:hover {
-+  text-decoration: underline;
-+}
-+
-+#browserFinalNavigation a:focus-visible {
-+  outline: 3px solid var(--cr-focus-outline-color);
-+  outline-offset: 3px;
-+}
-+
-+:host([show-composebox_]) #browserFinalBrand,
-+:host([show-composebox_]) #browserFinalNavigation,
-+:host([show-voice-search-scrim_]) #browserFinalNavigation {
-+  visibility: hidden;
-+}
+   protected onCustomizeClick_() {
+-    // Let side panel decide what page or section to show.
+-    this.selectedCustomizeDialogPage_ = null;
+-    this.setCustomizeChromeSidePanelVisible_(!this.showCustomize_);
+-    if (!this.showCustomize_) {
+-      this.customizeButtonsHandler_.incrementCustomizeChromeButtonOpenCount();
+-      recordCustomizeChromeOpen(NtpCustomizeChromeEntryPoint.CUSTOMIZE_BUTTON);
+-    }
++    window.location.href = 'blynx://settings/appearance';
+   }
+
+   protected computeShowWallpaperSearchButton_() {
 diff --git a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc b/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
+index 1291bb7..3a18aa9 100644
 --- a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
 +++ b/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
-@@ -206,6 +206,22 @@
+@@ -12,6 +12,7 @@
+ #include <vector>
+
+ #include "base/command_line.h"
++#include "browser/appearance/appearance_pref_store.h"
+ #include "base/logging.h"
+ #include "base/metrics/histogram_functions.h"
+ #include "base/notreached.h"
+@@ -206,6 +207,25 @@ content::WebUIDataSource* CreateAndAddNewTabPageUiHtmlSource(
    content::WebUIDataSource* source = content::WebUIDataSource::CreateAndAdd(
        profile, chrome::kChromeUINewTabPageHost);
 
++  source->AddString("blynxStyle", profile->GetPrefs()->GetString(browser::kNewTabStylePref));
++  source->AddBoolean("blynxLinks", profile->GetPrefs()->GetBoolean(browser::kNewTabLinksPref));
 +  static constexpr webui::LocalizedString kBrowserFinalStrings[] = {
 +      {"browserFinalName", IDS_PRODUCT_NAME},
-+      {"browserFinalTagline", IDS_BROWSER_FINAL_CUSTOMIZE_DESCRIPTION},
++      {"browserFinalTagline", IDS_BLYNX_NEWTAB_TAGLINE},
 +      {"browserFinalNavigation", IDS_PRODUCT_NAME},
 +      {"browserFinalBookmarks", IDS_BOOKMARK_MANAGER_TITLE},
 +      {"browserFinalHistory", IDS_HISTORY_MENU},
 +      {"browserFinalDownloads", IDS_DOWNLOAD_HISTORY_TITLE},
 +      {"browserFinalExtensions", IDS_EXTENSIONS_SUBMENU},
 +      {"browserFinalSettings", IDS_SETTINGS},
++      {"blynxExtensionStore", IDS_BLYNX_EXTENSION_STORE},
 +  };
 +  for (const auto& message : kBrowserFinalStrings) {
 +    std::u16string label = l10n_util::GetStringUTF16(message.id);
@@ -134,7 +202,7 @@ diff --git a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc b/chrome/br
    ui::Accelerator undo_accelerator(ui::VKEY_Z, ui::EF_PLATFORM_ACCELERATOR);
    source->AddString("undoDescription", l10n_util::GetStringFUTF16(
                                             IDS_UNDO_DESCRIPTION,
-@@ -399,7 +415,7 @@
+@@ -399,7 +419,7 @@ content::WebUIDataSource* CreateAndAddNewTabPageUiHtmlSource(
        {"colorPickerLabel", IDS_NTP_CUSTOMIZE_COLOR_PICKER_LABEL},
        {"hueSliderTitle", IDS_NTP_CUSTOMIZE_COLOR_HUE_SLIDER_TITLE},
        {"hueSliderAriaLabel", IDS_NTP_CUSTOMIZE_COLOR_HUE_SLIDER_ARIA_LABEL},
@@ -143,41 +211,11 @@ diff --git a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc b/chrome/br
        {"customizeThisPage", IDS_NTP_CUSTOM_BG_CUSTOMIZE_NTP_LABEL},
 
        // Wallpaper search.
-diff --git a/chrome/common/channel_info_posix.cc b/chrome/common/channel_info_posix.cc
---- a/chrome/common/channel_info_posix.cc
-+++ b/chrome/common/channel_info_posix.cc
-@@ -148,7 +148,7 @@
-   if (name.has_value() && !name.value().empty()) {
-     return name.value();
-   }
--  return "chromium-browser.desktop";
-+  return "blynx-dev.desktop";
- #endif
- }
- #endif  // BUILDFLAG(IS_LINUX)
-diff --git a/chrome/browser/resources/new_tab_page/app.ts b/chrome/browser/resources/new_tab_page/app.ts
---- a/chrome/browser/resources/new_tab_page/app.ts
-+++ b/chrome/browser/resources/new_tab_page/app.ts
-@@ -48,7 +48,6 @@
- import {CustomizeChromeSection} from './customize_chrome.mojom-webui.js';
- import {CustomizeDialogPage} from './customize_dialog_types.js';
- import type {IframeElement} from './iframe.js';
--import type {LogoElement} from './logo.js';
- import {recordBoolean, recordDuration, recordEnumeration, recordLinearValue, recordLoadDuration, recordSparseValueWithPersistentHash} from './metrics_utils.js';
- import {ParentTrustedDocumentProxy} from './modules/microsoft_auth_frame_connector.js';
- import type {PageCallbackRouter, PageHandlerRemote, Theme} from './new_tab_page.mojom-webui.js';
-@@ -176,7 +175,6 @@
-   $: {
-     customizeButtons: CustomizeButtonsElement,
-     oneGoogleBarClipPath: HTMLElement,
--    logo: LogoElement,
-     searchbox: NtpSearchboxElement,
-     composebox: NtpComposeboxElement,
-     undoToast: CrToastElement,
 diff --git a/chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_ui.cc b/chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_ui.cc
+index c15e040..26666c7 100644
 --- a/chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_ui.cc
 +++ b/chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_ui.cc
-@@ -101,7 +101,7 @@
+@@ -101,7 +101,7 @@ CustomizeChromeUI::CustomizeChromeUI(content::WebUI* web_ui)
    static constexpr webui::LocalizedString kLocalizedStrings[] = {
        // Side panel strings.
        {"backButton", IDS_ACCNAME_BACK},
@@ -186,3 +224,16 @@ diff --git a/chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrom
        // Header strings.
        {"appearanceHeader", IDS_NTP_CUSTOMIZE_APPEARANCE_LABEL},
        {"cardsHeader", IDS_NTP_CUSTOMIZE_MENU_MODULES_LABEL},
+diff --git a/chrome/common/channel_info_posix.cc b/chrome/common/channel_info_posix.cc
+index f6bcb3c..6dba686 100644
+--- a/chrome/common/channel_info_posix.cc
++++ b/chrome/common/channel_info_posix.cc
+@@ -148,7 +148,7 @@ std::string GetDesktopName(base::Environment* env) {
+   if (name.has_value() && !name.value().empty()) {
+     return name.value();
+   }
+-  return "chromium-browser.desktop";
++  return "blynx-dev.desktop";
+ #endif
+ }
+ #endif  // BUILDFLAG(IS_LINUX)

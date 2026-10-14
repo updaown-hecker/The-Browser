@@ -45,3 +45,25 @@ Before release: unique OS identities; dependency/license audit; profile separati
 TLS/sandbox/renderer-crash tests; extension/permission regression tests; privacy
 network capture; safe-download service availability disclosures; safe key storage
 tests; distribution signatures; a sustainable upstream security cadence.
+
+## Internal-page alias boundary
+
+`blynx://` is accepted only as a browser navigation alias. It is not registered
+as an additional secure, CORS-enabled or privileged WebUI renderer scheme.
+Navigation is canonicalized to upstream `chrome://` before policy, extensions
+and WebUI dispatch. Successfully committed internal pages receive a branded
+virtual address; their actual origins and bindings remain unchanged. HTTP(S),
+extension, chrome-untrusted and error documents are not assigned that display.
+
+Appearance messages are registered only on trusted Settings. The owned handler
+validates bounded schema JSON and field types, known new-tab styles and profile/
+policy write access before changing preferences. No website-to-native API,
+custom encryption, install bypass or updater is introduced. The Web Store route
+opens the official external service and adds no verification exception.
+
+Current evidence: integration preflight, patch reverse-check, `git diff --check`,
+the 90 Python tooling tests, the isolated CMake test, targeted Chromium identity/
+appearance and PrefService tests, and both DevTools/native Wayland smoke tests
+passed after the latest build. This evidence is not a security audit; broad
+policy/incognito, renderer-crash, network/privacy, Windows and package checks
+remain release gates.

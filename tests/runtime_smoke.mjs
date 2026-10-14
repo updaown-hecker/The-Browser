@@ -74,13 +74,13 @@ try {
   });
   await waitFor(page, `document.querySelector('ntp-app')?.shadowRoot?.querySelector('#browserFinalBrand')?.textContent.includes('Blynx')`);
   const links = await evaluate(page, `Array.from(document.querySelector('ntp-app').shadowRoot.querySelectorAll('#browserFinalNavigation a'), a => ({text: a.textContent.trim(), href: a.href}))`);
-  assert.equal(links.length, 5);
+  assert.equal(links.length, 6);
   assert(links.every(link => !link.text.includes('&')), 'Menu accelerator characters leaked into new-tab labels');
   assert.deepEqual(links.map(link => link.href), [
-    'chrome://bookmarks/', 'chrome://history/', 'chrome://downloads/',
-    'chrome://extensions/', 'chrome://settings/',
+    'blynx://bookmarks/', 'blynx://history/', 'blynx://downloads/',
+    'blynx://extensions/', 'blynx://settings/', 'blynx://webstore/',
   ]);
-  report.checks.push('branded new-tab header and five browser shortcuts');
+  report.checks.push('branded new-tab header and six browser shortcuts');
   await waitFor(page, `!!document.querySelector('ntp-app').shadowRoot.querySelector('ntp-searchbox')`);
   report.checks.push('upstream new-tab search component present');
   for (let index = 0; index < 3; ++index) {
@@ -98,9 +98,76 @@ try {
   await waitFor(page, `location.href.startsWith('chrome://bookmarks') && !!document.querySelector('bookmarks-app')`);
   report.checks.push('bookmark shortcut navigates to native bookmark WebUI');
 
+
+  // Exercise the real Settings page controls, backed by the guarded handler.
+  await page.send('Page.navigate', {url: 'blynx://settings/appearance'});
+  const deepFind = `(selector, root = document) => {
+    const found = root.querySelector(selector);
+    if (found) return found;
+    for (const node of root.querySelectorAll('*')) {
+      if (node.shadowRoot) {
+        const match = window.blynxFind(selector, node.shadowRoot);
+        if (match) return match;
+      }
+    }
+    return null;
+  }`;
+  await waitFor(page, `location.href === 'chrome://settings/appearance' && !!document.querySelector('settings-ui')`);
+  await evaluate(page, `window.blynxFind = ${deepFind}`);
+  await waitFor(page, `!!window.blynxFind('#blynxAccent')`);
+  report.checks.push('blynx://settings/appearance resolves to the original trusted Chromium Settings origin');
+  const getState = `import('chrome://resources/js/cr.js').then(m => m.sendWithPromise('getBlynxAppearance'))`;
+  const before = await evaluate(page, getState);
+  assert(before.editable);
+  await evaluate(page, `(() => {
+    const input = window.blynxFind('#blynxAccent');
+    input.value = '#3D8D88'; input.dispatchEvent(new Event('input', {bubbles:true}));
+    const style = window.blynxFind('#blynxStyle');
+    style.value = 'midnight'; style.dispatchEvent(new Event('change', {bubbles:true}));
+    window.blynxFind('#blynxVertical').click();
+    window.blynxFind('#blynxApply').click();
+  })()`);
+  await waitFor(page, `window.blynxFind('#blynxStatus').textContent.includes('Saved.')`);
+  const saved = await evaluate(page, getState);
+  assert.equal(JSON.parse(saved.preset).accent_color, '#3D8D88');
+  assert.equal(saved.style, 'midnight');
+  assert.equal(saved.vertical, true);
+  report.checks.push('Settings Apply saves the selected accent, vertical tabs and new-tab canvas');
+  const unsupportedStyle = await evaluate(page, `import('chrome://resources/js/cr.js').then(m => m.sendWithPromise('applyBlynxAppearance', ${JSON.stringify(saved.preset)}, true, 'unknown-style', true))`);
+  assert.equal(unsupportedStyle.saved, false);
+  assert.equal(unsupportedStyle.preset, saved.preset);
+  assert.equal(unsupportedStyle.style, 'midnight');
+  report.checks.push('unknown new-tab canvas is refused without partially applying appearance');
+  const settingsScreenshot = await page.send('Page.captureScreenshot');
+  await fs.writeFile(`${output}/settings.png`, Buffer.from(settingsScreenshot.data, 'base64'));
+  await evaluate(page, `(() => {
+    const input = window.blynxFind('#blynxAccent');
+    input.value = 'INVALID'; input.dispatchEvent(new Event('input', {bubbles:true}));
+    window.blynxFind('#blynxApply').click();
+  })()`);
+  await waitFor(page, `window.blynxFind('#blynxStatus').textContent.includes('could not be saved')`);
+  assert.equal((await evaluate(page, getState)).preset, saved.preset);
+  report.checks.push('invalid Settings accent is refused without replacing saved preferences');
+  await evaluate(page, `window.blynxFind('settings-appearance-page').onBlynxCancelClick_()`);
+  assert.equal(await evaluate(page, `window.blynxFind('#blynxAccent').value`), '#3D8D88');
+  report.checks.push('Settings Cancel restores the saved configuration');
+  await page.send('Page.navigate', {url:'chrome://settings/appearance'});
+  await waitFor(page, `location.href === 'chrome://settings/appearance' && !!document.querySelector('settings-ui')`);
+  await evaluate(page, `window.blynxFind = ${deepFind}`);
+  await waitFor(page, `window.blynxFind('#blynxAccent')?.value === '#3D8D88'`);
+  report.checks.push('legacy chrome:// Settings links still work and reload saved appearance');
+  await page.send('Page.navigate', {url:'blynx://newtab/'});
+  await waitFor(page, `document.querySelector('ntp-app')?.shadowRoot?.querySelector('#content.midnight')`);
+  report.checks.push('saved new-tab canvas renders through blynx://newtab');
+  await evaluate(page, `document.querySelector('ntp-app').onCustomizeClick_()`);
+  await waitFor(page, `location.href === 'chrome://settings/appearance'`);
+  report.checks.push('new-tab Customize opens Settings instead of a popup');
+
   await page.send('Page.navigate', {url: fixture});
   await waitFor(page, `document.title === 'Blynx local smoke'`);
   assert.equal(await evaluate(page, 'document.querySelector("#result").textContent'), 'JavaScript executed');
+  assert.equal(await evaluate(page, 'typeof chrome?.send'), 'undefined');
+  report.checks.push('ordinary local website has no trusted Settings message API');
   await evaluate(page, 'document.querySelector("#next").click()');
   await waitFor(page, `document.title === 'Second local page'`);
   report.checks.push('local HTTP page, JavaScript, and link navigation');

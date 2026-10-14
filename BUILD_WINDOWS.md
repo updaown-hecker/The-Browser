@@ -1,8 +1,9 @@
 # Native Windows build
 
-Same overlay and patches, native Chromium GN/clang-cl; **no Linux-to-Windows
+Same five-patch overlay, native Chromium GN/clang-cl; **no Linux-to-Windows
 cross-build is claimed**. No Windows host is available in this session, so all
-Windows build/runtime/installer checks remain unverified.
+Windows build/runtime/installer checks remain unverified (last reviewed October
+13, 2026).
 
 Pinned upstream requirements:
 https://chromium.googlesource.com/chromium/src/+/154.0.8037.97/docs/windows_build_instructions.md

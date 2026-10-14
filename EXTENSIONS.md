@@ -18,6 +18,9 @@ disposable profile and checks runtime message/storage round trips, then disables
 and re-enables it through the upstream extensions page. Store installation,
 other extensions and the broader API matrix remain unverified.
 
+The latest redesign follow-up reran this smoke successfully with no page errors;
+the result is recorded under ignored `.local/runtime-smoke/results.json`.
+
 ## Chrome Web Store investigation
 
 The pinned open-source Chromium includes the Web Store installer and restricted
