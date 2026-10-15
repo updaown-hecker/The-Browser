@@ -50,6 +50,13 @@ target. This avoids `toolbar -> custom UI -> browser UI -> toolbar` cycles.
 4. `0004-native-icons.patch`: replaces selected Linux/Views 1x/2x product icons
    with renders of the owned icon. Windows and other platform assets remain
    pending the platform identity audit.
+5. `0005-blynx-experience.patch`: internal aliases, Settings appearance controls,
+   new-tab canvases and a Settings-local illustrative preview. Staged edits update
+   the miniature browser without theme-service or preference writes; accent CSS
+   accepts only a six-digit RGB hex color. Apply remains the only write action.
+   Settings also exposes guarded, non-writing preset validation/export. An
+   off-the-record guard avoids querying an unavailable sign-in service while
+   constructing upstream Settings localization data.
 
 Binary output names remain upstream `chrome`/`chrome.exe` in this development
 slice. The root `blynx` is an executable development launcher for the
@@ -99,7 +106,9 @@ Owned `BlynxSettingsHandler` is attached only to trusted Settings and applies
 bounded validated appearance JSON through the existing native controller. New-tab
 style/shortcut preferences are per-profile PrefService values, constrained to
 known canvases and guarded before writes. The Lit card stages changes until Apply;
-Cancel reloads the saved state. Invalid input does not partially mutate settings.
+Cancel restores the saved state. A miniature browser preview reflects staged
+theme/accent/tab/bookmark/canvas/shortcut choices without modifying browser prefs.
+It illustrates layout and color choices; Chromium derives the actual native palette. Invalid input does not partially mutate settings.
 The old dialog implementation remains for isolated tests but is not exposed by
 the toolbar or new-tab Customize action. Canvas artwork is local; uploaded logo
 and generated taskbar asset live in `browser/resources/icons/`.
@@ -108,3 +117,57 @@ The final redesign build keeps an upstream `ntp-logo` element hidden in the NTP
 DOM for inherited TypeScript/test compatibility while the visible Blynx eye mark
 is rendered separately. This preserves upstream theme/test object shape without
 restoring the old visible logo or toolbar popup.
+
+
+## Preset file UI
+
+Settings imports use the browser's native HTML file chooser. File size is checked
+before reading (1–4096 bytes), UTF-8 decoding is fatal, and the trusted native
+Settings handler invokes the existing strict C++ schema parser and canonical
+exporter. Import only stages the validated preset in the local preview; Apply
+rechecks profile/policy/future-schema access before writing through PrefService.
+Cancel or a later edit invalidates an outstanding file read so it cannot restore
+stale edits. Tab layout and canvas prefs are outside preset schema v1 and retain
+their staged values. Other schema fields remain compatibility data until native
+token consumers are implemented.
+
+Export reads the saved native preset, refuses invalid/unsupported storage or
+read-only/managed access, and hands canonical JSON to Chromium's normal Blob
+URL download service with a fixed `.json` filename. It does not serialize
+credentials, take filesystem paths from WebUI, or save staged edits. The owned
+GRIT catalog and its adjacent-GRD patch copy must match; integration now refuses
+mismatches before changing the source checkout.
+
+## First-run setup and identity pass
+
+The native first visible normal window asks the owned appearance controller
+whether setup should open. A new regular profile starts at step 1; existing
+profiles at the default step 0 are left alone. Incomplete steps 1–3 resume once
+per profile/process, and completed step 4 suppresses automatic setup. Headless,
+private, guest, system, policy-controlled and unknown future states are excluded.
+The deferred Settings navigation uses the window's weak pointer.
+
+Trusted Settings exposes bounded setup actions through `BlynxSettingsHandler`.
+The local, non-syncable `blynx.onboarding_step` preference stores progress only.
+Welcome, transfer and personalization use the existing Lit Appearance page;
+step changes focus the visible heading. Transfer opens upstream `/importData`,
+which owns source detection, supported data types, user confirmation and secure
+credential import. Cancel returns to setup. Setup never reads another browser's
+files itself and never marks an import successful. Appearance still saves only
+through Apply; setup completion is an independent preference.
+
+Browser-owned English GRIT messages now use Blynx, with source-browser names,
+OS names, attribution and actual external-provider/store identities preserved.
+The Google-services category is titled “Services and connections”; its provider
+disclosures still identify Google. Existing translations may fall back to English
+for changed messages. Compatibility identifiers, URLs and on-disk profile roots
+are deliberately stable. Shared WebUI and native product glyphs now use the
+owned monochrome eye, inheriting their caller's theme/contrast color. Linux
+application PNGs continue to use the existing Blynx artwork.
+
+The transfer step links to the existing password CSV importer and extension
+manager in separate tabs, preserving setup progress. The pinned Linux source
+profile detector supports Firefox; exported bookmarks HTML and password CSV
+provide upstream import paths for other browsers. Extensions and unsupported
+history/sessions are not silently copied. Native payment footer branding uses the
+same product eye vector with `ui::kColorIcon`, replacing its inherited wordmark.

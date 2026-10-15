@@ -61,9 +61,35 @@ policy write access before changing preferences. No website-to-native API,
 custom encryption, install bypass or updater is introduced. The Web Store route
 opens the official external service and adds no verification exception.
 
-Current evidence: integration preflight, patch reverse-check, `git diff --check`,
-the 90 Python tooling tests, the isolated CMake test, targeted Chromium identity/
-appearance and PrefService tests, and both DevTools/native Wayland smoke tests
-passed after the latest build. This evidence is not a security audit; broad
-policy/incognito, renderer-crash, network/privacy, Windows and package checks
-remain release gates.
+Recorded October 13 evidence includes the isolated CMake and focused Chromium
+identity/appearance and PrefService tests. The October 14 continuation reran the
+Python tooling tests (now 93), integration/patch preflight, `git diff --check`, and
+expanded DevTools/native Wayland smoke after the Settings preview build. The
+preview never writes preferences while staging edits; its CSS accent accepts only
+six-digit RGB hex. A private-context fixture test verifies local-storage
+separation. This evidence is not a security audit; broad policy/incognito,
+renderer-crash, network/privacy, Windows and package checks remain release gates.
+
+
+Preset file imports are bounded before reading and use fatal UTF-8 decoding plus
+the native strict schema parser. They stage data only; Apply rechecks write access.
+Export reads canonical saved data only and refuses invalid/unsupported storage.
+User-selected files and exported JSON use Chromium's standard file-input/download
+facilities; no WebUI-supplied path reaches native file I/O. The import read is
+invalidated by Cancel or later edits. Runtime file tests use only owned fixtures
+and isolated regular/private browser contexts. Platform file-dialog/portal and
+broader policy/security suites remain separate validation gates.
+
+The expanded smoke found and fixed a null sign-in-service dereference in upstream
+Settings localization for a private browser context. Off-the-record contexts now
+skip this account-service query. Real private Settings tests refuse preset
+validate/export/apply, and clean-restart tests preserve ordinary profile data.
+These checks do not replace the full in-process policy/incognito/security suites.
+
+First-run setup persists only a bounded profile-local progress integer. Native
+handlers recheck regular-profile and preference-policy access on every action;
+future/invalid progress states are not overwritten. Automatic presentation does
+not import data or touch existing browser profiles. Transfer delegates to
+Chromium's standard importer and its explicit source/data confirmation, using
+upstream credential services. No password file parser, custom encryption,
+external-site branding injection, service impersonation or install bypass is added.

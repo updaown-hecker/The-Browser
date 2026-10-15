@@ -22,3 +22,10 @@ patch and the user-local desktop entry. Exact generation prompt:
 > outside the circular medallion, no letters, text, additional symbols, frame,
 > mockup, or checkerboard. Fill about 92% of the square canvas. Strong legibility,
 > clean silhouette.
+
+The identity follow-on adds `../blynx-eye.svg` and `../blynx-eye.icon`: matching
+monochrome eye geometry for shared WebUI and native product glyphs. Existing
+`cr-icon`/Views color plumbing supplies theme, selection and high-contrast colors;
+these are not recolored provider logos or site favicons. `../product-icon.svg`
+now uses the eye on a charcoal circular field rather than the earlier B artwork.
+The generated taskbar PNG and its derivatives are unchanged.

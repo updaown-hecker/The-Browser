@@ -9,6 +9,7 @@
 namespace browser {
 
 void RegisterAppearanceProfilePrefs(PrefRegistrySimple* registry) {
+  registry->RegisterIntegerPref(kOnboardingStepPref, 0);
   registry->RegisterStringPref(kAppearanceJsonPref, "");
   registry->RegisterStringPref(kNewTabStylePref, "aurora");
   registry->RegisterBooleanPref(kNewTabLinksPref, true);

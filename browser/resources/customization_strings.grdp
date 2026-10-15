@@ -43,4 +43,24 @@
   <message name="IDS_BLYNX_SETTINGS_READ_ONLY" desc="Blynx browser settings read only UI label.">These settings cannot be changed in this profile or are managed.</message>
   <message name="IDS_BLYNX_NEWTAB_TAGLINE" desc="Blynx browser newtab tagline UI label.">Find your focus. Make room for what matters.</message>
   <message name="IDS_BLYNX_EXTENSION_STORE" desc="Blynx browser extension store UI label.">Extensions · Chrome Web Store</message>
+  <message name="IDS_BLYNX_PRESET_IMPORT" desc="Button that opens a native file picker for a Blynx appearance preset.">Import preset</message>
+  <message name="IDS_BLYNX_PRESET_EXPORT" desc="Button that downloads the saved appearance preset as a JSON file.">Export saved preset</message>
+  <message name="IDS_BLYNX_PRESET_DESCRIPTION" desc="Explains the preset file UI and which appearance settings it affects.">Presets include theme, accent, and bookmarks. Tab layout and new-tab canvas stay as chosen. Import a JSON file up to 4 KiB, then preview and Apply.</message>
+  <message name="IDS_BLYNX_PRESET_IMPORTED" desc="Status after validating and staging a preset file without saving it.">Preset loaded into the preview. Choose Apply to save it, or Cancel to discard it.</message>
+  <message name="IDS_BLYNX_PRESET_IMPORT_ERROR" desc="Status when a preset file cannot be read or fails strict validation.">Choose a valid Blynx appearance preset (JSON, at most 4 KiB). No changes were saved.</message>
+  <message name="IDS_BLYNX_PRESET_EXPORTED" desc="Status after starting a download of the saved preset.">Saved preset download started.</message>
+  <message name="IDS_BLYNX_PRESET_EXPORT_ERROR" desc="Status when the saved preset cannot be exported safely.">The saved preset could not be exported. Check whether appearance settings are available in this profile.</message>
+  <message name="IDS_BLYNX_SETUP_TITLE" desc="Blynx first-run setup title.">Welcome to Blynx</message>
+  <message name="IDS_BLYNX_SETUP_WELCOME" desc="Blynx first-run setup welcome.">Your browsing, a little more yours. Bring your bookmarks and supported browser data, then choose a look that feels right.</message>
+  <message name="IDS_BLYNX_SETUP_IMPORT_TITLE" desc="Blynx first-run setup import title.">Bring your browsing with you</message>
+  <message name="IDS_BLYNX_SETUP_IMPORT_DESCRIPTION" desc="Blynx first-run setup import description.">Choose a detected browser or a bookmarks HTML file in the import dialog. Available data depends on the source browser and your platform. Nothing is imported until you confirm. For other browsers, export bookmarks as HTML and passwords as CSV, then use the matching importer. Password Manager and Extensions open in new tabs. Extensions need reinstalling; sessions and other unsupported data do not transfer automatically.</message>
+  <message name="IDS_BLYNX_SETUP_PERSONALIZE_TITLE" desc="Blynx first-run setup personalize title.">Find your look</message>
+  <message name="IDS_BLYNX_SETUP_PERSONALIZE_DESCRIPTION" desc="Blynx first-run setup personalize description.">Choose your theme, accent, tabs, and new-tab canvas below. Use Apply to save appearance changes, then start browsing.</message>
+  <message name="IDS_BLYNX_SETUP_START" desc="Blynx first-run setup start.">Set up Blynx</message>
+  <message name="IDS_BLYNX_SETUP_IMPORT" desc="Blynx first-run setup import.">Choose what to import</message>
+  <message name="IDS_BLYNX_SETUP_NEXT" desc="Blynx first-run setup next.">Continue</message>
+  <message name="IDS_BLYNX_SETUP_BACK" desc="Blynx first-run setup back.">Back</message>
+  <message name="IDS_BLYNX_SETUP_FINISH" desc="Blynx first-run setup finish.">Start browsing</message>
+  <message name="IDS_BLYNX_SETUP_SKIP" desc="Blynx first-run setup skip.">Skip setup</message>
+  <message name="IDS_BLYNX_SETUP_ERROR" desc="Blynx first-run setup error.">Setup could not be saved. Try again in a regular, unmanaged profile.</message>
 </grit-part>

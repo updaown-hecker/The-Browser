@@ -88,9 +88,15 @@ random DevTools port to check the built-in new-tab page, local navigation/tabs,
 downloads, a local MV3 extension, and `chrome://sandbox`. The native smoke uses
 this host's GI/AT-SPI accessibility library and Wayland display to operate the
 actual Settings page, save accent/tab/canvas choices, reject invalid colors and
-verify Cancel and page reload preserve the saved configuration. The native run
+verify Cancel and page reload preserve the saved configuration. Both smoke modes now also exercise the staged Settings preview without saving,
+Cancel, logo loading, Back/Forward, bookmark create/search/reload/delete, the
+history route and regular/private-context site-storage separation. The native run
 also inspects the visible vertical strip and branded address bar through AT-SPI. Logs/results/screenshots stay ignored under `.local/`. These
 checks are narrower than full inherited or native in-process browser tests.
+The runner requires a current successful-build receipt and adds a clean process
+restart to verify saved appearance/canvas choices and extension storage. Preset
+file checks intercept Chromium chooser dispatch to select owned local fixtures;
+platform-native dialog/portal interaction remains a separate validation task.
 
 The last two browser-test commands above need a substantial Chromium build; UI browser tests also need a
 usable display. The in-process tests must not be replaced with manifest parsing
@@ -164,3 +170,10 @@ Logs: `.local/logs/wayland-launch.log` and
 
 Packaging currently refuses with “Release not ready.” Do not distribute raw
 unvalidated upstream packages. Required gates are listed in `TODO.md`.
+
+The setup/branding follow-on changes shared GRIT headers and product icon inputs,
+so the next incremental link rebuilds many inherited consumers. Keep one build
+per GN output. Setup smoke now includes three process launches (initial,
+unfinished setup restart, completed setup restart); test profiles and screenshots
+remain under ignored `.local/`. Browser-data import through the OS chooser is a
+separate test from appearance-preset HTML file-input import.

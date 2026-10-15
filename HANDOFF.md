@@ -1,6 +1,6 @@
 # Blynx — live handoff
 
-Updated October 13, 2026. Native Chromium development distribution, not a
+Updated October 14, 2026. Native Chromium development distribution, not a
 completed daily-driver release. User explicitly selected the company/product
 name **Blynx**. Preserve Chromium/Views/C++23/GN/Clang/libc++, sandbox/isolation,
 pins, OS policy, credentials and existing profiles. No Electron/WebView shell.
@@ -11,7 +11,7 @@ KDE neon 24.04 x86-64, KDE Wayland, Ryzen 7 5700, 31 GiB RAM. Existing repositor
 commits are preserved; session changes are unstaged. Never stage `.local/`,
 PROMPT.txt, secrets, browser data or crash dumps. No OS security change or package
 installation was made. Owned code is `browser/`; five reviewed patches in
-`patches/series`; pins in `config/`. Integration installs 34 owned files and records
+`patches/series`; pins in `config/`. Integration installs 36 owned files and records
 hashes in `.local/chromium/src/.browser-final-overlay.json`.
 
 Pinned Chromium 154.0.8037.97 / `b510e9d7cd3a2fbd78d0ddc42234103206c5f78d`,
@@ -47,6 +47,9 @@ more distinct browser. Public product name remains Blynx.
   `BrowserFinal` disk roots, `browser_final.appearance_json`, GRIT/internal IDs and
   receipt filenames stay stable. New canvas prefs are `blynx.new_tab_style` and
   `blynx.new_tab_links`, per-profile and not syncable.
+- Settings-local live illustration and strict preset file import/export now work;
+  import stages until Apply, export reads saved data, and Cancel invalidates late reads.
+  Direct private Settings loads safely and refuses Blynx preset writes/export.
 - Strict <=4 KiB versioned appearance schema and policy/private-profile/future-
   schema guards remain. Only implemented controls are exposed in Settings;
   density/scaling/etc. remain data-only. No workspaces, privacy blocker, sync
@@ -158,6 +161,227 @@ Full browser_tests filters: `NativeAppearanceBrowserTest.*`,
 `NativeAppearancePolicyBrowserTest.*`, `BrowserFinalExtensionTest.*`. Building
 that executable is substantial. The next session should first retry the full
 `unit_tests` target from the existing GN output if broad coverage is desired,
-then implement/test genuine native design-token consumers, live preview/import-
-export and tabs/workspaces/sidebar slices while expanding browsing/security/
-extension coverage. See `TODO.md` for remaining work.
+then implement/test genuine native design-token consumers and tabs/workspaces/
+sidebar slices while expanding browsing/security/extension coverage. Settings-local
+preview and preset file import/export are now implemented and tested below. See `TODO.md` for remaining work.
+
+
+## October 14 continuation — Settings preview and functional coverage
+
+Read all repository Markdown documentation; no project `.mb` files were found.
+Before implementation, reran 90 Python tests, the existing 19-check DevTools
+smoke and 22-check native Wayland smoke: all passed. Independently launched an
+isolated browser and verified four additional scenarios: Back/Forward, bookmark
+create/search/reload/delete, the branded history route and regular/private-context
+site-storage isolation. Evidence: `.local/manual-oct14/results.json` and
+`.local/logs/session-oct14-manual.log`. These are disposable fixture tests, not
+personal-profile interaction or a full incognito policy audit.
+
+Implemented a Settings-local illustrative preview in the existing fifth patch.
+It reflects staged theme, RGB accent, vertical tabs, bookmark visibility, canvas
+and shortcut visibility. No preferences or ThemeService state change while
+editing; Apply remains the write operation and Cancel restores saved choices.
+Invalid accent text uses a fixed safe preview color. The preview is an
+illustration, not an exact native ColorProvider palette or whole-window preview.
+Reused existing GRIT strings and corrected the Settings emblem to the upstream
+`chrome://theme/current-channel-logo` resource route. No pin, toolchain, OS
+policy, credentials or user profile changes. Five reviewed patches remain;
+all integration was recorded using `scripts/integrate.py`.
+
+The first build failed only on Chromium CSS formatting checks; corrected with
+upstream stylelint. The second build succeeded in 13 actions / 53.64 seconds,
+including TypeScript/CSS lint, Settings resources, C++ localization provider and
+browser link. A subsequent no-op build succeeded after patch whitespace cleanup.
+The final logo-resource and dark-mode caption-contrast build succeeded in
+11 actions / 19.08 seconds (`.local/logs/session-oct14-preview-contrast-build.log`).
+The successful-build receipt was checked against the current overlay, GN args and
+runtime artifacts after that build.
+
+Final verification passed: 25 DevTools checks, 28 combined native Wayland/AT-SPI
+checks, no JavaScript page errors, and Seccomp-BPF reported enabled. This includes
+preview logo loading, staged edits leaving saved state unchanged, safe invalid-
+color fallback, Cancel, Apply, the existing browsing/download/MV3 checks and the
+four added browsing/isolation scenarios. Screenshots were visually inspected in
+both modes. A later source review found the attempted caption-color replacement
+had missed the formatted CSS line; the follow-on pass below corrects it and adds
+a computed-color assertion.
+Reports: `.local/runtime-smoke/results.json`, `.local/native-smoke/results.json`.
+Logs: `.local/logs/session-oct14-runtime-verified.log` and
+`.local/logs/session-oct14-native-verified.log`. All 90 tooling tests passed again
+(`.local/logs/session-oct14-tooling-final.log`); JavaScript syntax, integration
+preflight and repository whitespace checks passed. AT-SPI logged a denied cache
+request to an unrelated sandboxed desktop application; the Blynx checks passed.
+
+Not executed this session: full `unit_tests`/`browser_tests`, Windows, Web Store
+installation, restart/session recovery, broad security/privacy/media/performance
+suites or packaging. Earlier broad-unit build timeout remains unresolved. The
+new private-context check establishes local-storage separation only. All logs,
+profiles and screenshots remain ignored; no release/performance claim is made.
+
+
+## October 14 follow-on — preset files and restart smoke
+
+Continued from HANDOFF.md / TODO.md after the completed preview slice. Added
+Settings Import preset / Export saved preset. Import invokes Chromium's file
+chooser, checks 1–4096 bytes before reading, decodes UTF-8 without replacement,
+then calls the existing native strict schema parser for canonical data. It stages
+theme/accent/bookmark choices until Apply, preserving separately staged tab-layout
+and canvas choices. Cancel or a later edit invalidates an asynchronous file read.
+Export uses saved native canonical data and Chromium's normal download service;
+it refuses invalid/unsupported storage or unavailable/read-only/managed access.
+No WebUI-supplied file path reaches native code. Schema v1 and upstream pins are
+unchanged; unimplemented token fields remain compatibility data.
+
+Both owned GRIT source and the required adjacent-GRD catalog in patch 0002 were
+updated. Integration now checks that these copies match. First build failed on
+two unnecessary TypeScript assertions; the second found the stale patched GRIT
+copy. Both were corrected without overwriting unrelated upstream changes.
+The full shared-string-consumer build succeeded: 1060 actions / 26m18.42s,
+`.local/logs/session-oct14-presets-build3.log`. A final About/menu identity and
+caption resource pass succeeded: 241 actions / 29.29s,
+`.local/logs/session-oct14-presets-about-build.log`. About now says Blynx while
+retaining upstream source/license/copyright attribution. The preview caption's
+primary foreground was verified by computed-style assertion and visual inspection.
+
+Tooling checks: 93 tests passed, including catalog consistency and smoke refusal
+of an incomplete build / stale prior report. The existing focused Chromium
+identity/appearance executable and all nine PrefService tests were run and passed;
+these binaries' library sources are unchanged. The smoke runner now checks the
+current integration/build receipt, clears stale results, and adds an actual clean
+process restart to check saved appearance/canvas prefs and extension storage.
+File tests cover chooser dispatch (intercepted to select owned fixtures), canonical
+saved-preset export, valid staging/Apply/Cancel/round-trip, eight invalid files,
+a delayed-read cancellation race and private Settings guards. The first expanded runtime run found a real upstream Settings crash when opened
+in a private DevTools browser context: `isClearPrimaryAccountAllowed` dereferenced
+an unavailable ChromeSigninClient. Added an off-the-record short-circuit so that
+private profiles do not obtain or query this service. Rebuild and browser link
+passed: 2 actions / 29.21s (`.local/logs/session-oct14-presets-private-fix-build.log`).
+Crash evidence is preserved under `.local/logs/session-oct14-private-settings-crash.log`
+and `session-oct14-private-settings-failure.json`. DevTools disconnects now reject
+pending commands promptly; context cleanup preserves the original error.
+
+Final actual-browser results: **38 runtime checks and 41 combined native checks
+passed**, no JavaScript page errors, Seccomp-BPF enabled. Both modes perform a
+clean SIGINT shutdown and a second browser process using the same disposable
+profile. Saved appearance/tab/canvas settings, rendered canvas, site storage,
+bookmarks and MV3 storage survived that restart. Private Settings now loads,
+reports non-editable and refuses validate/export/apply through native guards.
+All preset file tests above passed. Chooser dispatch is intercepted to supply
+owned fixtures; OS-native portal interaction remains untested.
+
+Final logs: `.local/logs/session-oct14-presets-runtime2.log` and
+`.local/logs/session-oct14-presets-native2.log`. Reports/screenshots are under
+`.local/runtime-smoke/` and `.local/native-smoke/`, including `settings-import.png`
+and `about.png`; native screenshots were visually inspected. All **93 Python
+checks** passed again (`.local/logs/session-oct14-presets-tooling-verified.log`).
+Owned C++ clang-format, JavaScript syntax, integration preflight, repository
+whitespace and the current completed-build receipt also passed verification.
+
+An independent fresh-profile HTTPS check loaded `https://example.com/` with
+normal certificate checks and a secure context, reporting QUIC and no page errors.
+The initial test's overly specific body-text assertion was corrected; this was
+not a certificate/network failure. Evidence: `.local/manual-https-oct14/results.json`
+and `.local/logs/session-oct14-https-verified.log`. This is one real HTTPS page,
+not a TLS/network audit or benchmark.
+
+No personal profiles, credentials, OS policy or toolchain/pin changes. Logs and
+fixtures stay under ignored `.local/`. Full inherited browser/security suites,
+platform-native file-dialog/portal behavior, Windows, Web Store installation,
+release packaging, workspaces, native token consumers and performance/privacy
+work remain outstanding. Focused restart checks do not establish full tab/session
+recovery or renderer-crash recovery.
+
+
+## October 14 — first-run setup and broader identity pass
+
+Current user scope adds browser-owned Google/Chrome names, first-run data-transfer
+onboarding, then theme-appropriate Blynx icon replacements. Continued after passing
+93 tooling tests and the baseline runtime smoke. Read the user-requested local
+modern-web-guidance skill; searched onboarding/accessibility/icon guidance and
+retrieved `accessibility`. Existing Chromium buttons, explicit control labels,
+programmatically focusable headings and decorative-logo semantics are retained.
+
+Implemented in the same five patches / 36-file owned overlay:
+- Profile-local `blynx.onboarding_step`, bounded actions and native first-window
+  presentation. New regular profiles start setup; old default-state profiles do
+  not. Incomplete setup resumes once per profile/process; completion suppresses
+  it. Private/guest/system, managed and unknown future states cannot write.
+- Existing trusted Settings Appearance hosts Welcome → optional transfer →
+  personalization. Transfer navigates to Chromium's `/importData`, preserving its
+  source detection, data-type selection and explicit import confirmation. No
+  migration file parser or custom password handling. Apply still controls saving
+  appearance; setup completion only stores progress and opens a new tab.
+- Browser-owned GRIT product references use Blynx; shared WebUI and native product
+  glyphs use matching monochrome eye geometry with caller-supplied theme colors.
+  The legacy owned SVG also uses the eye. Existing Linux taskbar PNGs are reused.
+- Actual Google providers, external Chrome Web Store, legal/source attribution,
+  source browser names, OS names and compatibility identifiers remain truthful.
+  No external DOM injection, store install bypass, separate Blynx store/backend,
+  toolchain/pin/OS-policy change or personal-profile migration.
+
+The initial build found CSS formatting issues; corrected with upstream stylelint.
+The next build found Chromium click-handler naming requirements; corrected the
+five bindings. All 93 Python tests, JS syntax, GRIT XML parse and the GN UI header
+check pass. The completed broad build passed in 1455 actions / 12m54.75s at -j6
+(`.local/logs/blynx-onboarding-branding-build4.log`). The earlier -j4 build was
+intentionally interrupted after 753 successful actions to consolidate the final
+sources and resume at -j6; it reported zero failed compilation steps. Final
+payment-footer/transfer-link polish passed in 244 actions / 44.18s
+(`.local/logs/blynx-onboarding-branding-build5.log`). The browser build receipt is
+current; integration reports no pending overlay writes.
+
+Final expanded isolated smoke passed: 46 runtime checks and 51 combined native
+Wayland/AT-SPI checks, with no JavaScript page errors and Seccomp-BPF enabled.
+Coverage includes setup via keyboard/heading focus, real importer open/cancel,
+password CSV importer / extension-manager links, Blynx labels and theme-colored
+glyph, action bounds/private write refusal, automatic native first-run/resume,
+clean restart progress and completion with the wizard hidden. The existing
+browsing, bookmark, download, appearance/preset and MV3 storage checks also pass.
+Logs: `.local/logs/blynx-onboarding-runtime-final.log` and
+`.local/logs/blynx-onboarding-native-final.log`; reports/screenshots remain in
+`.local/runtime-smoke/` and `.local/native-smoke/`. Setup and importer screenshots
+were visually inspected.
+
+The first transfer-link assertion expected a chrome:// DevTools target URL;
+actual target metadata correctly reports the branded blynx:// virtual URL.
+The test now uses real pointer input and normalizes only that display alias,
+while still checking the original trusted document origin. Native restart can
+restore an Appearance tab through upstream session behavior; the completion
+check now verifies saved step 4 and a hidden wizard, rather than forbidding a
+restored Settings tab. A separate cold native profile at step 4 verifies no
+automatic setup. Native accessibility snapshots now retry stale GLib objects;
+required address/tab-layout assertions still time out on real failures.
+
+Independent native fixtures passed for existing step 0, completed step 4 and
+future step 999, with no automatic setup and no preference changes after clean
+shutdown (`.local/manual-onboarding/results.json`). All nine real PrefService
+tests passed (`.local/logs/blynx-onboarding-prefs-tests.log`), and all 93 Python
+tooling tests passed again. GN UI and payment-target header checks, JS syntax,
+GRIT XML parsing, integration preflight and repository whitespace checks pass.
+
+The transfer step also links to the existing password CSV importer and extension
+manager in new tabs. On Linux the pinned direct profile importer detects Firefox;
+other browsers can provide bookmarks HTML and password CSV. Extensions require
+reinstallation, and unsupported history/session data is not automatically moved.
+The payment footer now uses the Blynx eye with native icon theme colors, replacing
+its inherited Chromium wordmark; no payment-provider artwork is changed.
+
+Not executed: end-to-end browser-data/password import through OS file selection
+or real source-profile migration; payment-request flow; Windows build/icons/
+installer audit; localization review; full inherited policy/incognito/security/
+media/privacy suites; real Web Store installation or packaging. No release or
+performance claim is made.
+
+
+## October 14 — organized debug/test command guide
+
+Added `DEBUG_AND_TEST_COMMANDS.md` at the user's request and linked it from README.
+It consolidates supported CLI commands, their scope and prerequisites, disposable
+profile workflows, result paths, debugging and troubleshooting. Historical pass
+counts are clearly separate from commands merely documented. No browser sources,
+pins, build arguments, user profiles or extension manifests changed in this slice.
+Consulted the local Chrome extensions skill plus service-worker/DevTools references
+for the extension inspection notes; no extension publication was performed.
+Documentation verification: Bash block syntax, Python block syntax, CLI help/dry
+runs and repository whitespace were checked. Browser build/runtime suites were
+not rerun for this documentation-only change.

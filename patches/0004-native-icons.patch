@@ -540,3 +540,136 @@ zC{?h;n|va~&BFe$YHPA9+_qgwD7QP|6`G6i@%4;o2uD~G&rniftRfn(Vrh9?F1I>c
 zxI!~aH?ZBOW2dpBD%%>p!d(@+zfGQ9gkjJE090=!9+-^6DF6Tf07*qoM6N<$f~PY3
 A&j0`b
 
+diff --git a/chrome/app/vector_icons/chrome_product.icon b/chrome/app/vector_icons/chrome_product.icon
+index 31cb949b87..7ff666cbc2 100644
+--- a/chrome/app/vector_icons/chrome_product.icon
++++ b/chrome/app/vector_icons/chrome_product.icon
+@@ -1,47 +1,13 @@
+-// Copyright 2026 The Chromium Authors
+-// Use of this source code is governed by a BSD-style license that can be
+-// found in the LICENSE file.
+-
+-CANVAS_DIMENSIONS, 16,
++// Blynx eye product glyph. Uses the caller's theme color.
++CANVAS_DIMENSIONS, 24,
+ FILL_RULE_NONZERO,
+-MOVE_TO, 6.23f, 9.79f,
+-R_ARC_TO, 2.41f, 2.41f, 0, 0, 0, 1.77f, 0.73f,
+-R_CUBIC_TO, 0.7f, 0, 1.29f, -0.24f, 1.77f, -0.73f,
+-R_ARC_TO, 2.41f, 2.41f, 0, 0, 0, 0.73f, -1.77f,
+-R_CUBIC_TO, 0, -0.69f, -0.24f, -1.28f, -0.73f, -1.77f,
+-ARC_TO, 2.41f, 2.41f, 0, 0, 0, 8, 5.52f,
+-R_CUBIC_TO, -0.69f, 0, -1.28f, 0.24f, -1.77f, 0.73f,
+-R_ARC_TO, 2.41f, 2.41f, 0, 0, 0, -0.73f, 1.77f,
+-R_CUBIC_TO, 0, 0.7f, 0.24f, 1.29f, 0.73f, 1.77f,
++MOVE_TO, 2, 12,
++CUBIC_TO, 5, 4, 16, 3, 22, 8,
++CUBIC_TO, 16, 5, 7, 7, 5, 12,
++CUBIC_TO, 8, 18, 17, 18, 22, 13,
++CUBIC_TO, 18, 22, 7, 22, 2, 12,
+ CLOSE,
+-MOVE_TO, 8, 11.77f,
+-R_CUBIC_TO, 0.13f, 0, 0.25f, 0, 0.39f, -0.01f,
+-R_CUBIC_TO, 0.14f, -0.01f, 0.26f, -0.03f, 0.39f, -0.06f,
+-LINE_TO, 7.09f, 14.59f,
+-R_CUBIC_TO, -1.66f, -0.18f, -3.03f, -0.9f, -4.11f, -2.16f,
+-R_CUBIC_TO, -1.08f, -1.26f, -1.62f, -2.73f, -1.62f, -4.42f,
+-R_ARC_TO, 6.54f, 6.54f, 0, 0, 1, 0.66f, -2.86f,
+-R_LINE_TO, 2.77f, 4.73f,
+-R_CUBIC_TO, 0.33f, 0.59f, 0.77f, 1.05f, 1.35f, 1.38f,
+-R_CUBIC_TO, 0.58f, 0.33f, 1.2f, 0.5f, 1.87f, 0.5f,
++MOVE_TO, 8, 12,
++ARC_TO, 4, 4, 0, 1, 0, 16, 12,
++ARC_TO, 4, 4, 0, 1, 0, 8, 12,
+ CLOSE,
+-MOVE_TO, 8, 4.27f,
+-R_ARC_TO, 3.56f, 3.56f, 0, 0, 0, -2.2f, 0.73f,
+-R_ARC_TO, 3.81f, 3.81f, 0, 0, 0, -1.34f, 1.88f,
+-R_LINE_TO, -1.69f, -2.93f,
+-R_ARC_TO, 6.2f, 6.2f, 0, 0, 1, 2.29f, -1.9f,
+-ARC_TO, 6.65f, 6.65f, 0, 0, 1, 8, 1.38f,
+-R_CUBIC_TO, 1.09f, 0, 2.13f, 0.26f, 3.09f, 0.77f,
+-R_ARC_TO, 6.72f, 6.72f, 0, 0, 1, 2.38f, 2.12f,
+-CLOSE,
+-R_MOVE_TO, 6.16f, 1.25f,
+-R_CUBIC_TO, 0.17f, 0.41f, 0.3f, 0.82f, 0.37f, 1.23f,
+-R_ARC_TO, 6.8f, 6.8f, 0, 0, 1, 0.12f, 1.26f,
+-R_CUBIC_TO, 0, 1.79f, -0.58f, 3.29f, -1.73f, 4.5f,
+-R_CUBIC_TO, -1.15f, 1.22f, -2.62f, 1.93f, -4.41f, 2.12f,
+-R_LINE_TO, 2.71f, -4.75f,
+-R_CUBIC_TO, 0.16f, -0.29f, 0.29f, -0.59f, 0.38f, -0.9f,
+-R_ARC_TO, 3.32f, 3.32f, 0, 0, 0, 0.14f, -0.97f,
+-R_CUBIC_TO, 0, -0.46f, -0.09f, -0.91f, -0.26f, -1.34f,
+-R_ARC_TO, 4.21f, 4.21f, 0, 0, 0, -0.71f, -1.16f,
+-CLOSE
+diff --git a/chrome/browser/ui/views/payments/payment_request_views_util.cc b/chrome/browser/ui/views/payments/payment_request_views_util.cc
+index d3c41bffbb..dc78be0114 100644
+--- a/chrome/browser/ui/views/payments/payment_request_views_util.cc
++++ b/chrome/browser/ui/views/payments/payment_request_views_util.cc
+@@ -8,6 +8,7 @@
+ #include <utility>
+
+ #include "base/strings/utf_string_conversions.h"
++#include "chrome/app/vector_icons/vector_icons.h"
+ #include "chrome/browser/ui/views/chrome_typography.h"
+ #include "chrome/browser/ui/views/payments/payment_request_dialog_view_ids.h"
+ #include "chrome/browser/ui/views/payments/payment_request_sheet_controller.h"
+@@ -79,28 +80,25 @@ class ThemeTrackingLabel : public views::Label {
+ BEGIN_METADATA(ThemeTrackingLabel)
+ END_METADATA
+
+-class ChromeLogoImageView : public views::ImageView {
+-  METADATA_HEADER(ChromeLogoImageView, views::ImageView)
++class BlynxLogoImageView : public views::ImageView {
++  METADATA_HEADER(BlynxLogoImageView, views::ImageView)
+
+  public:
+-  ChromeLogoImageView() {
++  BlynxLogoImageView() {
+     SetCanProcessEventsWithinSubtree(false);
+     SetTooltipText(l10n_util::GetStringUTF16(IDS_PRODUCT_NAME));
+   }
+-  ~ChromeLogoImageView() override = default;
++  ~BlynxLogoImageView() override = default;
+
+   // views::ImageView:
+   void OnThemeChanged() override {
+     ImageView::OnThemeChanged();
+-    SetImage(ui::ImageModel::FromResourceId(
+-        (GetNativeTheme()->preferred_color_scheme() ==
+-         ui::NativeTheme::PreferredColorScheme::kDark)
+-            ? IDR_PRODUCT_LOGO_NAME_22_WHITE
+-            : IDR_PRODUCT_LOGO_NAME_22));
++    SetImage(
++        ui::ImageModel::FromVectorIcon(kChromeProductIcon, ui::kColorIcon, 22));
+   }
+ };
+
+-BEGIN_METADATA(ChromeLogoImageView)
++BEGIN_METADATA(BlynxLogoImageView)
+ END_METADATA
+
+ // |s1|, |s2|, and |s3| are lines identifying the profile. |s1| is the
+@@ -273,8 +271,8 @@ std::unique_ptr<views::View> CreateProductLogoFooterView() {
+       views::BoxLayout::CrossAxisAlignment::kStart);
+   content_view->SetLayoutManager(std::move(layout));
+
+-  // Adds the Chrome logo image.
+-  content_view->AddChildView(std::make_unique<ChromeLogoImageView>());
++  // Adds the theme-colored Blynx product glyph.
++  content_view->AddChildView(std::make_unique<BlynxLogoImageView>());
+
+   return content_view;
+ }
+diff --git a/chrome/browser/ui/views/payments/BUILD.gn b/chrome/browser/ui/views/payments/BUILD.gn
+index 27d1f8d10d..83eb659dc1 100644
+--- a/chrome/browser/ui/views/payments/BUILD.gn
++++ b/chrome/browser/ui/views/payments/BUILD.gn
+@@ -77,6 +77,7 @@ source_set("impl") {
+
+   deps = [
+     ":payments",
++    "//chrome/app/vector_icons",
+     "//chrome/browser:primitives",
+     "//chrome/browser/devtools",
+     "//chrome/browser/media/webrtc",

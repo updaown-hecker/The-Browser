@@ -13,6 +13,11 @@ class Profile;
 
 namespace browser {
 
+// Marks a new or incomplete regular profile once per process. Never imports
+// data.
+bool ShouldShowBlynxOnboarding(Profile& profile);
+bool CanEditBlynxOnboarding(Profile& profile);
+
 enum class NativeAppearanceAccess {
   kAllowed,
   kReadOnlyProfile,

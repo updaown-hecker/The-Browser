@@ -44,9 +44,28 @@ normally remain untouched; do not scatter fork-specific changes through it.
 
 ## Current integration state
 
-As of October 13, 2026, Chromium `154.0.8037.97` at the pinned revision has all
+As of October 14, 2026, Chromium `154.0.8037.97` at the pinned revision has all
 five patches applied and 34 owned overlay files installed. The read-only
 integration preflight passes. The redesign's final patch adjustment preserves a
 hidden upstream `ntp-logo` compatibility element so inherited TypeScript tests
 continue to type-check while the visible Blynx mark remains custom. No upstream
 source commit was created by this workspace.
+
+The October 14 continuation updates owned Settings preset validation/export,
+preview/import controls, About/menu labels and an off-the-record Settings
+localization guard. The owned GRIT catalog and its patch-0002 copy now have an
+integration consistency check. The same five-patch series, Chromium/depot_tools
+pins and 34-file overlay remain; current runtime and restart results are recorded
+in HANDOFF.md. No upstream source commit was created.
+
+The first-run/identity follow-on retains the five-patch series. Patch 0001 also
+owns browser-product GRIT message rebranding; patch 0004 includes the native
+product eye glyph; patch 0005 adds the first-window setup hook and shared WebUI
+eye glyph. Owned progress/policy logic remains under `browser/`. Provider/store
+identity and compatibility identifiers are retained. Review new upstream message
+semantics rather than applying a blind global replacement during a rebase.
+
+Patch 0004 also adapts the native payment-footer product mark to the owned vector
+and declares the icon dependency explicitly. The pinned Linux importer currently
+detects Firefox profiles; setup links to upstream bookmarks HTML and password CSV
+paths without pretending to implement universal source-profile migration.

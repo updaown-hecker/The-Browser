@@ -1,5 +1,28 @@
 # Changelog
 
+## October 14, 2026 — appearance preset file controls
+
+- Added Settings preset import through Chromium file selection, strict size/UTF-8/
+  native-schema validation and staging until Apply. Cancel invalidates late reads.
+- Added export of saved canonical presets through the upstream download service,
+  with profile/policy/unsupported-data guards and no native file-path bridge.
+- Added an integration guard against mismatched owned and patched GRIT catalogs.
+- Fixed an observed private Settings crash caused by querying an unavailable
+  upstream sign-in service. Corrected About/menu Blynx labels, preserving attribution.
+- Passed 93 tooling tests, 38 runtime checks, 41 combined native checks and an
+  independent HTTPS load. Added clean-process persistence coverage for appearance,
+  canvas, site storage, bookmarks and MV3 storage. Full results are in HANDOFF.md.
+
+## October 14, 2026 — Settings preview and browsing checks
+
+- Added a Settings-local illustrative browser preview for staged theme, accent,
+  tab layout, bookmarks, canvas and shortcut choices. Only Apply saves preferences;
+  Cancel restores the saved choices. Invalid RGB input uses a safe preview fallback.
+- Corrected the Settings emblem to use the upstream current-channel logo route.
+- Expanded actual-browser smoke coverage for preview transaction behavior, logo
+  loading, Back/Forward, bookmark operations, history routing and private-context
+  site-storage separation. Exact rebuild/runtime results are in HANDOFF.md.
+
 ## October 13, 2026 — redesign follow-up validation
 
 - Completed the redesign Chromium rebuild after preserving the hidden upstream
@@ -61,3 +84,20 @@
 
 Full browser launch and shipping feature completeness are not implied; current
 targeted compiler and runtime status is recorded in `HANDOFF.md`.
+
+### First-run setup and identity follow-on (October 14)
+
+- Added resumable, profile-local Blynx welcome, optional browser-data import entry,
+  and personalization setup; existing profiles can start it from Appearance.
+- Rebranded browser-owned Settings/install/extension messages and monochrome
+  WebUI/native product glyphs; provider/store identities and upstream attribution
+  remain identifiable. Native and WebUI eye glyphs follow interface theme colors.
+- Runtime coverage extended for setup navigation/focus, importer open/cancel,
+  private writes, clean restart persistence and completion suppression.
+
+- Transfer setup links to the upstream password CSV importer and extension manager
+  without completing setup. Replaced the native payment footer wordmark with the
+  theme-colored product eye; provider logos remain unchanged.
+- Validated the Linux link, 46 runtime / 51 combined native checks, nine PrefService
+  tests and 93 tooling tests; independent existing/completed/future-state native
+  fixtures pass. Data import through OS selection and other release gates remain.

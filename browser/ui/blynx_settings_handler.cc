@@ -1,5 +1,8 @@
 #include "browser/ui/blynx_settings_handler.h"
 
+#include <optional>
+#include <string>
+
 #include "base/functional/bind.h"
 #include "browser/appearance/appearance_pref_store.h"
 #include "browser/ui/native_appearance_controller.h"
@@ -22,11 +25,59 @@ bool CanEditNewTab(PrefService* prefs) {
 
 void BlynxSettingsHandler::RegisterMessages() {
   web_ui()->RegisterMessageCallback(
+      "blynxOnboarding", base::BindRepeating(&BlynxSettingsHandler::Onboarding,
+                                             base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
       "getBlynxAppearance",
       base::BindRepeating(&BlynxSettingsHandler::Get, base::Unretained(this)));
   web_ui()->RegisterMessageCallback(
       "applyBlynxAppearance", base::BindRepeating(&BlynxSettingsHandler::Apply,
                                                   base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "validateBlynxAppearancePreset",
+      base::BindRepeating(&BlynxSettingsHandler::ValidatePreset,
+                          base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "exportBlynxAppearancePreset",
+      base::BindRepeating(&BlynxSettingsHandler::ExportSavedPreset,
+                          base::Unretained(this)));
+}
+
+void BlynxSettingsHandler::Onboarding(const base::ListValue& args) {
+  if (args.size() != 2 || !args[0].is_string() || !args[1].is_string()) {
+    return;
+  }
+  AllowJavascript();
+  auto* profile = Profile::FromWebUI(web_ui());
+  auto* prefs = profile->GetPrefs();
+  int step = prefs->GetInteger(kOnboardingStepPref);
+  const bool editable = CanEditBlynxOnboarding(*profile);
+  const auto& action = args[1].GetString();
+  bool saved = false;
+  if (editable) {
+    int next = step;
+    if (action == "start") {
+      next = 1;
+    }
+    if (action == "next" && step >= 1 && step < 3) {
+      next = step + 1;
+    }
+    if (action == "back" && step > 1 && step <= 3) {
+      next = step - 1;
+    }
+    if (action == "finish" && step >= 1 && step <= 3) {
+      next = 4;
+    }
+    if (next != step) {
+      prefs->SetInteger(kOnboardingStepPref, next);
+      step = next;
+      saved = true;
+    }
+  }
+  ResolveJavascriptCallback(args[0], base::DictValue()
+                                         .Set("step", step)
+                                         .Set("editable", editable)
+                                         .Set("saved", saved));
 }
 
 base::DictValue BlynxSettingsHandler::State(bool saved) {
@@ -75,5 +126,48 @@ void BlynxSettingsHandler::Apply(const base::ListValue& args) {
     saved = true;
   }
   ResolveJavascriptCallback(args[0], State(saved));
+}
+
+// Validation is read-only. Imported data is staged in Settings; the existing
+// Apply endpoint alone writes preferences after checking access again.
+void BlynxSettingsHandler::ValidatePreset(const base::ListValue& args) {
+  if (args.size() != 2 || !args[0].is_string() || !args[1].is_string()) {
+    return;
+  }
+  AllowJavascript();
+  auto* profile = Profile::FromWebUI(web_ui());
+  NativeAppearanceController controller(*profile);
+  const auto parsed = ImportAppearancePreset(args[1].GetString());
+  std::optional<std::string> canonical;
+  if (parsed.preset &&
+      controller.GetAccess() == NativeAppearanceAccess::kAllowed &&
+      CanEditNewTab(profile->GetPrefs())) {
+    canonical = ExportAppearancePreset(*parsed.preset);
+  }
+  ResolveJavascriptCallback(args[0],
+                            base::DictValue()
+                                .Set("valid", canonical.has_value())
+                                .Set("preset", canonical.value_or("")));
+}
+
+void BlynxSettingsHandler::ExportSavedPreset(const base::ListValue& args) {
+  if (args.size() != 1 || !args[0].is_string()) {
+    return;
+  }
+  AllowJavascript();
+  auto* profile = Profile::FromWebUI(web_ui());
+  NativeAppearanceController controller(*profile);
+  const auto stored = controller.Load();
+  std::optional<std::string> canonical;
+  if (controller.GetAccess() == NativeAppearanceAccess::kAllowed &&
+      CanEditNewTab(profile->GetPrefs()) &&
+      (stored.state == AppearancePrefState::kSaved ||
+       stored.state == AppearancePrefState::kUnconfigured)) {
+    canonical = ExportAppearancePreset(stored.preset);
+  }
+  ResolveJavascriptCallback(args[0],
+                            base::DictValue()
+                                .Set("valid", canonical.has_value())
+                                .Set("preset", canonical.value_or("")));
 }
 }  // namespace browser

@@ -15,8 +15,11 @@ class BlynxSettingsHandler : public settings::SettingsPageUIHandler {
   void OnJavascriptDisallowed() override {}
 
  private:
+  void Onboarding(const base::ListValue& args);
   void Get(const base::ListValue& args);
   void Apply(const base::ListValue& args);
+  void ValidatePreset(const base::ListValue& args);
+  void ExportSavedPreset(const base::ListValue& args);
   base::DictValue State(bool saved);
 };
 }  // namespace browser

@@ -1,8 +1,10 @@
 #include "browser/ui/native_appearance_controller.h"
 
+#include <memory>
 #include <string_view>
 
 #include "base/strings/string_number_conversions.h"
+#include "base/supports_user_data.h"
 #include "build/build_config.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/themes/theme_service.h"
@@ -37,6 +39,29 @@ ThemeService::BrowserColorScheme ColorScheme(AppearanceTheme theme) {
 }
 
 }  // namespace
+
+bool CanEditBlynxOnboarding(Profile& profile) {
+  const auto* pref = profile.GetPrefs()->FindPreference(kOnboardingStepPref);
+  const int step = profile.GetPrefs()->GetInteger(kOnboardingStepPref);
+  return PrefAccess(profile) == AppearancePrefAccess::kWritableProfile &&
+         pref && pref->IsUserModifiable() && step >= 0 && step <= 4;
+}
+
+bool ShouldShowBlynxOnboarding(Profile& profile) {
+  static const char kShown[] = "blynx-onboarding-shown";
+  if (!CanEditBlynxOnboarding(profile) || profile.GetUserData(kShown)) {
+    return false;
+  }
+  const int step = profile.GetPrefs()->GetInteger(kOnboardingStepPref);
+  if (step == 4 || (step == 0 && !profile.IsNewProfile())) {
+    return false;
+  }
+  profile.SetUserData(kShown, std::make_unique<base::SupportsUserData::Data>());
+  if (step == 0) {
+    profile.GetPrefs()->SetInteger(kOnboardingStepPref, 1);
+  }
+  return true;
+}
 
 std::optional<SkColor> AppearanceAccentColor(const AppearancePreset& preset) {
   if (ValidateAppearancePreset(preset) != AppearancePresetError::kNone) {

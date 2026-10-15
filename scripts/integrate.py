@@ -28,6 +28,29 @@ def git(source: Path, *args: str) -> subprocess.CompletedProcess:
                           text=True, check=False)
 
 
+def validate_customization_catalog(repo: Path) -> None:
+    """Keep the owned GRIT source and its required adjacent-GRD copy identical."""
+    catalog = repo / "browser/resources/customization_strings.grdp"
+    if not catalog.is_file():
+        return
+    patch = repo / "patches/0002-customization.patch"
+    header = ("diff --git a/chrome/app/browser_final_customization_strings.grdp "
+              "b/chrome/app/browser_final_customization_strings.grdp\n")
+    text = patch.read_text(encoding="utf-8")
+    sections = text.split(header)
+    if len(sections) != 2:
+        raise ToolError("Missing or ambiguous customization GRIT catalog patch.")
+    section = sections[1].split("diff --git ", 1)[0]
+    if "new file mode " not in section:
+        raise ToolError("Customization GRIT catalog must be a reviewed added file.")
+    installed = "".join(line[1:] + "\n" for line in section.splitlines()
+                        if line.startswith("+") and not line.startswith("+++"))
+    if installed != catalog.read_text(encoding="utf-8"):
+        raise ToolError("Owned customization GRIT catalog differs from "
+                        "patches/0002-customization.patch; update both copies "
+                        "together before integration.")
+
+
 def integrate(repo: Path, source: Path, check_only: bool = False) -> None:
     pin = json.loads((repo / "config/upstream.json").read_text(encoding="utf-8"))
     head = git(source, "rev-parse", "HEAD")
@@ -49,6 +72,7 @@ def integrate(repo: Path, source: Path, check_only: bool = False) -> None:
         patches.append(str(path.resolve()))
     if not patches:
         raise ToolError("Empty patch series.")
+    validate_customization_catalog(repo)
     ready = git(source, "apply", "--check", *patches)
     installed = git(source, "apply", "--reverse", "--check", *patches)
     if ready.returncode and installed.returncode:

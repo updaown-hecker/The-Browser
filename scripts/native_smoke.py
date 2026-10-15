@@ -34,24 +34,30 @@ def check_native_chrome(pid, output):
                 if not context.pending():
                     break
                 context.iteration(False)
-            desktop = Atspi.get_desktop(0)
-            apps = [desktop.get_child_at_index(i) for i in range(desktop.get_child_count())]
-            app = next((app for app in apps if app and app.get_process_id() == pid), None)
-            if app:
-                visible = [node for node in descendants(app) if node.get_state_set().contains(Atspi.StateType.SHOWING)]
-                names = [node.get_name() for node in visible]
-                address = next((node for node in visible if node.get_name() == "Address and search bar"), None)
-                if address and "Collapse tabs" in names:
-                    text = Atspi.Text.get_text(address, 0, -1)
-                    if "blynx://sandbox" in text:
-                        assert "Customize Blynx" not in names, "Removed popup toolbar control is still visible"
-                        report["checks"].extend([
-                            "native address bar displays blynx://sandbox after navigating to chrome://sandbox",
-                            "Settings enables the actual visible native vertical tab strip",
-                            "native toolbar has no Customize Blynx popup button",
-                        ])
-                        report["visible_address"] = text
-                        return
+            try:
+                desktop = Atspi.get_desktop(0)
+                apps = [desktop.get_child_at_index(i) for i in range(desktop.get_child_count())]
+                app = next((app for app in apps if app and app.get_process_id() == pid), None)
+                if app:
+                    visible = [node for node in descendants(app) if node.get_state_set().contains(Atspi.StateType.SHOWING)]
+                    names = [node.get_name() for node in visible]
+                    address = next((node for node in visible if node.get_name() == "Address and search bar"), None)
+                    if address and "Collapse tabs" in names:
+                        text = Atspi.Text.get_text(address, 0, -1)
+                        if "blynx://sandbox" in text:
+                            assert "Customize Blynx" not in names, "Removed popup toolbar control is still visible"
+                            report["checks"].extend([
+                                "native address bar displays blynx://sandbox after navigating to chrome://sandbox",
+                                "Settings enables the actual visible native vertical tab strip",
+                                "native toolbar has no Customize Blynx popup button",
+                            ])
+                            report["visible_address"] = text
+                            return
+            except GLib.Error:
+                # Windows/tabs can disappear during an accessibility snapshot.
+                # Retry a fresh tree; missing required chrome still times out.
+                time.sleep(.2)
+                continue
             time.sleep(.2)
         raise RuntimeError("Native alias address/vertical-strip accessibility assertion timed out")
     except Exception as error:

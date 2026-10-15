@@ -1,9 +1,8 @@
 diff --git a/chrome/app/browser_final_customization_strings.grdp b/chrome/app/browser_final_customization_strings.grdp
 new file mode 100644
-index 0000000..6e017af
 --- /dev/null
 +++ b/chrome/app/browser_final_customization_strings.grdp
-@@ -0,0 +1,46 @@
+@@ -0,0 +1,66 @@
 +<?xml version="1.0" encoding="utf-8"?>
 +<!-- 0002-customization.patch installs this catalog beside generated_resources.grd
 +     as required by that upstream GRD's part-location contract. -->
@@ -49,9 +48,29 @@ index 0000000..6e017af
 +  <message name="IDS_BLYNX_SETTINGS_READ_ONLY" desc="Blynx browser settings read only UI label.">These settings cannot be changed in this profile or are managed.</message>
 +  <message name="IDS_BLYNX_NEWTAB_TAGLINE" desc="Blynx browser newtab tagline UI label.">Find your focus. Make room for what matters.</message>
 +  <message name="IDS_BLYNX_EXTENSION_STORE" desc="Blynx browser extension store UI label.">Extensions · Chrome Web Store</message>
++  <message name="IDS_BLYNX_PRESET_IMPORT" desc="Button that opens a native file picker for a Blynx appearance preset.">Import preset</message>
++  <message name="IDS_BLYNX_PRESET_EXPORT" desc="Button that downloads the saved appearance preset as a JSON file.">Export saved preset</message>
++  <message name="IDS_BLYNX_PRESET_DESCRIPTION" desc="Explains the preset file UI and which appearance settings it affects.">Presets include theme, accent, and bookmarks. Tab layout and new-tab canvas stay as chosen. Import a JSON file up to 4 KiB, then preview and Apply.</message>
++  <message name="IDS_BLYNX_PRESET_IMPORTED" desc="Status after validating and staging a preset file without saving it.">Preset loaded into the preview. Choose Apply to save it, or Cancel to discard it.</message>
++  <message name="IDS_BLYNX_PRESET_IMPORT_ERROR" desc="Status when a preset file cannot be read or fails strict validation.">Choose a valid Blynx appearance preset (JSON, at most 4 KiB). No changes were saved.</message>
++  <message name="IDS_BLYNX_PRESET_EXPORTED" desc="Status after starting a download of the saved preset.">Saved preset download started.</message>
++  <message name="IDS_BLYNX_PRESET_EXPORT_ERROR" desc="Status when the saved preset cannot be exported safely.">The saved preset could not be exported. Check whether appearance settings are available in this profile.</message>
++  <message name="IDS_BLYNX_SETUP_TITLE" desc="Blynx first-run setup title.">Welcome to Blynx</message>
++  <message name="IDS_BLYNX_SETUP_WELCOME" desc="Blynx first-run setup welcome.">Your browsing, a little more yours. Bring your bookmarks and supported browser data, then choose a look that feels right.</message>
++  <message name="IDS_BLYNX_SETUP_IMPORT_TITLE" desc="Blynx first-run setup import title.">Bring your browsing with you</message>
++  <message name="IDS_BLYNX_SETUP_IMPORT_DESCRIPTION" desc="Blynx first-run setup import description.">Choose a detected browser or a bookmarks HTML file in the import dialog. Available data depends on the source browser and your platform. Nothing is imported until you confirm. For other browsers, export bookmarks as HTML and passwords as CSV, then use the matching importer. Password Manager and Extensions open in new tabs. Extensions need reinstalling; sessions and other unsupported data do not transfer automatically.</message>
++  <message name="IDS_BLYNX_SETUP_PERSONALIZE_TITLE" desc="Blynx first-run setup personalize title.">Find your look</message>
++  <message name="IDS_BLYNX_SETUP_PERSONALIZE_DESCRIPTION" desc="Blynx first-run setup personalize description.">Choose your theme, accent, tabs, and new-tab canvas below. Use Apply to save appearance changes, then start browsing.</message>
++  <message name="IDS_BLYNX_SETUP_START" desc="Blynx first-run setup start.">Set up Blynx</message>
++  <message name="IDS_BLYNX_SETUP_IMPORT" desc="Blynx first-run setup import.">Choose what to import</message>
++  <message name="IDS_BLYNX_SETUP_NEXT" desc="Blynx first-run setup next.">Continue</message>
++  <message name="IDS_BLYNX_SETUP_BACK" desc="Blynx first-run setup back.">Back</message>
++  <message name="IDS_BLYNX_SETUP_FINISH" desc="Blynx first-run setup finish.">Start browsing</message>
++  <message name="IDS_BLYNX_SETUP_SKIP" desc="Blynx first-run setup skip.">Skip setup</message>
++  <message name="IDS_BLYNX_SETUP_ERROR" desc="Blynx first-run setup error.">Setup could not be saved. Try again in a regular, unmanaged profile.</message>
 +</grit-part>
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index d718a56..35c7095 100644
+index d718a56fe4..cfbde9bf1a 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
 @@ -277,6 +277,7 @@ are declared in tools/grit/grit_args.gni.
@@ -62,6 +81,850 @@ index d718a56..35c7095 100644
        <!-- Access Code Cast specific strings -->
        <part file="access_code_cast_strings.grdp" />
 
+@@ -1774,7 +1775,7 @@ are declared in tools/grit/grit_args.gni.
+           T&amp;ake screenshot
+         </message>
+         <message name="IDS_CHROMELABS" desc="The text label of the Chrome Labs menu item">
+-          Chrome &amp;Labs...
++          Blynx &amp;Labs...
+         </message>
+       </if>
+       <!-- macOS Capitalization Policy (go/chrome-capitalization):
+@@ -1830,7 +1831,7 @@ are declared in tools/grit/grit_args.gni.
+           Reopen Closed Split View
+         </message>
+         <message name="IDS_CHROMELABS" desc="In Title Case: The text label of the Chrome Labs menu item">
+-          Chrome &amp;Labs...
++          Blynx &amp;Labs...
+         </message>
+       </if>
+
+@@ -3040,7 +3041,7 @@ are declared in tools/grit/grit_args.gni.
+       </message>
+       <message name="IDS_DOWNLOAD_BUBBLE_ESB_PROMO"
+                desc="Text for the in-product-help bubble shown for the esb promo download bubble.">
+-        Chrome just blocked a dangerous file from downloading. Get even stronger security with enhanced protection.
++        Blynx just blocked a dangerous file from downloading. Get even stronger security with enhanced protection.
+       </message>
+       <message name="IDS_DOWNLOAD_BUBBLE_ESB_PROMO_CUSTOM_ACTION"
+                desc="Text for the custom action within the in-product-help bubble shown for the esb promo download bubble.">
+@@ -3448,7 +3449,7 @@ are declared in tools/grit/grit_args.gni.
+       </message>
+       <if expr="_google_chrome">
+         <message name="IDS_DOWNLOAD_ROW_ESB_PROMOTION" desc="Link button text that teaches the user about Enhanced Protection.">
+-          Discover enhanced protection to get Chrome's highest level of security for downloads
++          Discover enhanced protection to get Blynx's highest level of security for downloads
+         </message>
+         <message name="IDS_DOWNLOAD_ROW_ESB_PROMO_A11Y" desc="ARIA (accessibility) label describing a link which opens in a new tab.">
+           Opens security settings page in a new tab
+@@ -3558,7 +3559,7 @@ are declared in tools/grit/grit_args.gni.
+       </message>
+       <message name="IDS_DOWNLOAD_LOCAL_DECRYPTION_PROMPT_ALERT"
+                desc="Accessible alert announced when a local decryption prompt appears on a suspicious archive">
+-        <ph name="FILENAME">$1<ex>bla.exe</ex></ph> may be dangerous. Add a password if you want Chrome to verify it or you can download it directly.
++        <ph name="FILENAME">$1<ex>bla.exe</ex></ph> may be dangerous. Add a password if you want Blynx to verify it or you can download it directly.
+       </message>
+
+       <!-- Web App Window Title string -->
+@@ -3664,7 +3665,7 @@ are declared in tools/grit/grit_args.gni.
+         Adding to Start Menu
+       </message>
+       <message name="IDS_WEB_APP_INSTALL_CHROME_APPS_LOCATION" desc="Installer option text signifying where inside the Start Menu the web app shortcut will be created on Windows.">
+-        Chrome Apps &gt; <ph name="APP_NAME">$1<ex>AppName</ex></ph>
++        Blynx Apps &gt; <ph name="APP_NAME">$1<ex>AppName</ex></ph>
+       </message>
+       <message name="IDS_WEB_APP_INSTALL_CREATE_DESKTOP_SHORTCUT" desc="Label of the checkbox to add a shortcut to the desktop after installing the web app.">
+         Add desktop shortcut
+@@ -3786,10 +3787,10 @@ are declared in tools/grit/grit_args.gni.
+           Quit
+         </message>
+         <message name="IDS_QUIT_WITH_APPS_EXPLANATION" desc="Text displayed in a notification explaining that Chrome will continue running in the background as long as there are Chrome Apps open.">
+-          Chrome will keep running while Chrome Apps are open.
++          Blynx will keep running while Blynx Apps are open.
+         </message>
+         <message name="IDS_QUIT_WITH_APPS_QUIT_LABEL" desc="Button text to quit all running Chrome apps.">
+-          Quit all Chrome Apps
++          Quit all Blynx Apps
+         </message>
+         <message name="IDS_QUIT_WITH_APPS_SUPPRESSION_LABEL" desc="Button text to prevent a notification from showing in future.">
+           Don't show this again
+@@ -4244,7 +4245,7 @@ are declared in tools/grit/grit_args.gni.
+         Notifications from this site may be disruptive
+       </message>
+       <message name="IDS_NOTIFICATIONS_QUIET_PERMISSION_BUBBLE_PREDICTION_SERVICE_DESCRIPTION" desc="Text used as notification message when requesting permission for Web Notifications via a notification. Used when the prediction service has decided that the user will be very unlikely to grant this permission.">
+-        Chrome thinks you don't want notifications from this site. So, requests are hidden to reduce interruptions.
++        Blynx thinks you don't want notifications from this site. So, requests are hidden to reduce interruptions.
+       </message>
+       <message name="IDS_GEOLOCATION_OFF_EXPLANATORY_TEXT" desc="Explanatory animated text that appears (and then disappears) in the address bar as part of the less-prominent UX, when a website requests the geolocation permission.">
+         Location blocked
+@@ -4253,7 +4254,7 @@ are declared in tools/grit/grit_args.gni.
+         Location blocked
+       </message>
+       <message name="IDS_GEOLOCATION_QUIET_PERMISSION_BUBBLE_PREDICTION_SERVICE_DESCRIPTION" desc="Text used as notification message when requesting permission for Geolocation. Used when the prediction service has decided that the user will be very unlikely to grant this permission.">
+-        Chrome thinks you don't want to use your location on this site. So, requests are hidden to reduce interruptions.
++        Blynx thinks you don't want to use your location on this site. So, requests are hidden to reduce interruptions.
+       </message>
+       <message name="IDS_GEOLOCATION_QUIET_PERMISSION_BUBBLE_ALLOW_BUTTON" desc="Text displayed on the button that enables geolocation for a site. This button is part of the geolocation status bubble, which is triggered when a user clicks on the blocked geolocation icon in the omnibox.">
+         Allow for this site
+@@ -4770,7 +4771,7 @@ are declared in tools/grit/grit_args.gni.
+         Allow remote debugging?
+       </message>
+       <message name="IDS_DEV_TOOLS_CONNECTION_DIALOG_MESSAGE_PART_1" desc="Message displayed in the dialog asking user to confirm allowing a debugging connection to this browser instance.">
+-        An external app wants full control over this Chrome session to debug it. This includes access to your saved data, cookies and site data, and the ability to navigate to any URL.
++        An external app wants full control over this Blynx session to debug it. This includes access to your saved data, cookies and site data, and the ability to navigate to any URL.
+       </message>
+       <message name="IDS_DEV_TOOLS_CONNECTION_DIALOG_MESSAGE_PART_2" desc="Message displayed in the dialog asking user to confirm allowing a debugging connection to this browser instance.">
+         Only web developers should turn on this feature, and only use it with trusted apps.
+@@ -5154,7 +5155,7 @@ are declared in tools/grit/grit_args.gni.
+         Omnibox
+       </message>
+       <message name="IDS_UTILITY_PROCESS_FILE_UTILITY_NAME" desc="The name of the utility process used for various Chrome specific file operations.">
+-          Chrome File Utilities
++          Blynx File Utilities
+       </message>
+       <if expr="not is_android">
+         <message name="IDS_UTILITY_PROCESS_PROFILE_IMPORTER_NAME" desc="The name of the utility process used for importing profiles.">
+@@ -5185,7 +5186,7 @@ are declared in tools/grit/grit_args.gni.
+         No-op Service
+       </message>
+       <message name="IDS_SERVICE_PROCESS_DOCUMENT_ANALYSIS_NAME" desc="The name of the service process used for document analysis operations as part of Safe Browsing.">
+-        Chrome Document Analysis
++        Blynx Document Analysis
+       </message>
+       <!-- Theme preview infobar -->
+       <message name="IDS_THEME_INSTALL_INFOBAR_LABEL" desc="Text displayed on an infobar when a theme has been installed.">
+@@ -6149,7 +6150,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         To allow this extension, enter your password.
+       </message>
+       <message name="IDS_SKIP_PARENT_PERMISSION_EXTENSION_INFORMATION" desc="Text informing the parent about the option to skip parent approvals in Family Link">
+-        To allow <ph name="CHILD_NAME">$1<ex>Junior</ex></ph> to install future extensions without your approval, open the Family Link app on your device and update <ph name="CHILD_NAME">$1<ex>Junior</ex></ph>’s Google Chrome settings.
++        To allow <ph name="CHILD_NAME">$1<ex>Junior</ex></ph> to install future extensions without your approval, open the Family Link app on your device and update <ph name="CHILD_NAME">$1<ex>Junior</ex></ph>’s Blynx settings.
+       </message>
+       <message name="IDS_PARENT_PERMISSION_PROMPT_ENTER_PASSWORD_LABEL" desc="Text for the label shown above the parent password entry field.">
+         Enter password
+@@ -6216,13 +6217,13 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         "<ph name="EXTENSION_NAME">$1<ex>Babylon Toolbar</ex></ph>" added
+       </message>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_ALERT_BUBBLE_HEADING_APP" desc="The heading text (below the title) for the bubble that alerts the user that a new external app was installed.">
+-        Another program on your computer added an app that may change the way Chrome works.
++        Another program on your computer added an app that may change the way Blynx works.
+       </message>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_ALERT_BUBBLE_HEADING_EXTENSION" desc="The heading text (below the title) for the bubble that alerts the user that a new external extension was installed.">
+-        Another program on your computer added an extension that may change the way Chrome works.
++        Another program on your computer added an extension that may change the way Blynx works.
+       </message>
+       <message name="IDS_EXTENSION_EXTERNAL_INSTALL_ALERT_BUBBLE_HEADING_THEME" desc="The heading text (below the title) for the bubble that alerts the user that a new external theme was installed.">
+-        Another program on your computer added a theme that may change the way Chrome works.
++        Another program on your computer added a theme that may change the way Blynx works.
+       </message>
+
+       <message name="IDS_EXTENSIONS_ADDED_WITHOUT_KNOWLEDGE" desc="Text shown in the extensions settings for items that might have been forcefully added to Chrome without the user's knowledge">
+@@ -6280,22 +6281,22 @@ Keep your key file in a safe place. You will need it to create new versions of y
+       <!-- Force Installed Deprecated Apps Deletion Dialog strings. -->
+       <if expr="is_macosx">
+         <message name="IDS_FORCE_INSTALLED_DEPRECATED_APPS_CONTENT" desc="Content of the force installed deprecated app dialog">
+-          Old versions of Chrome Apps won't open on Mac devices after December 2022. Contact your administrator to update to a new version or remove this app.
++          Old versions of Blynx Apps won't open on Mac devices after December 2022. Contact your administrator to update to a new version or remove this app.
+         </message>
+       </if>
+       <if expr="is_win">
+         <message name="IDS_FORCE_INSTALLED_DEPRECATED_APPS_CONTENT" desc="Content of the force installed deprecated app dialog">
+-          Old versions of Chrome Apps won't open on Windows devices after December 2022. Contact your administrator to update to a new version or remove this app.
++          Old versions of Blynx Apps won't open on Windows devices after December 2022. Contact your administrator to update to a new version or remove this app.
+         </message>
+       </if>
+       <if expr="is_linux">
+         <message name="IDS_FORCE_INSTALLED_DEPRECATED_APPS_CONTENT" desc="Content of the force installed deprecated app dialog">
+-          Old versions of Chrome Apps won't open on Linux devices after December 2022. Contact your administrator to update to a new version or remove this app.
++          Old versions of Blynx Apps won't open on Linux devices after December 2022. Contact your administrator to update to a new version or remove this app.
+         </message>
+       </if>
+       <if expr="is_fuchsia">
+         <message name="IDS_FORCE_INSTALLED_DEPRECATED_APPS_CONTENT" desc="Content of the force installed deprecated app dialog">
+-          Old versions of Chrome Apps won't open after December 2022. Contact your administrator to update to a new version or remove this app.
++          Old versions of Blynx Apps won't open after December 2022. Contact your administrator to update to a new version or remove this app.
+         </message>
+       </if>
+       <!-- End Force Installed Deprecated Apps Deletion Dialog strings. -->
+@@ -6304,7 +6305,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         Ask your admin to update this app
+       </message>
+       <message name="IDS_FORCE_INSTALLED_PREINSTALLED_DEPRECATED_APPS_CONTENT" desc="Content of the force installed preinstalled deprecated app dialog">
+-        Chrome Apps are migrating to Progressive Web Apps. This Chrome App was installed on your browser by your organization. To open the Progressive Web App from the Apps list, first contact your administrator and ask them to uninstall the Chrome App. In the meantime, you can visit <ph name="EXTENSION_LAUNCH_URL">$1<ex>sheets.google.com</ex></ph> to open <ph name="EXTENSION_NAME">$2<ex>Google Sheets</ex></ph> on the web.
++        Blynx Apps are migrating to Progressive Web Apps. This Blynx App was installed on your browser by your organization. To open the Progressive Web App from the Apps list, first contact your administrator and ask them to uninstall the Blynx App. In the meantime, you can visit <ph name="EXTENSION_LAUNCH_URL">$1<ex>sheets.google.com</ex></ph> to open <ph name="EXTENSION_NAME">$2<ex>Google Sheets</ex></ph> on the web.
+       </message>
+       <if expr="use_titlecase">
+         <message name="IDS_FORCE_INSTALLED_PREINSTALLED_DEPRECATED_APPS_GO_TO_SITE_BUTTON" desc="Label for the button that opens the website for the app">
+@@ -6326,29 +6327,29 @@ Keep your key file in a safe place. You will need it to create new versions of y
+       </message>
+       <if expr="is_macosx">
+         <message name="IDS_DEPRECATED_APPS_MONITOR_RENDERER" desc="Dialog content that educates users that Chrome Apps will soon no longer launch.">
+-          Old versions of Chrome apps won't open on Mac devices after December 2022. You can check if there's a new version available.
++          Old versions of Blynx apps won't open on Mac devices after December 2022. You can check if there's a new version available.
+         </message>
+       </if>
+       <if expr="is_win">
+         <message name="IDS_DEPRECATED_APPS_MONITOR_RENDERER" desc="Dialog content that educates users that Chrome Apps will soon no longer launch.">
+-          Old versions of Chrome apps won't open on Windows devices after December 2022. You can check if there's a new version available.
++          Old versions of Blynx apps won't open on Windows devices after December 2022. You can check if there's a new version available.
+         </message>
+       </if>
+       <if expr="is_linux">
+         <message name="IDS_DEPRECATED_APPS_MONITOR_RENDERER" desc="Dialog content that educates users that Chrome Apps will soon no longer launch.">
+-          Old versions of Chrome apps won't open on Linux devices after December 2022. You can check if there's a new version available.
++          Old versions of Blynx apps won't open on Linux devices after December 2022. You can check if there's a new version available.
+         </message>
+       </if>
+       <if expr="is_fuchsia">
+         <message name="IDS_DEPRECATED_APPS_MONITOR_RENDERER" desc="Dialog content that educates users that Chrome Apps will soon no longer launch.">
+-          Old versions of Chrome apps won't open after December 2022. You can check if there's a new version available.
++          Old versions of Blynx apps won't open after December 2022. You can check if there's a new version available.
+         </message>
+       </if>
+       <message name="IDS_DEPRECATED_APPS_LEARN_MORE" desc="Redirects to a link with more information on chrome apps deprecation">
+         Learn more
+       </message>
+       <message name="IDS_DEPRECATED_APPS_LEARN_MORE_AX_LABEL" desc="Accessibility label text for IDS_DEPRECATED_APPS_LEARN_MORE link">
+-        Learn more about unsupported Chrome apps
++        Learn more about unsupported Blynx apps
+       </message>
+       <message name="IDS_DEPRECATED_APPS_DELETION_LINK" desc="Contains link to trigger the deprecated apps deletion dialog from chrome://apps">
+         {NUM_APPS, plural,
+@@ -6745,7 +6746,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+       </message>
+
+       <message name="IDS_APP_HOME_REMOVE_APP" desc="Menu entry label for removing an app from context menu on App Home that isn't locally installed">
+-        Remove from Chrome
++        Remove from Blynx
+       </message>
+
+       <message name="IDS_APP_HOME_APP_SETTINGS" desc="Menu entry label for navigation to App Settings page for an app from context menu on App Home">
+@@ -7156,7 +7157,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+       </message>
+
+       <message name="IDS_BAD_FLAGS_FROM_FILE_WARNING_MESSAGE" desc="Message shown when command-line flags are loaded from a file. [Keep it short so it fits in the infobar.]">
+-        Chrome is loading flags from a command-line file. Stability and security may be affected.
++        Blynx is loading flags from a command-line file. Stability and security may be affected.
+       </message>
+
+       <!-- Bad Environment Variables Infobar-->
+@@ -7884,7 +7885,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         Cards
+       </message>
+       <message name="IDS_NTP_CUSTOMIZE_NO_BACKGROUND_LABEL" desc="The label for the 'Default Chrome' tile in the customization menu on the New Tab Page">
+-        Default Chrome
++        Default Blynx
+       </message>
+       <message name="IDS_NTP_CUSTOMIZE_CHROME_CHANGE_THEME_LABEL" desc="The label for the action button for changing Chrome theme in the New Tab Page customize chrome side panel.">
+         Change theme
+@@ -7905,7 +7906,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         <ph name="THIRD_PARTY_NTP_MANAGER">$1<ex>ZomboCom</ex></ph> is managing your new tab page, opens in a new tab
+       </message>
+       <message name="IDS_NTP_CUSTOMIZE_CHROME_RESET_TO_CLASSIC_CHROME_COMPLETE" desc="Text for a screenreader to read aloud when the user's theme has finished changing to classic chrome in the Customize Chrome side panel.">
+-        Theme updated to Default Chrome
++        Theme updated to Default Blynx
+       </message>
+       <message name="IDS_NTP_CUSTOMIZE_CHROME_RESET_TO_UPLOADED_IMAGE_COMPLETE" desc="Text for a screenreader to read aloud when the user's theme has finished changing to an uploaded image in the Customize Chrome side panel.">
+         Theme updated to uploaded image
+@@ -8884,10 +8885,10 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         <ph name="MODULE_NAME">$1<ex>Make Chrome Yours</ex></ph> hidden
+       </message>
+       <message name="IDS_NTP_MODULES_SETUP_LIST_INFO" desc="Text shown in the body of the info dialog of the Make Chrome Yours card.">
+-        You're seeing suggestions on how to personalize Chrome and make it more powerful for your daily needs.
++        You're seeing suggestions on how to personalize Blynx and make it more powerful for your daily needs.
+         <ph name="BREAK">&lt;br&gt;</ph>
+         <ph name="BREAK">&lt;br&gt;</ph>
+-        You can manage settings from the card menu or see more options in Customize Chrome.
++        You can manage settings from the card menu or see more options in Customize Blynx.
+       </message>
+       <message name="IDS_NTP_MODULES_INFO_BUTTON_TITLE" desc="Text shown in tooltip of info button of an NTP module.">
+         About this card
+@@ -8971,7 +8972,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         You’re seeing suggested files to help you easily get back to your most recent activity in Google Drive.
+         <ph name="BREAK">&lt;br&gt;</ph>
+         <ph name="BREAK">&lt;br&gt;</ph>
+-        You can manage settings from the card menu or see more options in Customize Chrome.
++        You can manage settings from the card menu or see more options in Customize Blynx.
+       </message>
+       <message name="IDS_NTP_MODULES_DRIVE_SEE_MORE" desc="A label for the see more button in the Drive module.">
+         See more
+@@ -8986,7 +8987,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         You’re seeing suggested files to help you easily get back to your most recent activity in Microsoft SharePoint and OneDrive.
+         <ph name="BREAK">&lt;br&gt;</ph>
+         <ph name="BREAK">&lt;br&gt;</ph>
+-        You can manage settings from the card menu or see more options in Customize Chrome.
++        You can manage settings from the card menu or see more options in Customize Blynx.
+       </message>
+       <message name="IDS_NTP_MODULES_MICROSOFT_FILES_DISABLE_BUTTON_TEXT" desc="Text shown on the disable button of a NTP Microsoft files card.">
+         Don't show SharePoint and OneDrive files
+@@ -9022,7 +9023,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         You’re seeing your calendar to help you easily navigate to your next event in Google Calendar.
+         <ph name="BREAK">&lt;br&gt;</ph>
+         <ph name="BREAK">&lt;br&gt;</ph>
+-        You can manage settings from the card menu or see more options in Customize Chrome.
++        You can manage settings from the card menu or see more options in Customize Blynx.
+       </message>
+       <message name="IDS_NTP_MODULES_GOOGLE_CALENDAR_MORE_ACTIONS" desc="Text shown on the tooltip for the 3 dot menu on the Google Calendar card on the NTP.">
+         More actions for Google Calendar
+@@ -9049,7 +9050,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+        You’re seeing your calendar to help you easily navigate to your next event in Outlook Calendar.
+        <ph name="BREAK">&lt;br&gt;</ph>
+        <ph name="BREAK">&lt;br&gt;</ph>
+-       You can manage settings from the card menu or see more options in Customize Chrome.
++       You can manage settings from the card menu or see more options in Customize Blynx.
+      </message>
+       <message name="IDS_NTP_MODULES_CALENDAR_DOUBLE_BOOKED" desc="Text displaying that the calendar event is booked at the same time as another." meaning="The meeting takes place at the same time as another.">
+         Double-Booked
+@@ -9118,13 +9119,13 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         You’re seeing pages you've visited and suggested searches to help you easily get back to your most recent activity.
+         <ph name="BREAK">&lt;br&gt;</ph>
+         <ph name="BREAK">&lt;br&gt;</ph>
+-        You can manage settings from the card menu or see more options in Customize Chrome.
++        You can manage settings from the card menu or see more options in Customize Blynx.
+       </message>
+       <message name="IDS_NTP_MODULES_HISTORY_CLUSTERS_WITH_DISCOUNT_INFO" desc="Text shown in the body of the info dialog of the history clusters module when the cluster has available discount.">
+         You’re seeing suggested searches and shopping discounts that might interest you based on your recent activity.
+         <ph name="BREAK">&lt;br&gt;</ph>
+         <ph name="BREAK">&lt;br&gt;</ph>
+-        You can manage settings from this card anytime or see more options in Customize Chrome.
++        You can manage settings from this card anytime or see more options in Customize Blynx.
+       </message>
+       <message name="IDS_NTP_MODULES_HISTORY_CLUSTERS_SENTENCE2" desc="Variant of the name of the History Clusters module in sentence case shown in various UIs.">
+         Journeys
+@@ -9160,7 +9161,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         You’re seeing tabs from other devices to help you easily get back to your most recent activity.
+         <ph name="BREAK">&lt;br&gt;</ph>
+         <ph name="BREAK">&lt;br&gt;</ph>
+-        You can manage settings from the card menu or see more options in Customize Chrome.
++        You can manage settings from the card menu or see more options in Customize Blynx.
+       </message>
+       <message name="IDS_NTP_MODULES_TAB_RESUMPTION_MULTI_DISMISS" desc="String text for module dismissal in the Tab Resumption module.">
+         Tabs hidden
+@@ -9199,7 +9200,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         You’re seeing your recently used tab groups to help you easily pick up where you left off.
+         <ph name="BREAK">&lt;br&gt;</ph>
+         <ph name="BREAK">&lt;br&gt;</ph>
+-        You can manage settings from the card menu or see more options in Customize Chrome.
++        You can manage settings from the card menu or see more options in Customize Blynx.
+       </message>
+       <message name="IDS_NTP_MODULES_TAB_GROUPS_TITLE" desc="Title for Tab Groups NTP module on the new tab page.">
+         Your tab groups
+@@ -9242,10 +9243,10 @@ Keep your key file in a safe place. You will need it to create new versions of y
+
+       <!-- Mobile NTP Middle Slot Promo -->
+       <message name="IDS_NTP_MOBILE_PROMO_HEADER" desc="Header for a promo that shows on the Desktop NTP prompting user to scan a QR code with their mobile device">
+-        Get Chrome on your mobile device
++        Get Blynx on your mobile device
+       </message>
+       <message name="IDS_NTP_MOBILE_PROMO_DESCRIPTION" desc="Description for a promo that shows on the Desktop NTP prompting user to scan a QR code with their mobile device">
+-        Download Chrome for iOS to access your tabs, bookmarks and passwords on your phone.
++        Download Blynx for iOS to access your tabs, bookmarks and passwords on your phone.
+       </message>
+       <message name="IDS_NTP_MOBILE_PROMO_QR_CODE_LABEL" desc="Accessibility label for a QR code that shows on the Desktop NTP that prompts the user to scan it.">
+         Scan QR Code
+@@ -9446,7 +9447,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         Please try again later
+       </message>
+       <message name="IDS_SHOW_CUSTOMIZE_CHROME_SIDE_PANEL" desc="The title of the menu item for showing the Customize Chrome side panel.">
+-        Customize Chrome
++        Customize Blynx
+       </message>
+       <if expr="use_titlecase">
+         <message name="IDS_SHOW_CUSTOMIZE_CHROME_TOOLBAR" desc="The title of the menu item for showing the toolbar section of the Customize Chrome side panel.">
+@@ -10680,7 +10681,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+           Open
+         </message>
+         <message name="IDS_INTENT_PICKER_BUBBLE_VIEW_STAY_IN_CHROME" desc="Message contained in a button to continue the navigation within Chrome.">
+-          Stay in Chrome
++          Stay in Blynx
+         </message>
+         <message name="IDS_INTENT_PICKER_BUBBLE_VIEW_INITIATING_ORIGIN" desc="The label for the initiating origin of the intent picker.">
+           From <ph name="ORIGIN">$1<ex>https://google.com</ex></ph>
+@@ -10733,7 +10734,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+             You can access it on Google Password Manager.
+           </message>
+           <message name="IDS_IOS_PASSWORD_PROMO_BUBBLE_FOOTER_DESCRIPTION_GENERIC" desc="The description for the iOS promo bubble footer which lets the user know how to use their saved passwords on their phone: download Chrome for iOS and sign in to their account.">
+-            To use your saved passwords on your phone, download Chrome for iOS and sign in to your Google Account.
++            To use your saved passwords on your phone, download Blynx for iOS and sign in to your Google Account.
+           </message>
+         </if>
+       </if>
+@@ -10829,7 +10830,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+           You can find it in your Addresses and More
+         </message>
+         <message name="IDS_IOS_DESKTOP_ADDRESS_PROMO_BUBBLE_FOOTER_DESCRIPTION_QR" desc="The description for the iOS desktop address promo bubble footer which lets the user know how to use their saved addresses on their phone: follow the QR code, download Chrome for iOS and sign in to their account.">
+-          Download Chrome with this QR code, and sign in to your Google Account.
++          Download Blynx with this QR code, and sign in to your Google Account.
+         </message>
+       </if>
+
+@@ -10861,7 +10862,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+           You can access it in your Payment Methods
+         </message>
+         <message name="IDS_IOS_DESKTOP_PAYMENT_PROMO_BUBBLE_FOOTER_DESCRIPTION_QR" desc="The description for the iOS desktop payment promo bubble footer which lets the user know how to use their saved payment methods on their phone: follow the QR code, download Chrome for iOS and sign in to their account.">
+-          Download Chrome with this QR code, and sign in to your Google Account.
++          Download Blynx with this QR code, and sign in to your Google Account.
+         </message>
+       </if>
+
+@@ -11116,7 +11117,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         Get back here fast by bookmarking this tab
+       </message>
+       <message name="IDS_CHROME_TIP" desc="Accessible name used by a screen reader for the in-product-help or tutorial bubble icon." is_accessibility_with_no_ui="true">
+-        Chrome tip
++        Blynx tip
+       </message>
+       <message name="IDS_EXTENSIONS_MENU_IPH_ENTRY_POINT_TITLE" desc="">
+         See what extensions can read or change a site
+@@ -11146,7 +11147,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+          Enhance your browser with extensions
+       </message>
+       <message name="IDS_EXTENSIONS_ZERO_STATE_PROMO_CUSTOM_ACTION_IPH_DESCRIPTION" desc="Body text shown on the promotional UI appearing when the user has no extensions installed.">
+-         Extensions are add-ons to Chrome that can help you stay organized, simplify tasks, and customize your browsing
++         Extensions are add-ons to Blynx that can help you stay organized, simplify tasks, and customize your browsing
+       </message>
+       <message name="IDS_EXTENSIONS_ZERO_STATE_PROMO_CUSTOM_ACTION_IPH_ACCEPT" desc="Text on the custom action button that opens a new tab to the Chrome Web Store.">
+          Discover extensions
+@@ -11200,7 +11201,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         Open App settings
+       </message>
+       <message name="IDS_UPDATED_CONNECTION_SECURITY_INDICATORS_PROMO" desc="Text shown on promotional UI appearing next to the new omnibox connection security icon">
+-        Your connection is always secure unless Chrome tells you otherwise
++        Your connection is always secure unless Blynx tells you otherwise
+       </message>
+       <message name="IDS_READING_LIST_IN_SIDE_PANEL_PROMO" desc="Text shown on promotional UI appearing next to the side panel button">
+         Your reading list has moved to the new side panel. Try it here.
+@@ -11323,10 +11324,10 @@ Keep your key file in a safe place. You will need it to create new versions of y
+
+       <!-- Customize Chrome Tutorial Strings -->
+       <message name="IDS_TUTORIAL_CUSTOMIZE_CHROME_START_TUTORIAL_IPH" desc="The description of the IPH to start the customize chrome tutorial">
+-        Customize Chrome to give your browser a new look
++        Customize Blynx to give your browser a new look
+       </message>
+       <message name="IDS_TUTORIAL_CUSTOMIZE_CHROME_OPEN_SIDE_PANEL" desc="The description of the 'open side panel' step in customize chrome tutorial">
+-        Click "Customize Chrome"
++        Click "Customize Blynx"
+       </message>
+       <message name="IDS_TUTORIAL_CUSTOMIZE_CHROME_CHANGE_THEME" desc="The description of the 'change theme' step in customize chrome tutorial">
+         Click “Change theme” to explore themes inspired by artists, nature and more
+@@ -11341,7 +11342,7 @@ Keep your key file in a safe place. You will need it to create new versions of y
+         Click the back arrow to explore other options
+       </message>
+       <message name="IDS_TUTORIAL_CUSTOMIZE_CHROME_SUCCESS_BODY" desc="The description of the body text in the 'success' step in customize chrome tutorial">
+-        You can now give your browser a new look at any time from the Customize Chrome menu
++        You can now give your browser a new look at any time from the Customize Blynx menu
+       </message>
+
+       <!-- Password Manager Tutorial Strings -->
+@@ -11448,12 +11449,12 @@ Keep your key file in a safe place. You will need it to create new versions of y
+          Show original content?
+       </message>
+       <message name="IDS_NEAR_OOM_REDUCTION_MESSAGE_DESCRIPTION" desc="The description of the message stating that the browser removed some content on the page using too much memory.">
+-         To save memory, Chrome removed some content
++         To save memory, Blynx removed some content
+       </message>
+
+       <!-- Tailored Security Prompt for Unconsented users -->
+       <message name="IDS_TAILORED_SECURITY_UNCONSENTED_MESSAGE_TITLE" desc="The title of the message asking if the user wants to enable Enhanced Safe Browsing">
+-         Also turn on Enhanced Safe Browsing for this Chrome profile?
++         Also turn on Enhanced Safe Browsing for this Blynx profile?
+       </message>
+       <message name="IDS_TAILORED_SECURITY_UNCONSENTED_MESSAGE_ACCEPT" desc="The text on the 'accept' button when asking if the user wants to enable Enhanced Safe Browsing">
+         Turn on
+@@ -11555,10 +11556,10 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+           Use Google Password Manager to sign in faster to sites from any of your devices
+         </message>
+         <message name="IDS_PASSWORDS_SAVE_PRIMING_PROMO_BODY_NOT_SIGNED_IN" desc="Body of IPH prompting users to consider saving passwords">
+-          To save strong passwords with Google Password Manager, sign in to Chrome
++          To save strong passwords with Google Password Manager, sign in to Blynx
+         </message>
+         <message name="IDS_PASSWORDS_SAVE_PRIMING_PROMO_SCREENREADER" is_accessibility_with_no_ui="true" desc="Screenreader text for IPH prompting users to consider saving passwords">
+-          You can save passwords with Google Password Manager when you are signed in to Chrome
++          You can save passwords with Google Password Manager when you are signed in to Blynx
+         </message>
+         <message name="IDS_PASSWORDS_SAVE_RECOVERY_PROMO_BODY" desc="Body of IPH prompting users to reconsider saving passwords">
+           To save your password to Google Password Manager, click the key
+@@ -11863,10 +11864,10 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+         Delete browsing data
+       </message>
+       <message name="IDS_CLEAR_BROWSING_DATA_HISTORY_NOTICE" desc="A dialog informing the user that their Chrome browsing history was deleted, but other forms of history can still be found on Google My Activity.">
+-        The selected data has been removed from Chrome and synced devices. Your Google Account may have other forms of browsing history like searches and activity from other Google services at <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1"&gt;</ph>myactivity.google.com<ph name="END_LINK">&lt;/a&gt;</ph>.
++        The selected data has been removed from Blynx and synced devices. Your Google Account may have other forms of browsing history like searches and activity from other Google services at <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1"&gt;</ph>myactivity.google.com<ph name="END_LINK">&lt;/a&gt;</ph>.
+       </message>
+       <message name="IDS_CLEAR_BROWSING_DATA_HISTORY_NOTICE_TITLE" desc="Title of a dialog that informs the user that the deletion of Chrome's browsing data has been completed.">
+-        Deleted Chrome data
++        Deleted Blynx data
+       </message>
+       <message name="IDS_CLEAR_BROWSING_DATA_HISTORY_NOTICE_OK" desc="Button in a dialog that informs the user that the deletion of Chrome's browsing data has been completed.">
+         Ok, got it
+@@ -11899,7 +11900,7 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+       </message>
+
+       <message name="IDS_ZOOMLEVELS_CHROME_ERROR_PAGES_LABEL" desc="Label for zoom level list entry for Chrome error pages.">
+-        (Chrome error pages)
++        (Blynx error pages)
+       </message>
+
+       <message name="IDS_STORAGE_ACCESS_MANAGE_TEXT" desc="The text on the button to manage the StorageAcccess settings.">
+@@ -12669,7 +12670,7 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+
+       <!-- Tab Group Deletion Dialog -->
+       <message name="IDS_TAB_GROUP_DELETION_DIALOG_MISSING_EMAIL" desc="The email address used in the deletion dialog body when an email is missing.">
+-        Chrome with this Google Account
++        Blynx with this Google Account
+       </message>
+       <message name="IDS_TAB_GROUP_DELETION_DIALOG_BODY_SYNCED_DELETE" desc="The body text for deleting a synced group or groups. Displayed in the Tab Group Deletion Dialog.">
+         {GROUP_COUNT, plural,
+@@ -13270,7 +13271,7 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+           Collaborate with others
+         </message>
+         <message name="IDS_DATA_SHARING_NEED_SIGN_IN_AND_SYNC_HISTORY_BODY" desc="The body of dialog that prompts users to sign in and opt in to history sync.">
+-          To share tabs and collaborate with others, sign in to Chrome and sync your history and tabs. You’ll also get your passwords and more on all your devices.
++          To share tabs and collaborate with others, sign in to Blynx and sync your history and tabs. You’ll also get your passwords and more on all your devices.
+         </message>
+         <message name="IDS_DATA_SHARING_NEED_SYNC_HISTORY_BODY" desc="The body of dialog that prompts users to sign in and opt in to history sync.">
+           To share tabs and collaborate with others, sync your history and tabs to <ph name="EMAIL">$1<ex>foo@gmail.com</ex></ph>
+@@ -13297,13 +13298,13 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+           Make sure you trust the person that sent this invitation
+         </message>
+         <message name="IDS_DATA_SHARING_ORGANIZATION_DISALLOW_SIGN_IN_BODY" desc="The body text of the organization disallowing signin dialog.">
+-          To share or join tab groups, you must be able to sign in to Chrome
++          To share or join tab groups, you must be able to sign in to Blynx
+         </message>
+         <message name="IDS_DATA_SHARING_ORGANIZATION_LIMIT_SAVE_BODY" desc="The body text of the organization limiting saving to account dialog.">
+           When your organization limits saving to your Google Account, you can’t share or join tab groups
+         </message>
+         <message name="IDS_DATA_SHARING_SIGNED_OUT_BODY" desc="The body text of the dialog that prompts users to allow Chrome sign in.">
+-          To share, join, and collaborate in tab groups, open settings and turn on Allow Chrome sign-in
++          To share, join, and collaborate in tab groups, open settings and turn on Allow Blynx sign-in
+         </message>
+         <message name="IDS_DATA_SHARING_SETTINGS" desc="The generic text on buttons that take users to Chrome settings page.">
+           Settings
+@@ -13479,7 +13480,7 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+           Relaunch to update
+         </message>
+         <message name="IDS_APP_MENU_BUTTON_UPDATE_ALT3" desc="Alternate short label next to app-menu button when an update is available.">
+-          New Chrome available
++          New Blynx available
+         </message>
+       </if>
+       <message name="IDS_APP_MENU_BUTTON_ERROR" desc="Short label next to app-menu button when the user needs to resolve something.">
+@@ -13521,10 +13522,10 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+         <ph name="APP_NAME">$1<ex>html5rocks.com</ex></ph> is sharing a window and audio.
+       </message>
+       <message name="IDS_MEDIA_TAB_CAPTURE_NOTIFICATION_TEXT" desc="label used in screen capture notification UI to show the screen sharing status when the stream is consumed by the same app initiating the window picker">
+-        <ph name="APP_NAME">$1<ex>html5rocks.com</ex></ph> is sharing a Chrome tab.
++        <ph name="APP_NAME">$1<ex>html5rocks.com</ex></ph> is sharing a Blynx tab.
+       </message>
+       <message name="IDS_MEDIA_TAB_CAPTURE_WITH_AUDIO_NOTIFICATION_TEXT" desc="label used in screen capture notification UI to show the screen sharing status when the stream is consumed by the same app initiating the window picker">
+-        <ph name="APP_NAME">$1<ex>html5rocks.com</ex></ph> is sharing a Chrome tab and audio.
++        <ph name="APP_NAME">$1<ex>html5rocks.com</ex></ph> is sharing a Blynx tab and audio.
+       </message>
+       <message name="IDS_MEDIA_SCREEN_CAPTURE_NOTIFICATION_HIDE" desc="Text shown on a link that hides the notification that the screen is being captured.">
+         Hide
+@@ -13617,7 +13618,7 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+       <!-- Killed Tab Strings -->
+       <if expr="is_chromeos">
+         <message name="IDS_KILLED_TAB_BY_OOM_MESSAGE" desc="The message displayed on the killed tab page when the page was killed by an out of memory error.">
+-          Either Chrome ran out of memory or the process for the webpage was terminated for some other reason.  To continue, reload or go to another page.
++          Either Blynx ran out of memory or the process for the webpage was terminated for some other reason.  To continue, reload or go to another page.
+         </message>
+       </if>
+       <message name="IDS_KILLED_TAB_FEEDBACK_MESSAGE" desc="The text to auto-populate the feedback page with. The triple single quotes are needed to preserve the line break.">
+@@ -13763,7 +13764,7 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+           This extension violates the Chrome Web Store policy.
+         </message>
+         <message name="IDS_EXTENSIONS_BLOCKLISTED_POTENTIALLY_UNWANTED" desc="The text explaining the reason for disabling extension or app. The extension in question might have been installed without user consent.">
+-          Disabled by Chrome. This extension may be unsafe.
++          Disabled by Blynx. This extension may be unsafe.
+         </message>
+
+         <!-- Enhanced Safe Browsing CRX allowlist warning -->
+@@ -13799,7 +13800,7 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+           <ph name="THIRD_PARTY_TOOL_NAME">$1<ex>SuperDuper PC Cleaner Pro</ex></ph> wants to reset your settings.
+         </message>
+         <message name="IDS_TRIGGERED_RESET_PROFILE_SETTINGS_EXPLANATION" desc="Dialog title for reset dialog triggered by a third party tool">
+-          <ph name="THIRD_PARTY_TOOL_NAME">$1<ex>SuperDuper PC Cleaner Pro</ex></ph> wants to restore your Chrome settings to their original defaults. This will reset your homepage, new tab page and search engine, disable your extensions, and unpin all tabs. It will also clear other temporary and cached data, such as cookies, content and site data.
++          <ph name="THIRD_PARTY_TOOL_NAME">$1<ex>SuperDuper PC Cleaner Pro</ex></ph> wants to restore your Blynx settings to their original defaults. This will reset your homepage, new tab page and search engine, disable your extensions, and unpin all tabs. It will also clear other temporary and cached data, such as cookies, content and site data.
+         </message>
+         <message name="IDS_TRIGGERED_RESET_PROFILE_SETTINGS_DEFAULT_TOOL_NAME" desc="Default tool name when a reset was triggered but a name could not be found.">
+           A cleanup tool
+@@ -13891,7 +13892,7 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+         Shared Tab
+       </message>
+       <message name="IDS_TOOLBAR_BUTTON_SEND_TAB_TO_SELF_BUTTON_HINT_TEXT" desc="The hint text shown on received tab dialog shown from the toolbar button. Where 'THERE' is the device the user selected.">
+-        Choose a device. Then, to see the page, open Chrome there.
++        Choose a device. Then, to see the page, open Blynx there.
+       </message>
+       <message name="IDS_MENU_SEND_TAB_TO_SELF" desc="The label of a menu entry to share the current tab to another device">
+         Send to your &amp;device
+@@ -13909,10 +13910,10 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+         <ph name="BEGIN_LINK">$1</ph>Your devices<ph name="END_LINK">$2</ph> · <ph name="EMAIL">$3<ex>foo@gmail.com</ex></ph>
+       </message>
+       <message name="IDS_SEND_TAB_TO_SELF_SIGN_IN_PROMO_LABEL" desc = "Text when a signed out user attempts to use send-tab-to-self, then sees a sign-in promo.">
+-        To send this tab to another device, sign in to Chrome on both devices
++        To send this tab to another device, sign in to Blynx on both devices
+       </message>
+       <message name="IDS_SEND_TAB_TO_SELF_NO_TARGET_DEVICE_LABEL" desc = "Text shown when a user with no available target devices attempts to use send-tab-to-self.">
+-        To send this tab to another device, sign in to Chrome there
++        To send this tab to another device, sign in to Blynx there
+       </message>
+       <message name="IDS_SEND_TAB_TO_SELF_SIGN_IN_PROMO_BODY" desc="Body label text of the send-tab-to-self sign-in promo bubble.">
+         To send links between devices, ensure both are signed in to the same Google account.
+@@ -13933,7 +13934,7 @@ Check your passwords anytime in <ph name="GOOGLE_PASSWORD_MANAGER">$1<ex>Google
+         Sent!
+       </message>
+       <message name="IDS_TUTORIAL_SEND_TAB_TO_SELF_SUCCESS_BODY" desc="Success description educating about sign-in and cross-device sharing.">
+-        When you’re signed in to Chrome with the same account, you can quickly send links between any devices
++        When you’re signed in to Blynx with the same account, you can quickly send links between any devices
+       </message>
+       <message name="IDS_SEND_TAB_TO_SELF_VERIFY_ITS_YOU_PROMO_TITLE" desc="Title of the send-tab-to-self sign-in promo bubble when the user needs to verify their identity (reauthenticate).">
+         Send a link to another device
+@@ -17561,7 +17562,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+
+     <!-- Automation infobar -->
+     <message name="IDS_CONTROLLED_BY_AUTOMATION" desc="Message shown when the browser session is being controlled by an automated test.">
+-      Chrome is being controlled by automated test software
++      Blynx is being controlled by automated test software
+     </message>
+
+     <!-- Chrome for Testing infobar main text -->
+@@ -17573,7 +17574,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+
+     <!-- Chrome for Testing infobar download chrome hyperlink text -->
+     <message name="IDS_DOWNLOAD_CHROME" desc="Hyperlink call-out to download Chrome">
+-      Download Chrome
++      Download Blynx
+     </message>
+
+     <!-- Security Key permission -->
+@@ -17847,7 +17848,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+       </message>
+       <if expr="is_macosx">
+         <message name="IDS_WEBAUTHN_YOUR_CHROME_PROFILE" desc="Menu item text. The user selects this to use a hardware-based authentication mechanism that is built in to the computer, such as a fingerprint reader. The credential itself is stored in the Chrome profile, however, and this text emphasizes that.">
+-          Your Chrome profile
++          Your Blynx profile
+         </message>
+       </if>
+       <message name="IDS_WEBAUTHN_TRANSPORT_INTERNAL" desc="Menu item text. The user selects this to use a hardware-based authentication mechanism that is built in to the computer, such as a fingerprint reader.">
+@@ -17937,7 +17938,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+
+       <if expr="is_macosx">
+         <message name="IDS_WEBAUTHN_BLUETOOTH_PERMISSION" desc="Body text in a dialog that appears when the user has requested some function that depends on Bluetooth, but Chrome doesn't have permission to use Bluetooth. The action on this dialog is a button that will open the macOS System Settings so that the user can grant permission.">
+-          Chrome needs permission to use Bluetooth to connect to your device
++          Blynx needs permission to use Bluetooth to connect to your device
+         </message>
+       </if>
+
+@@ -18113,7 +18114,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+         On other devices
+       </message>
+       <message name="IDS_WEBAUTHN_SOURCE_CHROME_PROFILE" desc="The subtitle shown in a button that lets the user select a passkey to sign in, indicating that the passkey resides in the user's Chrome Profile.">
+-        Your Chrome profile
++        Your Blynx profile
+       </message>
+       <message name="IDS_WEBAUTHN_SOURCE_ICLOUD_KEYCHAIN" desc="The subtitle shown in a button that lets the user select a passkey to sign in, indicating that the passkey resides in the user's iCloud Keychain.">
+         iCloud Keychain
+@@ -18573,24 +18574,24 @@ Please help our engineers fix this problem. Tell us what happened right before y
+     </message>
+
+     <message name="IDS_TAILORED_SECURITY_ENABLED_DIALOG_MAIN_TEXT" desc="Title shown in the tab dialog when the account tailored security setting changes for a consented primary account">
+-      You have Chrome's strongest security against dangerous websites, downloads and extensions
++      You have Blynx's strongest security against dangerous websites, downloads and extensions
+     </message>
+     <message name="IDS_TAILORED_SECURITY_DISABLED_DIALOG_MAIN_TEXT" desc="Title shown in the tab dialog when the account tailored security setting changes for a consented primary account">
+-      You're getting standard security protection. To get more protection against dangerous websites, downloads, and extensions, turn on Enhanced Safe Browsing in Chrome settings.
++      You're getting standard security protection. To get more protection against dangerous websites, downloads, and extensions, turn on Enhanced Safe Browsing in Blynx settings.
+     </message>
+     <message name="IDS_TAILORED_SECURITY_DISABLED_DIALOG_ACCEPT_BUTTON" desc="The text on the accept button in the tab modal dialog when the account tailored security setting is disabled for a consented primary account">
+       Got it
+     </message>
+     <message name="IDS_TAILORED_SECURITY_DIALOG_SETTINGS_BUTTON" desc="The text on the cancel button in the tab dialog when the account tailored security setting changes for a consented primary account">
+-      Chrome settings
++      Blynx settings
+     </message>
+
+     <!-- Tailored security dialog for unconsented primary accounts -->
+     <message name="IDS_TAILORED_SECURITY_UNCONSENTED_MODAL_TITLE" desc="Title shown in the tab modal dialog when the account tailored security setting changes for an unconsented primary account">
+-      Also turn on Enhanced Safe Browsing for this Chrome profile?
++      Also turn on Enhanced Safe Browsing for this Blynx profile?
+     </message>
+     <message name="IDS_TAILORED_SECURITY_UNCONSENTED_MODAL_BODY" desc="Body shown in the tab modal dialog when the account tailored security setting changes for an unconsented primary account">
+-      Chrome&#x2019;s strongest security does more to protect you against dangerous websites, downloads, and extensions
++      Blynx&#x2019;s strongest security does more to protect you against dangerous websites, downloads, and extensions
+     </message>
+     <message name="IDS_TAILORED_SECURITY_UNCONSENTED_ACCEPT_BUTTON" desc="The text on the accept button in the tab modal dialog when the account tailored security setting changes for an unconsented primary account">
+       Turn on
+@@ -18604,7 +18605,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+       Enhanced Safe Browsing is on
+     </message>
+     <message name="IDS_TAILORED_SECURITY_CONSENTED_ENABLE_MESSAGE_DESCRIPTION" desc="Description shown in the Android message when the account tailored security setting changes for a consented primary account">
+-      You have Chrome&#x2019;s strongest security against harmful websites
++      You have Blynx&#x2019;s strongest security against harmful websites
+     </message>
+     <message name="IDS_TAILORED_SECURITY_CONSENTED_DISABLE_MESSAGE_TITLE" desc="Title shown in the Android message when the account tailored security setting changes for a consented primary account">
+       Enhanced Safe Browsing is off
+@@ -18670,7 +18671,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+     </message>
+
+     <message name="IDS_APP_PAUSE_HEADING_FOR_WEB_APPS" desc="Tells the user the app will be paused.">
+-      You reached the time limit your parent set for <ph name="APP_NAME">$1<ex>Google Photos</ex></ph> Chrome app. You can use it for <ph name="TIME_LIMIT">$2<ex>2 hours and 30 minutes</ex></ph> tomorrow.
++      You reached the time limit your parent set for <ph name="APP_NAME">$1<ex>Google Photos</ex></ph> Blynx app. You can use it for <ph name="TIME_LIMIT">$2<ex>2 hours and 30 minutes</ex></ph> tomorrow.
+     </message>
+
+     <!-- App block prompt -->
+@@ -19230,10 +19231,10 @@ Please help our engineers fix this problem. Tell us what happened right before y
+         From your recent search
+       </message>
+       <message name="IDS_MULTISTEP_FILTER_IPH_BODY" desc="Text shown in the IPH bubble for educating users about Multistep Filter." translateable="false">
+-        Chrome can now suggest your recent filters and search details, helping you pick up where you left off or compare options across sites
++        Blynx can now suggest your recent filters and search details, helping you pick up where you left off or compare options across sites
+       </message>
+       <message name="IDS_MULTISTEP_FILTER_IPH_BODY_SCREENREADER" is_accessibility_with_no_ui="true" desc="Screenreader text shown in the IPH bubble for educating users about Multistep Filter." translateable="false">
+-        Chrome can now suggest your recent filters and search details, helping you pick up where you left off or compare options across sites
++        Blynx can now suggest your recent filters and search details, helping you pick up where you left off or compare options across sites
+       </message>
+       <message name="IDS_LINK_COPIED_TOAST_BODY" desc="Text on a toast notification that is shown when a link is successfully copied.">
+         Link copied
+@@ -19293,7 +19294,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+         Close
+       </message>
+       <message name="IDS_NON_MILESTONE_UPDATE_TOAST_BODY" desc="Text on a toast notification that is shown when a non milestone update is complete.">
+-        Chrome was updated
++        Blynx was updated
+       </message>
+       <message name="IDS_GLIC_SHARE_IMAGE_FAILED_TOAST_BODY" desc="Text on a toast notification that is shown when sharing an image with Gemini fails (when using the 'Create image with Gemini' context menu item)">
+         Could not share image with Gemini. Try again or try another image.
+@@ -19532,7 +19533,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+       Launch application
+     </message>
+     <message name="IDS_IWA_INSTALLER_VERIFICATION_TITLE" desc="Title of the verification step of the IWA installation">
+-      Chrome is verifying the installation bundle
++      Blynx is verifying the installation bundle
+     </message>
+     <message name="IDS_IWA_INSTALLER_VERIFICATION_SUBTITLE" desc="Subtitle of the verification step of the IWA installation">
+       Please wait while verification is in progress
+@@ -19544,7 +19545,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+         other {Checking public key and integrity block... # minutes remaining}}
+     </message>
+     <message name="IDS_IWA_INSTALLER_VERIFICATION_ERROR_TITLE" desc="Title of an error popup during the verification step of the Isolated Web App installer">
+-      Chrome failed to verify this installation bundle
++      Blynx failed to verify this installation bundle
+     </message>
+     <message name="IDS_IWA_INSTALLER_VERIFICATION_ERROR_SUBTITLE" desc="Subtitle of an error popup during the verification step of the Isolated Web App installer">
+       This bundle might be broken or compromised. Please close this window and download it again
+@@ -19637,8 +19638,8 @@ Please help our engineers fix this problem. Tell us what happened right before y
+         </message>
+         <message name="IDS_SETTINGS_SAFETY_HUB_REVOKED_PERMISSIONS_MENU_NOTIFICATION" desc="Title for the permissions review Safety Check module on the Magic Stack. Shown when Safety Check has identified several sites that send abusive notifications.">
+           {NUM_SITES, plural,
+-          =1 {Chrome removed permissions from 1 site}
+-          other {Chrome removed permissions from {NUM_SITES} sites}}
++          =1 {Blynx removed permissions from 1 site}
++          other {Blynx removed permissions from {NUM_SITES} sites}}
+         </message>
+         <message name="IDS_SETTINGS_SAFETY_HUB_COMPROMISED_PASSWORDS_MENU_NOTIFICATION" desc="Summary for the compromised passwords Safety Check module on the Magic Stack. Shown when Safety Check has identified insecure credentials.">
+           {NUM_SITES, plural,
+@@ -19657,7 +19658,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+
+     <!-- PDF Searchify elements. -->
+     <message name="IDS_PDF_SEARCHIFY_IPH_TITLE" desc="Title of in product help to introduce PDF Searchify feature.">
+-    Chrome makes PDFs better
++    Blynx makes PDFs better
+     </message>
+     <message name="IDS_PDF_SEARCHIFY_IPH_BODY" desc="Content of in product help to introduce PDF Searchify feature.">
+     PDFs automatically get converted so you can search and select text
+@@ -19746,7 +19747,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+     Always allow
+   </message>
+   <message name="IDS_CHROME_NO_LONGER_SHOW_WARNINGS_NOTIFICATION_BODY" desc="The body for the notification sent by Chrome informing the user that their decision to never show warnings for the url has been applied.">
+-    Chrome will stop flagging notifications from this site as spam
++    Blynx will stop flagging notifications from this site as spam
+   </message>
+   <message name="IDS_CHROME_NO_LONGER_SHOW_WARNINGS_NOTIFICATION_TITLE_NEW" desc="The title for the notification sent by Chrome informing the user that their decision to never show warnings for the url has been applied.">
+     Notifications allowed from <ph name="DOMAIN">$1<ex>example.com</ex></ph>
+@@ -19758,13 +19759,13 @@ Please help our engineers fix this problem. Tell us what happened right before y
+     <!-- Chrome Apps Deprecation -->
+     <if expr="is_chromeos">
+       <message name="IDS_USER_INSTALLED_CHROME_APP_DEPRECATION_NOTIFICATION_MESSAGE" desc="Message of the notification displayed while launching a user-installed app.">
+-        This Chrome app will stop working after your ChromeOS version is updated. Save any app data you want to keep. To learn about your options, contact the app developer or your IT support team.
++        This Blynx app will stop working after your ChromeOS version is updated. Save any app data you want to keep. To learn about your options, contact the app developer or your IT support team.
+       </message>
+       <message name="IDS_USER_INSTALLED_CHROME_APP_DEPRECATION_BLOCKED_LAUNCH_DIALOG_TITLE" desc="The title of the dialog displayed when a Crome App launch is blocked.">
+         <ph name="APP_NAME">$1<ex>Application</ex></ph> can't be launched
+       </message>
+       <message name="IDS_USER_INSTALLED_CHROME_APP_DEPRECATION_BLOCKED_LAUNCH_DIALOG_MESSAGE" desc="The content of the dialog displayed when a Crome App launch is blocked, explaining why the app was not launched.">
+-        Chrome apps stopped running on ChromeOS devices in July 2025. Consider an alternative app.
++        Blynx apps stopped running on ChromeOS devices in July 2025. Consider an alternative app.
+       </message>
+       <message name="IDS_USER_INSTALLED_CHROME_APP_DEPRECATION_BLOCKED_LAUNCH_DIALOG_CLOSE_BUTTON" desc="The text of the button to dismiss the dialog displayed when a Chrome App launch is blocked.">
+         Got it
+@@ -19848,7 +19849,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+       Find your <ph name="FILENAME">$1<ex>document.pdf</ex></ph> in the <ph name="FEATURE_NAME">$2<ex>Saved from Chrome</ex></ph> folder
+     </message>
+     <message name="IDS_SAVE_TO_DRIVE_FOLDER_NAME" desc="Name of the folder in Drive where files saved from Chrome are stored." meaning="Name of the folder in Drive where files saved from Chrome are stored. Please use the short version of the branded term for Google Chrome i.e. Chrome">
+-      Saved from Chrome
++      Saved from Blynx
+     </message>
+     <message name="IDS_ACCOUNT_CHOOSER_DRIVE" desc="Google Drive product name.">
+       Drive
+@@ -19865,10 +19866,10 @@ Please help our engineers fix this problem. Tell us what happened right before y
+
+     <!-- Tips Notifications-->
+     <message name="IDS_TIPS_NOTIFICATIONS_HELPFUL_BUTTON_TEXT" desc="Text for the helpful button found on tips notifications.">
+-      Open Chrome
++      Open Blynx
+     </message>
+     <message name="IDS_TIPS_NOTIFICATIONS_ENHANCED_SAFE_BROWSING_TITLE" desc="Title for the enhanced safe browsing tip notification. [CHAR_LIMIT=32]">
+-      Get Chrome's strongest security
++      Get Blynx's strongest security
+     </message>
+     <message name="IDS_TIPS_NOTIFICATIONS_ENHANCED_SAFE_BROWSING_SUBTITLE" desc="Subtitle for the enhanced safe browsing tip notification.">
+       Add an extra layer of security against online threats with enhanced protection
+@@ -19898,7 +19899,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+       Create, save, and manage your passwords so you can easily sign in
+     </message>
+     <message name="IDS_TIPS_NOTIFICATIONS_SIGNIN_TITLE" desc="Title for the sign-in tip notification. [CHAR_LIMIT=32]">
+-      Make Chrome your own
++      Make Blynx your own
+     </message>
+     <message name="IDS_TIPS_NOTIFICATIONS_SIGNIN_SUBTITLE" desc="Subtitle for the sign-in tip notification.">
+       Sign in to easily continue on all your devices
+@@ -19919,7 +19920,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+       Pick up where you left off
+     </message>
+     <message name="IDS_TIPS_NOTIFICATIONS_RECENT_TABS_SUBTITLE" desc="Subtitle for the recent tabs tip notification.">
+-      You can reopen tabs that you've recently closed from wherever you use Chrome
++      You can reopen tabs that you've recently closed from wherever you use Blynx
+     </message>
+
+     <!-- chrome://updater -->
+@@ -20087,7 +20088,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+         Updater Scope: <ph name="OUTCOMES">$1<ex>Per-system updater, Per-user updater</ex></ph>
+       </message>
+       <message name="IDS_UPDATER_HELP_CENTER_TOOLTIP" desc="Tooltip for the help center link about maintaining Chrome updates.">
+-        Learn more about maintaining Chrome updates
++        Learn more about maintaining Blynx updates
+       </message>
+       <message name="IDS_UPDATER_INACTIVE_VERSIONS_LABEL" desc="A label for a list of inactive versions of the Chrome Updater. Multiple Chrome Updater versions may be present on a users machine but only one may be active at a time.">
+         Inactive Versions:
+@@ -20255,7 +20256,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+         Update Error
+       </message>
+       <message name="IDS_UPDATER_VIEW_ALL_CHROME_POLICIES" desc="Label for a button that opens the chrome://policy page.">
+-        View all Chrome Policies
++        View all Blynx Policies
+       </message>
+       <message name="IDS_UPDATER_VIEW_RAW_DETAILS" desc="Title of the button to display the contents of a Chrome Updater log in JSON format">
+         Source
+@@ -20284,7 +20285,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+
+     <!-- Chrome finds Notifications -->
+     <message name="IDS_CHROME_FINDS_NOTIFICATIONS_HELPFUL_BUTTON_TEXT" desc="Text for the helpful button found on Chrome finds notifications.">
+-      Open in Chrome
++      Open in Blynx
+     </message>
+     <message name="IDS_CHROME_FINDS_NOTIFICATIONS_UNHELPFUL_BUTTON_TEXT" desc="Text for the unhelpful button found on Chrome finds notifications.">
+       Not interested
 diff --git a/chrome/app/generated_resources.grd.gritdeps b/chrome/app/generated_resources.grd.gritdeps
 index 9aa7b11..217a8c7 100644
 --- a/chrome/app/generated_resources.grd.gritdeps

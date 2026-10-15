@@ -2948,10 +2948,10 @@ literal 0
 HcmV?d00001
 
 diff --git a/chrome/browser/resources/settings/appearance_page/appearance_page.css b/chrome/browser/resources/settings/appearance_page/appearance_page.css
-index 77a1094..174e06d 100644
+index 77a109485a..97b37c8198 100644
 --- a/chrome/browser/resources/settings/appearance_page/appearance_page.css
 +++ b/chrome/browser/resources/settings/appearance_page/appearance_page.css
-@@ -46,3 +46,69 @@
+@@ -46,3 +46,213 @@
  .indented-rows .cr-row {
    padding-inline-start: 0;
  }
@@ -2969,7 +2969,7 @@ index 77a1094..174e06d 100644
 +
 +.blynx-emblem { flex: 0 0 52px;
 + height: 52px;
-+ background: url(chrome://theme/IDR_PRODUCT_LOGO_32) center/contain no-repeat; }
++ background: url(chrome://theme/current-channel-logo) center/contain no-repeat; }
 +
 +.blynx-heading h2 { font-size: 24px;
 + letter-spacing: -.5px;
@@ -3021,14 +3021,188 @@ index 77a1094..174e06d 100644
 +
 +#blynxStatus { color: var(--cr-secondary-text-color);
 + margin-bottom: 0; }
++
++#blynxPreview {
++  --blynx-preview-surface: #f1f3f8;
++  --blynx-preview-text: #252833;
++  margin: 20px 0;
++}
++
++#blynxPreview.dark {
++  --blynx-preview-surface: #252833;
++  --blynx-preview-text: #f1f3f8;
++}
++
++@media (prefers-color-scheme: dark) {
++  #blynxPreview.system {
++    --blynx-preview-surface: #252833;
++    --blynx-preview-text: #f1f3f8;
++  }
++}
++
++.blynx-preview-window {
++  background: var(--blynx-preview-surface);
++  border: 1px solid var(--cr-separator-color);
++  border-radius: 12px;
++  color: var(--blynx-preview-text);
++  overflow: hidden;
++}
++
++.blynx-preview-window[data-vertical] { display: flex; }
++
++.blynx-preview-window[data-vertical] .blynx-preview-tabs {
++  flex-direction: column;
++  width: 68px;
++}
++
++.blynx-preview-page { flex: 1;
++ min-width: 0; }
++
++.blynx-preview-tabs { display: flex;
++ gap: 12px;
++ padding: 10px; }
++
++.blynx-preview-tabs span:first-child {
++  border-bottom: 3px solid var(--blynx-preview-accent);
++  padding: 4px;
++}
++
++.blynx-preview-address {
++  border: 1px solid var(--cr-separator-color);
++  border-radius: 20px;
++  margin: 8px;
++  padding: 6px 16px;
++}
++
++.blynx-preview-bookmarks { font-size: 11px;
++ padding: 4px 12px 8px; }
++
++.blynx-preview-canvas {
++  align-items: center;
++  background: radial-gradient(ellipse at top left, #55666f, #171c28 75%);
++  color: #f1f3f8;
++  display: flex;
++  flex-direction: column;
++  gap: 10px;
++  padding: 22px;
++}
++
++.blynx-preview-canvas.midnight { background: linear-gradient(135deg, #1a2441, #0b0f1b); }
++
++.blynx-preview-canvas.paper { background: linear-gradient(135deg, #efe9de, #faf8f1);
++ color: #252833; }
++
++.blynx-preview-canvas .blynx-emblem { flex-basis: 40px;
++ width: 40px; }
++
++.blynx-preview-search {
++  background: var(--blynx-preview-surface);
++  border: 2px solid var(--blynx-preview-accent);
++  border-radius: 20px;
++  height: 22px;
++  max-width: 260px;
++  width: 80%;
++}
++
++.blynx-preview-links { display: flex;
++ gap: 12px; }
++
++.blynx-preview-links[hidden],
++ .blynx-preview-bookmarks[hidden] { display: none; }
++
++.blynx-preview-links span {
++  background: var(--blynx-preview-accent);
++  border-radius: 6px;
++  height: 12px;
++  width: 36px;
++}
++
++#blynxPreview figcaption { color: var(--cr-primary-text-color);
++ font-size: 12px;
++ margin-top: 10px; }
++
++.blynx-preset-actions {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 12px;
++}
++
++#blynxPresetDescription {
++  line-height: 1.6;
++  margin-top: 20px;
++}
++
++.blynx-setup {
++  background: var(--cr-card-background-color);
++  border: 1px solid var(--cr-separator-color);
++  border-radius: 20px;
++  color: var(--cr-primary-text-color);
++  margin-block-end: 20px;
++  padding: 24px;
++}
++
++.blynx-setup p { line-height: 1.6; }
++
++.blynx-setup-progress { color: var(--cr-secondary-text-color); }
++
++.blynx-setup-actions { display: flex;
++ flex-wrap: wrap;
++ gap: 12px;
++ justify-content: flex-end;
++ margin-block-start: 24px; }
++
++#blynxSetupHeading:focus-visible { outline: 2px solid var(--cr-focus-outline-color);
++ outline-offset: 4px; }
++
++.blynx-setup-links { display: flex;
++ flex-wrap: wrap;
++ gap: 16px;
++ margin-block-start: 16px; }
++
++.blynx-setup-links a { align-content: center;
++ color: var(--cr-link-color);
++ min-height: 24px; }
++
++.blynx-setup-links a:focus-visible { outline: 2px solid var(--cr-focus-outline-color);
++ outline-offset: 4px; }
 diff --git a/chrome/browser/resources/settings/appearance_page/appearance_page.html.ts b/chrome/browser/resources/settings/appearance_page/appearance_page.html.ts
-index eba0ba1..c63586c 100644
+index eba0ba1ebb..c7ff097cd7 100644
 --- a/chrome/browser/resources/settings/appearance_page/appearance_page.html.ts
 +++ b/chrome/browser/resources/settings/appearance_page/appearance_page.html.ts
-@@ -11,6 +11,32 @@ export function getHtml(this: SettingsAppearancePageElement) {
+@@ -11,6 +11,86 @@ export function getHtml(this: SettingsAppearancePageElement) {
    return html`<!--_html_template_start_-->
  <settings-section page-title="$i18n{appearancePageTitle}">
    <div route-path="default">
++    ${this.blynxSetup_?.editable ? html`
++      <div id="blynxSetup" class="blynx-setup">
++        ${this.blynxSetup_.step >= 1 && this.blynxSetup_.step <= 3 ? html`
++          <div class="blynx-heading">
++            <span class="blynx-emblem" aria-hidden="true"></span>
++            <div>
++              <p class="blynx-setup-progress">${this.blynxSetup_.step} / 3</p>
++              <h2 id="blynxSetupHeading" tabindex="-1">${this.i18n(
++                  this.blynxSetup_.step === 1 ? 'blynxSetupTitle' :
++                  this.blynxSetup_.step === 2 ? 'blynxSetupImportTitle' :
++                  'blynxSetupPersonalizeTitle')}</h2>
++            </div>
++          </div>
++          <p>${this.i18n(this.blynxSetup_.step === 1 ? 'blynxSetupWelcome' :
++              this.blynxSetup_.step === 2 ? 'blynxSetupImportDescription' :
++              'blynxSetupPersonalizeDescription')}</p>
++          ${this.blynxSetup_.step === 2 ? html`
++            <cr-button id="blynxSetupImport" @click="${this.onBlynxSetupImportClick_}">$i18n{blynxSetupImport}</cr-button>
++            <div class="blynx-setup-links">
++              <a id="blynxSetupPasswords" href="blynx://password-manager/settings" target="_blank" rel="noopener">$i18n{localPasswordManager}</a>
++              <a id="blynxSetupExtensions" href="blynx://extensions/" target="_blank" rel="noopener">$i18n{extensionsPageTitle}</a>
++            </div>` : ''}
++          <div class="blynx-setup-actions">
++            <cr-button data-action="finish" ?disabled="${this.blynxSetupBusy_}" @click="${this.onBlynxSetupActionClick_}">$i18n{blynxSetupSkip}</cr-button>
++            ${this.blynxSetup_.step > 1 ? html`<cr-button data-action="back" ?disabled="${this.blynxSetupBusy_}" @click="${this.onBlynxSetupActionClick_}">$i18n{blynxSetupBack}</cr-button>` : ''}
++            <cr-button id="blynxSetupNext" class="action-button" data-action="${this.blynxSetup_.step === 3 ? 'finish' : 'next'}" ?disabled="${this.blynxSetupBusy_}" @click="${this.onBlynxSetupActionClick_}">${this.i18n(this.blynxSetup_.step === 3 ? 'blynxSetupFinish' : 'blynxSetupNext')}</cr-button>
++          </div>` : html`
++          <cr-button id="blynxSetupStart" data-action="start" ?disabled="${this.blynxSetupBusy_}" @click="${this.onBlynxSetupActionClick_}">$i18n{blynxSetupStart}</cr-button>`}
++        <p role="status">${this.blynxSetupError_}</p>
++      </div>` : ''}
 +    <section id="blynxAppearance" aria-label="$i18n{blynxAppearanceTitle}">
 +      <div class="blynx-heading"><span class="blynx-emblem" aria-hidden="true"></span>
 +        <div><h2>$i18n{blynxAppearanceTitle}</h2><p>$i18n{blynxAppearanceDescription}</p></div>
@@ -3036,20 +3210,44 @@ index eba0ba1..c63586c 100644
 +      ${this.blynxState_ ? html`
 +        <fieldset ?disabled="${!this.blynxState_.editable}">
 +          <div class="blynx-fields">
-+            <label>$i18n{blynxTheme}<select id="blynxTheme" .value="${this.blynxPreset_().theme}" @change="${this.onBlynxChange_}">
++            <label for="blynxTheme">$i18n{blynxTheme}<select id="blynxTheme" .value="${this.blynxPreset_().theme}" @change="${this.onBlynxChange_}">
 +              <option value="system">$i18n{blynxSystem}</option><option value="light">$i18n{blynxLight}</option><option value="dark">$i18n{blynxDark}</option>
 +            </select></label>
-+            <label>$i18n{blynxAccent}<input id="blynxAccent" maxlength="7" .value="${this.blynxPreset_().accent_color}" @input="${this.onBlynxInput_}"></label>
-+            <label>$i18n{blynxNewTab}<select id="blynxStyle" .value="${this.blynxState_.style}" @change="${this.onBlynxChange_}">
++            <label for="blynxAccent">$i18n{blynxAccent}<input id="blynxAccent" maxlength="7" .value="${this.blynxPreset_().accent_color}" @input="${this.onBlynxInput_}"></label>
++            <label for="blynxStyle">$i18n{blynxNewTab}<select id="blynxStyle" .value="${this.blynxState_.style}" @change="${this.onBlynxChange_}">
 +              <option value="aurora">$i18n{blynxAurora}</option><option value="midnight">$i18n{blynxMidnight}</option><option value="paper">$i18n{blynxPaper}</option>
 +            </select></label>
 +          </div>
 +          <div class="blynx-toggles">
-+            <label><input id="blynxVertical" type="checkbox" .checked="${this.blynxState_.vertical}" @change="${this.onBlynxChange_}">$i18n{tabStripPosition}: $i18n{uiFeatureAlignSide}</label>
-+            <label><input id="blynxBookmarks" type="checkbox" .checked="${this.blynxPreset_().show_bookmarks_bar}" @change="${this.onBlynxChange_}">$i18n{blynxBookmarks}</label>
-+            <label><input id="blynxLinks" type="checkbox" .checked="${this.blynxState_.links}" @change="${this.onBlynxChange_}">$i18n{blynxLinks}</label>
++            <label for="blynxVertical"><input id="blynxVertical" type="checkbox" .checked="${this.blynxState_.vertical}" @change="${this.onBlynxChange_}">$i18n{tabStripPosition}: $i18n{uiFeatureAlignSide}</label>
++            <label for="blynxBookmarks"><input id="blynxBookmarks" type="checkbox" .checked="${this.blynxPreset_().show_bookmarks_bar}" @change="${this.onBlynxChange_}">$i18n{blynxBookmarks}</label>
++            <label for="blynxLinks"><input id="blynxLinks" type="checkbox" .checked="${this.blynxState_.links}" @change="${this.onBlynxChange_}">$i18n{blynxLinks}</label>
 +          </div>
-+          <div class="blynx-actions"><cr-button @click="${this.onBlynxCancelClick_}">$i18n{blynxCancel}</cr-button><cr-button id="blynxApply" class="action-button" @click="${this.onBlynxApplyClick_}">$i18n{blynxApply}</cr-button></div>
++          <p id="blynxPresetDescription">$i18n{blynxPresetDescription}</p>
++          <div class="blynx-preset-actions">
++            <cr-button id="blynxImport" ?disabled="${!this.blynxState_.editable}" @click="${this.onBlynxImportClick_}">$i18n{blynxPresetImport}</cr-button>
++            <cr-button id="blynxExport" ?disabled="${!this.blynxState_.editable}" @click="${this.onBlynxExportClick_}">$i18n{blynxPresetExport}</cr-button>
++            <input id="blynxPresetFile" type="file" accept=".json,application/json" hidden @change="${this.onBlynxPresetFileChange_}">
++          </div>
++          <figure id="blynxPreview" class="${this.blynxPreset_().theme}"
++              aria-label="$i18n{blynxPreview}"
++              style="--blynx-preview-accent: ${this.blynxPreviewAccent_()}">
++            <div class="blynx-preview-window" ?data-vertical="${this.blynxState_.vertical}" aria-hidden="true">
++              <div class="blynx-preview-tabs"><span>Blynx</span><span>+</span></div>
++              <div class="blynx-preview-page">
++                <div class="blynx-preview-address">blynx://newtab</div>
++                <div class="blynx-preview-bookmarks" ?hidden="${!this.blynxPreset_().show_bookmarks_bar}">$i18n{blynxPreviewBookmarks}</div>
++                <div class="blynx-preview-canvas ${this.blynxState_.style}">
++                  <span class="blynx-emblem"></span>
++                  <strong>Blynx</strong>
++                  <span class="blynx-preview-search"></span>
++                  <div class="blynx-preview-links" ?hidden="${!this.blynxState_.links}"><span></span><span></span><span></span></div>
++                </div>
++              </div>
++            </div>
++            <figcaption>$i18n{blynxPreviewNotice}</figcaption>
++          </figure>
++          <div class="blynx-actions"><cr-button id="blynxCancel" @click="${this.onBlynxCancelClick_}">$i18n{blynxCancel}</cr-button><cr-button id="blynxApply" class="action-button" @click="${this.onBlynxApplyClick_}">$i18n{blynxApply}</cr-button></div>
 +        </fieldset>
 +        ${!this.blynxState_.editable ? html`<p>$i18n{blynxReadOnly}</p>` : ''}
 +        <p id="blynxStatus" role="status">${this.blynxStatus_}</p>
@@ -3059,7 +3257,7 @@ index eba0ba1..c63586c 100644
          ?hidden="${!this.pageVisibility_.setTheme}">
        <cr-link-row id="openTheme" class="first"
 diff --git a/chrome/browser/resources/settings/appearance_page/appearance_page.ts b/chrome/browser/resources/settings/appearance_page/appearance_page.ts
-index 8b7ea61..c581870 100644
+index 8b7ea61313..e04b2076af 100644
 --- a/chrome/browser/resources/settings/appearance_page/appearance_page.ts
 +++ b/chrome/browser/resources/settings/appearance_page/appearance_page.ts
 @@ -18,6 +18,7 @@ import {PrefServiceObserverMixinLit} from '/shared/settings/prefs2/pref_service_
@@ -3070,10 +3268,16 @@ index 8b7ea61..c581870 100644
  import {assert, assertNotReached} from 'chrome://resources/js/assert.js';
  import {CrLitElement} from 'chrome://resources/lit/v3_0/lit.rollup.js';
  import type {PropertyValues} from 'chrome://resources/lit/v3_0/lit.rollup.js';
-@@ -114,6 +115,15 @@ function normalizePageVisibility(
+@@ -114,6 +115,21 @@ function normalizePageVisibility(
  const SettingsAppearancePageElementBase = SettingsViewMixinLit(
      RelaunchMixinLit(I18nMixinLit(PrefServiceObserverMixinLit(CrLitElement))));
 
++interface BlynxSetupState {
++  step: number;
++  editable: boolean;
++  saved: boolean;
++}
++
 +interface BlynxAppearanceState {
 +  preset: string;
 +  vertical: boolean;
@@ -3086,25 +3290,67 @@ index 8b7ea61..c581870 100644
  export class SettingsAppearancePageElement extends
      SettingsAppearancePageElementBase {
    static get is() {
-@@ -130,6 +140,8 @@ export class SettingsAppearancePageElement extends
+@@ -130,6 +146,11 @@ export class SettingsAppearancePageElement extends
 
    static override get properties() {
      return {
 +      blynxState_: {type: Object},
++      blynxSetup_: {type: Object},
++      blynxSetupBusy_: {type: Boolean},
++      blynxSetupError_: {type: String},
 +      blynxStatus_: {type: String},
        pageVisibility_: {type: Object},
        defaultZoom_: {type: Number},
 
-@@ -314,6 +326,50 @@ export class SettingsAppearancePageElement extends
+@@ -314,6 +335,148 @@ export class SettingsAppearancePageElement extends
        Array<{id: string, label: string}> =
            JSON.parse(loadTimeData.getString('configurableSidePanelAlignments'));
 
++  protected accessor blynxSetup_: BlynxSetupState|null = null;
++  protected accessor blynxSetupBusy_: boolean = false;
++  protected accessor blynxSetupError_: string = '';
++
++  protected async onBlynxSetupActionClick_(event: Event) {
++    if (this.blynxSetupBusy_ || !this.blynxSetup_?.editable) return;
++    const action = (event.currentTarget as HTMLElement).dataset['action'];
++    if (!action) return;
++    this.blynxSetupBusy_ = true;
++    this.blynxSetupError_ = '';
++    try {
++      const state = await sendWithPromise<BlynxSetupState>('blynxOnboarding', action);
++      if (!this.isConnected) return;
++      this.blynxSetup_ = state;
++      if (!state.saved) {
++        this.blynxSetupError_ = this.i18n('blynxSetupError');
++      } else if (state.step === 4) {
++        window.location.href = 'blynx://newtab/';
++      } else {
++        await this.updateComplete;
++        this.shadowRoot.querySelector<HTMLElement>('#blynxSetupHeading')?.focus();
++      }
++    } catch {
++      this.blynxSetupError_ = this.i18n('blynxSetupError');
++    } finally {
++      this.blynxSetupBusy_ = false;
++    }
++  }
++
++  protected onBlynxSetupImportClick_() {
++    Router.getInstance().navigateTo(routes.IMPORT_DATA);
++  }
++
 +  protected accessor blynxState_: BlynxAppearanceState|null = null;
 +  protected accessor blynxStatus_: string = '';
 +  private blynxSaved_: typeof this.blynxState_ = null;
++  private blynxEditVersion_: number = 0;
 +
 +  protected blynxPreset_(): {theme: string, accent_color: string, show_bookmarks_bar: boolean} {
 +    return JSON.parse(this.blynxState_?.preset || '{}');
++  }
++
++  protected blynxPreviewAccent_(): string {
++    const accent = this.blynxPreset_().accent_color;
++    return /^#[0-9a-f]{6}$/i.test(accent) ? accent : '#4F6BED';
 +  }
 +
 +  protected onBlynxInput_(event: Event) {
@@ -3113,6 +3359,7 @@ index 8b7ea61..c581870 100644
 +
 +  protected onBlynxChange_(event: Event) {
 +    if (!this.blynxState_) return;
++    ++this.blynxEditVersion_;
 +    const field = event.target as HTMLInputElement;
 +    const state = {...this.blynxState_};
 +    const preset = JSON.parse(state.preset);
@@ -3129,6 +3376,7 @@ index 8b7ea61..c581870 100644
 +
 +  protected async onBlynxApplyClick_() {
 +    if (!this.blynxState_?.editable) return;
++    ++this.blynxEditVersion_;
 +    const s = this.blynxState_;
 +    const result = await sendWithPromise<BlynxAppearanceState>('applyBlynxAppearance', s.preset, s.vertical, s.style, s.links);
 +    this.blynxStatus_ = this.i18n(result.saved ? 'blynxSaved' : 'blynxError');
@@ -3139,17 +3387,77 @@ index 8b7ea61..c581870 100644
 +  }
 +
 +  protected onBlynxCancelClick_() {
++    ++this.blynxEditVersion_;
 +    this.blynxState_ = this.blynxSaved_ ? {...this.blynxSaved_} : null;
 +    this.blynxStatus_ = '';
++  }
++
++  protected onBlynxImportClick_() {
++    if (!this.blynxState_?.editable) return;
++    this.shadowRoot.querySelector<HTMLInputElement>('#blynxPresetFile')!.click();
++  }
++
++  protected async onBlynxPresetFileChange_(event: Event) {
++    const input = event.target as HTMLInputElement;
++    const file = input.files?.[0];
++    input.value = '';
++    if (!file || !this.blynxState_?.editable) return;
++    const version = ++this.blynxEditVersion_;
++    try {
++      if (file.size === 0 || file.size > 4096) throw new Error('size');
++      // Fatal decoding rejects malformed UTF-8 rather than silently replacing
++      // bytes. Preserve a BOM so the strict native JSON parser can reject it.
++      const text = new TextDecoder('utf-8', {fatal: true, ignoreBOM: true})
++                       .decode(await file.arrayBuffer());
++      const result = await sendWithPromise<{valid: boolean, preset: string}>(
++          'validateBlynxAppearancePreset', text);
++      if (!this.isConnected || version !== this.blynxEditVersion_) return;
++      if (!result.valid) throw new Error('preset');
++      this.blynxState_ = {...this.blynxState_, preset: result.preset};
++      this.blynxStatus_ = this.i18n('blynxPresetImported');
++    } catch {
++      if (this.isConnected && version === this.blynxEditVersion_) {
++        this.blynxStatus_ = this.i18n('blynxPresetImportError');
++      }
++    }
++  }
++
++  protected async onBlynxExportClick_() {
++    if (!this.blynxState_?.editable) return;
++    const version = ++this.blynxEditVersion_;
++    try {
++      const result = await sendWithPromise<{valid: boolean, preset: string}>(
++          'exportBlynxAppearancePreset');
++      if (!this.isConnected || version !== this.blynxEditVersion_) return;
++      if (!result.valid) throw new Error('preset');
++      const url = URL.createObjectURL(new Blob([result.preset], {
++        type: 'application/json',
++      }));
++      const link = document.createElement('a');
++      link.href = url;
++      link.download = 'blynx-appearance.json';
++      link.click();
++      // The upstream download service owns the save operation. No filesystem
++      // path from Settings is passed to native code, and no page navigation.
++      setTimeout(() => URL.revokeObjectURL(url), 1000);
++      this.blynxStatus_ = this.i18n('blynxPresetExported');
++    } catch {
++      if (this.isConnected && version === this.blynxEditVersion_) {
++        this.blynxStatus_ = this.i18n('blynxPresetExportError');
++      }
++    }
 +  }
 +
    private appearanceBrowserProxy_: AppearanceBrowserProxy =
        AppearanceBrowserProxyImpl.getInstance();
    private colorSchemeModeBrowserProxy_: CustomizeColorSchemeModeBrowserProxy =
-@@ -324,6 +380,11 @@ export class SettingsAppearancePageElement extends
+@@ -324,6 +487,14 @@ export class SettingsAppearancePageElement extends
 
    override connectedCallback() {
      super.connectedCallback();
++    sendWithPromise<BlynxSetupState>('blynxOnboarding', 'get').then(state => {
++      if (this.isConnected) this.blynxSetup_ = state;
++    });
 +    sendWithPromise<BlynxAppearanceState>('getBlynxAppearance').then(state => {
 +      if (!this.isConnected) return;
 +      this.blynxSaved_ = state;
@@ -3221,7 +3529,7 @@ index 9c9878f..017e2af 100644
      "//chrome/app:command_ids",
      "//chrome/app:generated_resources",
 diff --git a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-index e8a171f..60cab96 100644
+index e8a171fb21..d201ae9bf4 100644
 --- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 +++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 @@ -227,7 +227,7 @@ void AddCommonStrings(content::WebUIDataSource* html_source, Profile* profile) {
@@ -3233,7 +3541,7 @@ index e8a171f..60cab96 100644
        {"settingsAltPageTitle", IDS_SETTINGS_ALT_PAGE_TITLE},
        {"subpageArrowRoleDescription", IDS_SETTINGS_SUBPAGE_BUTTON},
        {"subpageBackButtonAriaLabel",
-@@ -576,6 +576,24 @@ void AddAiStrings(content::WebUIDataSource* html_source) {
+@@ -576,6 +576,47 @@ void AddAiStrings(content::WebUIDataSource* html_source) {
  void AddAppearanceStrings(content::WebUIDataSource* html_source,
                            Profile* profile) {
    static constexpr webui::LocalizedString kLocalizedStrings[] = {
@@ -3255,9 +3563,42 @@ index e8a171f..60cab96 100644
 +      {"blynxSaved", IDS_BLYNX_SETTINGS_SAVED},
 +      {"blynxError", IDS_BLYNX_SETTINGS_ERROR},
 +      {"blynxReadOnly", IDS_BLYNX_SETTINGS_READ_ONLY},
++      {"blynxPresetImport", IDS_BLYNX_PRESET_IMPORT},
++      {"blynxPresetExport", IDS_BLYNX_PRESET_EXPORT},
++      {"blynxPresetDescription", IDS_BLYNX_PRESET_DESCRIPTION},
++      {"blynxPresetImported", IDS_BLYNX_PRESET_IMPORTED},
++      {"blynxPresetImportError", IDS_BLYNX_PRESET_IMPORT_ERROR},
++      {"blynxPresetExported", IDS_BLYNX_PRESET_EXPORTED},
++      {"blynxPresetExportError", IDS_BLYNX_PRESET_EXPORT_ERROR},
++      {"blynxSetupTitle", IDS_BLYNX_SETUP_TITLE},
++      {"blynxSetupWelcome", IDS_BLYNX_SETUP_WELCOME},
++      {"blynxSetupImportTitle", IDS_BLYNX_SETUP_IMPORT_TITLE},
++      {"blynxSetupImportDescription", IDS_BLYNX_SETUP_IMPORT_DESCRIPTION},
++      {"blynxSetupPersonalizeTitle", IDS_BLYNX_SETUP_PERSONALIZE_TITLE},
++      {"blynxSetupPersonalizeDescription", IDS_BLYNX_SETUP_PERSONALIZE_DESCRIPTION},
++      {"blynxSetupStart", IDS_BLYNX_SETUP_START},
++      {"blynxSetupImport", IDS_BLYNX_SETUP_IMPORT},
++      {"blynxSetupNext", IDS_BLYNX_SETUP_NEXT},
++      {"blynxSetupBack", IDS_BLYNX_SETUP_BACK},
++      {"blynxSetupFinish", IDS_BLYNX_SETUP_FINISH},
++      {"blynxSetupSkip", IDS_BLYNX_SETUP_SKIP},
++      {"blynxSetupError", IDS_BLYNX_SETUP_ERROR},
++      {"blynxPreview", IDS_BROWSER_FINAL_CUSTOMIZE_PREVIEW},
++      {"blynxPreviewNotice", IDS_BROWSER_FINAL_CUSTOMIZE_PREVIEW_NOTICE},
++      {"blynxPreviewBookmarks", IDS_BROWSER_FINAL_CUSTOMIZE_PREVIEW_BOOKMARKS},
        {"appearancePageTitle", IDS_SETTINGS_APPEARANCE},
        {"ctrlTabMru", IDS_SETTINGS_CTRL_TAB_MRU},
        {"glassEffect", IDS_SETTINGS_TAB_STYLING},
+@@ -797,7 +838,8 @@ void AddClearBrowsingDataStrings(content::WebUIDataSource* html_source,
+
+ #if !BUILDFLAG(IS_CHROMEOS)
+   html_source->AddBoolean("isClearPrimaryAccountAllowed",
+-                          !profile->IsGuestSession() &&
++                          !profile->IsOffTheRecord() &&
++                              !profile->IsGuestSession() &&
+                               ChromeSigninClientFactory::GetForProfile(profile)
+                                   ->IsClearPrimaryAccountAllowed());
+ #endif  // !BUILDFLAG(IS_CHROMEOS)
 diff --git a/chrome/browser/ui/webui/settings/settings_ui.cc b/chrome/browser/ui/webui/settings/settings_ui.cc
 index c87847c..1365fc3 100644
 --- a/chrome/browser/ui/webui/settings/settings_ui.cc
@@ -3291,3 +3632,883 @@ index a972831..2647340 100644
    for (auto* standard_scheme : kChromeStandardURLSchemes)
      schemes->standard_schemes.push_back(standard_scheme);
 
+diff --git a/chrome/app/settings_strings.grdp b/chrome/app/settings_strings.grdp
+index 884e32a5f2..cb9556ec3a 100644
+--- a/chrome/app/settings_strings.grdp
++++ b/chrome/app/settings_strings.grdp
+@@ -68,7 +68,7 @@
+     </if>
+     <if expr="is_macosx">
+       <message name="IDS_ABOUT_CHROME_AUTOUPDATE_ALL" desc="The 'Automatically update Chrome for all users.' button in the About window.  Mac-only.">
+-        Automatically update Chrome for all users
++        Automatically update Blynx for all users
+       </message>
+       <message name="IDS_ABOUT_CHROME_AUTOUPDATE_ALL_IS_ON" desc="The text in About Page to indicate automatic update is turned on.  Mac-only.">
+         Automatic updates are turned on.
+@@ -95,7 +95,7 @@
+       Get image descriptions from Google
+     </message>
+     <message name="IDS_SETTINGS_ACCESSIBLE_IMAGE_LABELS_SUBTITLE" desc="Subtitle for screen reader image labels feature.">
+-      If an image doesn’t have a useful description, Chrome will try to provide one for you. To create descriptions, images are sent to Google.
++      If an image doesn’t have a useful description, Blynx will try to provide one for you. To create descriptions, images are sent to Google.
+     </message>
+     <message name="IDS_SETTINGS_MAIN_NODE_ANNOTATIONS_DOWNLOAD_COMPLETE" desc="Success message when it has downloaded main node annotation files.">
+       Main node annotation files downloaded
+@@ -248,7 +248,7 @@
+       Reset toolbar to default settings
+     </message>
+     <message name="IDS_SETTINGS_CHROME_COLORS" desc="Text of the label describing 'Chrome Colors' theme.">
+-      Chrome Colors
++      Blynx Colors
+     </message>
+     <message name="IDS_SETTINGS_COLOR_SCHEME_MODE" desc="Text of the label for selecting a color scheme mode for the browser.">
+       Mode
+@@ -329,7 +329,7 @@
+       Google Search AI Mode
+     </message>
+     <message name="IDS_SETTINGS_SIDE_PANEL_ALIGNMENT_CHROME_PANELS" desc="Label for the default Chrome Panels alignment setting.">
+-      Chrome Panels
++      Blynx Panels
+     </message>
+     <message name="IDS_SETTINGS_SIDE_PANEL_ALIGNMENT_A11Y_LABEL" is_accessibility_with_no_ui="true" desc="Accessible label for side panel alignment dropdown menus, combining the side panel item name and the side panel position category name for screen readers.">
+       <ph name="ITEM_NAME">$1<ex>Google Search AI Mode</ex></ph> <ph name="CATEGORY_NAME">$2<ex>Side panel position</ex></ph>
+@@ -839,16 +839,16 @@
+       Edit in Google Account
+     </message>
+     <message name="IDS_SETTINGS_HOME_AND_WORK_ADDRESS_REMOVE" desc="Label for a context menu item that removes the selected home and work address from Chrome.">
+-      Remove from Chrome
++      Remove from Blynx
+     </message>
+     <message name="IDS_SETTINGS_HOME_ADDRESS_REMOVE_CONFIRMATION_DIALOG_TITLE" desc="Title for the dialog that asks for confirmation to remove the selected home address from Chrome.">
+-      Remove your home address from Chrome autofill?
++      Remove your home address from Blynx autofill?
+     </message>
+     <message name="IDS_SETTINGS_WORK_ADDRESS_REMOVE_CONFIRMATION_DIALOG_TITLE" desc="Title for the dialog that asks for confirmation to remove the selected work address from Chrome.">
+-      Remove your work address from Chrome autofill?
++      Remove your work address from Blynx autofill?
+     </message>
+     <message name="IDS_SETTINGS_NAME_EMAIL_ADDRESS_REMOVE_CONFIRMATION_DIALOG_TITLE" desc="Title for the dialog that asks for confirmation to remove the selected name and email address from Chrome.">
+-      Remove this info from Chrome autofill?
++      Remove this info from Blynx autofill?
+     </message>
+     <message name="IDS_SETTINGS_HOME_ADDRESS_REMOVE_CONFIRMATION_DIALOG_NOTICE" desc="Body for the dialog that asks for confirmation to remove the selected home address from Chrome.">
+       Your home address can help you get things done across Google services, like more relevant Search results and directions in Google Maps. You can edit or delete your address in your <ph name="BEGIN_LINK">&lt;a href="$1" target=&quot;_blank&quot;&gt;</ph>Google Account<ph name="END_LINK">&lt;/a&gt;</ph> <ph name="USERNAME">$2<ex>example@gmail.com</ex></ph>.
+@@ -1416,10 +1416,10 @@
+       Sites you visit can verify that you're a real person and not a bot
+     </message>
+     <message name="IDS_SETTINGS_ANTI_ABUSE_WHEN_ON_SECTION_ONE" desc="A description that informs users that Chrome saves a small amount of data when the anti-abuse features are enabled.">
+-      A site you visit can save a small amount of info with Chrome, mainly to validate you're not a bot
++      A site you visit can save a small amount of info with Blynx, mainly to validate you're not a bot
+     </message>
+     <message name="IDS_SETTINGS_ANTI_ABUSE_WHEN_ON_SECTION_TWO" desc="A description that informs users how the anti-abuse features work.">
+-      As you keep browsing, sites can check with Chrome and verify with a previous site you've visited that you're likely a real person
++      As you keep browsing, sites can check with Blynx and verify with a previous site you've visited that you're likely a real person
+     </message>
+     <message name="IDS_SETTINGS_ANTI_ABUSE_WHEN_ON_SECTION_THREE" desc="A description that informs users how their browsing could be helped by the anti-abuse features.">
+       Browsing is faster because a site is less likely to ask you to verify you're a real person
+@@ -1479,7 +1479,7 @@
+       Web &#38; App Activity
+     </message>
+     <message name="IDS_SETTINGS_PRIVACY_GUIDE_COMPLETION_CARD_AI_SETTINGS_LABEL" desc="Text of the AI Innovations sublabel in the completion card of the 'Privacy Guide'.">
+-      Learn more about how AI shapes your experience and the controls provided by Chrome
++      Learn more about how AI shapes your experience and the controls provided by Blynx
+     </message>
+     <message name="IDS_SETTINGS_PRIVACY_GUIDE_MSBB_CARD_HEADER" desc="Header of the 'make searches and browsing better' card in the 'Privacy Guide'.">
+       Choose your search and browsing quality
+@@ -1540,7 +1540,7 @@
+         Sends an obfuscated portion of the URL to Google through a privacy server that hides your IP address
+       </message>
+       <message name="IDS_SETTINGS_PRIVACY_GUIDE_SAFE_BROWSING_CARD_STANDARD_PROTECTION_PRIVACY_DESCRIPTION1_PROXY" desc="A part of the privacy description of the standard protection section of the safe browsing card in the 'Privacy Guide'.">
+-        If a site tries to steal your password, or when you download a harmful file, Chrome may also send URLs, including bits of page content, to Google
++        If a site tries to steal your password, or when you download a harmful file, Blynx may also send URLs, including bits of page content, to Google
+       </message>
+     </if>
+
+@@ -1696,10 +1696,10 @@
+     </message>
+     <if expr="_google_chrome">
+       <message name="IDS_SETTINGS_SAFEBROWSING_STANDARD_DESC_PROXY" desc="Description for safe browsing standard protection mode">
+-        Protects against sites, downloads, and extensions that are known to be dangerous. When you visit a site, Chrome sends an obfuscated portion of the URL to Google through a privacy server that hides your IP address. If a site does something suspicious, full URLs and bits of page content are also sent.
++        Protects against sites, downloads, and extensions that are known to be dangerous. When you visit a site, Blynx sends an obfuscated portion of the URL to Google through a privacy server that hides your IP address. If a site does something suspicious, full URLs and bits of page content are also sent.
+       </message>
+       <message name="IDS_SETTINGS_SAFEBROWSING_STANDARD_BULLET_TWO_PROXY" desc="Bullet point under the safe browsing standard protection mode">
+-        Sends an obfuscated portion of the URL to Google through a privacy server that hides your IP address. If a site tries to steal your password, or when you download a harmful file, Chrome may also send URLs, including bits of page content, to Google.
++        Sends an obfuscated portion of the URL to Google through a privacy server that hides your IP address. If a site tries to steal your password, or when you download a harmful file, Blynx may also send URLs, including bits of page content, to Google.
+       </message>
+     </if>
+     <message name="IDS_SETTINGS_SAFEBROWSING_STANDARD_EXPAND_ACCESSIBILITY_LABEL" desc="Label for the button that toggles showing the detailed description of safe browsing standard protection. Only visible by screen reader software.">
+@@ -2083,10 +2083,10 @@
+       Learn more about resetting settings
+     </message>
+     <message name="IDS_SETTINGS_RESET_AUTOMATED_DIALOG_V2_TITLE" desc="The title of the dialog informing the user that automated resetting of some settings occurred.">
+-      Chrome reset these settings
++      Blynx reset these settings
+     </message>
+     <message name="IDS_SETTINGS_RESET_AUTOMATED_DIALOG_V2_BODY" desc="The body of the dialog informing the user that automated resetting of some settings occurred.">
+-      These settings were changed from outside of Chrome. To protect you, Chrome reset them.
++      These settings were changed from outside of Blynx. To protect you, Blynx reset them.
+     </message>
+     <message name="IDS_SETTINGS_RESET_PINNED_TABS" desc="A string that is used to describe the pinned tabs setting.">
+       Pinned tabs
+@@ -2219,7 +2219,7 @@
+       Site search
+     </message>
+     <message name="IDS_SETTINGS_SEARCH_ENGINES_SITE_SEARCH_EXPLANATION" desc="Explanation for 'Site Search' section. Used interchangeably with IDS_SETTINGS_SEARCH_ENGINES_SITE_SEARCH_EXPLANATION_STARTER_PACK">
+-      To search a specific site or part of Chrome, type its shortcut in the address bar, followed by your preferred keyboard shortcut.
++      To search a specific site or part of Blynx, type its shortcut in the address bar, followed by your preferred keyboard shortcut.
+     </message>
+     <message name="IDS_SETTINGS_SEARCH_ENGINES_NO_SITES_ADDED" desc="Text shown when the 'Site Search' section is empty">
+       No sites added
+@@ -2234,7 +2234,7 @@
+       Extensions
+     </message>
+     <message name="IDS_SETTINGS_SEARCH_ENGINES_EXTENSION_ENGINES_EXPLANATION" desc="Explanation for a section that displays search engines added by extensions">
+-      Some extensions can add search engines to Chrome
++      Some extensions can add search engines to Blynx
+     </message>
+     <message name="IDS_SETTINGS_SEARCH_ENGINES_NAME" desc="Label for a table column that holds the name of a search engine or site search provider">
+       Name
+@@ -2907,7 +2907,7 @@
+     </if>
+     <if expr="is_win and _google_chrome">
+       <message name="IDS_SETTINGS_SITE_SETTINGS_PROTECTED_CONTENT_IDENTIFIERS_ALLOWED_SUB_LABEL" desc="A subtitle for the ‘Protected Content IDs’ setting, shown if user chooses to allow Protected Content IDs. This text explains that enabling protected content IDs may result in live captioning not working.">
+-        Chrome Live Caption might not work
++        Blynx Live Caption might not work
+       </message>
+     </if>
+     <message name="IDS_SETTINGS_SITE_SETTINGS_PROTOCOL_HANDLERS_DESCRIPTION" desc="Description of the protocol handlers content setting.">
+@@ -3124,7 +3124,7 @@
+       Insecure content is blocked by default on secure sites
+     </message>
+     <message name="IDS_SETTINGS_SITE_SETTINGS_PDF_DOWNLOAD_PDFS" desc="Label for downloading PDF documents instead of automatically opening them in Chrome.">
+-      Download PDF files instead of automatically opening them in Chrome
++      Download PDF files instead of automatically opening them in Blynx
+     </message>
+     <message name="IDS_SETTINGS_SITE_SETTINGS_RECENT_ACTIVITY" desc="Label for the section which contains the user's recent permissions changes">
+       Recent activity
+@@ -3409,7 +3409,7 @@
+       No sites added
+     </message>
+     <message name="IDS_SETTINGS_SITE_SETTINGS_BLOCK_AUTOPLAY" desc="A label for a toggle in site settings to block autoplay. If the toggle is on then Chrome will block autoplay by default and use an algorithm to determine which sites should still be able to autoplay. If the toggle is off then autoplay will be enabled for all sites.">
+-      Let Chrome choose when sites can play sound (recommended)
++      Let Blynx choose when sites can play sound (recommended)
+     </message>
+     <message name="IDS_SETTINGS_SITE_SETTINGS_EMPTY_ALL_SITES_PAGE" desc="Explanation shown when there are no sites that have appeared yet on the All Sites page.">
+       Sites you visit will appear here
+@@ -3593,7 +3593,7 @@
+
+     <!-- Sync / People Page -->
+     <message name="IDS_SETTINGS_PEOPLE" desc="Name of the settings page which manages the user's relationship to Google.">
+-      You and Google
++      You and Blynx
+     </message>
+     <message name="IDS_SETTINGS_CHANGE_PICTURE_PROFILE_PHOTO" desc="The text on the Google profile photo of the user.">
+       Google Profile photo
+@@ -3674,7 +3674,7 @@
+       Turn on to get your browsing history and tabs from other devices
+     </message>
+     <message name="IDS_SETTINGS_GOOGLE_SERVICES_PAGE_TITLE" desc="Name of the settings page for managing Google services.">
+-      Google services
++      Services and connections
+     </message>
+
+     <message name="IDS_SETTINGS_SYNC_DISCONNECT_EXPLANATION" desc="The text to display in the Sign out of Chrome dialog to stop syncing for non-managed profiles.">
+@@ -3690,7 +3690,7 @@
+       Show profile stats
+     </message>
+     <message name="IDS_SETTINGS_ENCRYPT_WITH_SYNC_PASSPHRASE_LABEL" desc="Label for the radio button which, when selected, causes synced settings to be encrypted with a user-provided password.">
+-      Encrypt synced data with your own <ph name="BEGIN_LINK">&lt;a href="$1" target=&quot;_blank&quot;&gt;<ex>&lt;a href="$1" target=&quot;_blank&quot;&gt;</ex></ph>sync passphrase<ph name="END_LINK">&lt;/a&gt;<ex>&lt;/a&gt;</ex></ph>. Payment methods and addresses from Google Pay won’t be encrypted. Browsing history from Chrome won’t sync.
++      Encrypt synced data with your own <ph name="BEGIN_LINK">&lt;a href="$1" target=&quot;_blank&quot;&gt;<ex>&lt;a href="$1" target=&quot;_blank&quot;&gt;</ex></ph>sync passphrase<ph name="END_LINK">&lt;/a&gt;<ex>&lt;/a&gt;</ex></ph>. Payment methods and addresses from Google Pay won’t be encrypted. Browsing history from Blynx won’t sync.
+     </message>
+     <message name="IDS_SETTINGS_PASSPHRASE_EXPLANATION_TEXT" desc="Message shown when explicit passphrase is selected.">
+       Only someone with your passphrase can read your encrypted data. The passphrase is not sent to or stored by Google. If you forget your passphrase or want to change this setting, you'll need to <ph name="BEGIN_LINK">&lt;a href="$1" target=&quot;_blank&quot;&gt;<ex>&lt;a href="$1" target=&quot;_blank&quot;&gt;</ex></ph>reset sync<ph name="END_LINK">&lt;/a&gt;<ex>&lt;/a&gt;</ex></ph>.
+@@ -3831,7 +3831,7 @@
+       When you ask questions about your history, you can get answers about specific information from a page you visited
+     </message>
+     <message name="IDS_SETTINGS_HISTORY_SEARCH_WITH_ANSWERS_CONSIDER_DATA_ENCRYPTED" desc="This is a bullet point in the ‘Things to consider’ column, which describes things users should consider about a feature. This string explains that AI features will save data to the user’s device in order to provide the feature’s respective benefit. The data will be appropriately encrypted for security. The tone should be informative.">
+-      As you browse sites, their page contents are encrypted and saved to your device. This may affect Chrome's performance
++      As you browse sites, their page contents are encrypted and saved to your device. This may affect Blynx's performance
+     </message>
+     <message name="IDS_SETTINGS_HISTORY_SEARCH_WITH_ANSWERS_CONSIDER_OUTDATED" desc="This is a bullet point in the ‘Things to consider’ column, which describes things users should consider about a feature. This string explains that history search results and answers powered by AI may become outdated since they are dependent on the user's last visit to the page contents.">
+       AI-powered history search results and answers may become outdated if site content has changed since your last visit
+@@ -3926,7 +3926,7 @@
+         </message>
+       </if>
+       <message name="IDS_SETTINGS_SYSTEM_FEATURE_NOTIFICATIONS_LABEL" desc="Label for the toggle that enables Chrome system notifications about features.">
+-        Show system notifications about Chrome features and tips
++        Show system notifications about Blynx features and tips
+       </message>
+       <message name="IDS_SETTINGS_SYSTEM_PROXY_SETTINGS_LABEL" desc="Label for the control that opens the system network proxy settings. These settings apply to the entire computer.">
+         Open your computer's proxy settings
+@@ -3952,10 +3952,10 @@
+         On-device AI
+       </message>
+       <message name="IDS_SETTINGS_SYSTEM_FEATURE_ON_DEVICE_AI_ENABLED_SUB_LABEL" desc="This string describes what turning off the toggle implies.">
+-        To power features like scam detection, Chrome can use AI models that run directly on your device. When this is off, these features might not work. <ph name="BEGIN_LINK">&lt;a href="$1" target="_blank" aria-description="$2"&gt;</ph>Learn more about on-device AI<ph name="END_LINK">&lt;/a&gt;</ph>
++        To power features like scam detection, Blynx can use AI models that run directly on your device. When this is off, these features might not work. <ph name="BEGIN_LINK">&lt;a href="$1" target="_blank" aria-description="$2"&gt;</ph>Learn more about on-device AI<ph name="END_LINK">&lt;/a&gt;</ph>
+       </message>
+       <message name="IDS_SETTINGS_SYSTEM_ON_DEVICE_AI_LINK_SUBTITLE" desc="Subtitle for the link row that points to the on-device AI settings.">
+-        Choose whether Chrome uses AI models that run directly on your device
++        Choose whether Blynx uses AI models that run directly on your device
+       </message>
+     </if>
+
+@@ -4245,7 +4245,7 @@
+       Enhanced Safe Browsing is on
+     </message>
+     <message name="IDS_SETTINGS_SAFETY_HUB_SB_ON_ENHANCED_SUBHEADER" desc="Safety Hub settings page (chrome://settings/safetyHub) gives users an overview over their safety status. Safe browsing card in this page shows the current state of Safe browsing setting (chrome://settings/security). This string is the body text of the Safe Browsing card when the current state is Enhanced protection.">
+-      You have Chrome's strongest security
++      You have Blynx's strongest security
+     </message>
+     <message name="IDS_SETTINGS_SAFETY_HUB_SB_ON_STANDARD_HEADER" desc="Safety Hub settings page (chrome://settings/safetyHub) gives users an overview over their safety status. Safe browsing card in this page shows the current state of Safe browsing setting (chrome://settings/security). This string is the headline of the Safe Browsing card when the current state is Standard protection.">
+       Safe Browsing is on
+@@ -4355,10 +4355,10 @@
+         AI innovations
+       </message>
+       <message name="IDS_SETTINGS_AI_PAGE_TITLE" desc="This label is on the left Navigation sidebar in Chrome’s settings. It tells the user that they can see settings related to AI (artificial intelligence) in this section. It is a noun phrase that refers to our collection of AI settings. These settings include Help me write and more.">
+-        AI in Chrome
++        AI in Blynx
+       </message>
+       <message name="IDS_SETTINGS_AI_PAGE_MAIN_SUBLABEL_3" desc="This is a bullet point on a card that sets the context for the ‘AI innovations’ section of Chrome’s settings. Here, the user can see settings related to AI (artificial intelligence) in this section; these settings include Help me write and more. This bullet point is after the ‘Reimagine Chrome, supercharged with AI’ title and ‘Things to consider’ subheading. We want users to read this card and understand the considerations that apply to all Chrome’s AI features. This bullet point specifically notes that AI features are actively developing and results may include errors. The tone should be informative.">
+-        Data sent to Google may be seen by human reviewers to improve Chrome AI’s technology
++        Data sent to Google may be seen by human reviewers to improve Blynx AI’s technology
+       </message>
+       <message name="IDS_SETTINGS_AI_PAGE_MAIN_MANAGED_LEARN_MORE_ACCESSIBILITY_LABEL" desc="This string is found in a link that takes the user to the AI features and policies help center article when the user taps it. The tone should be informative">
+         Learn more about using generative AI at work
+@@ -4381,7 +4381,7 @@
+         Automated Password Change
+       </message>
+       <message name="IDS_SETTINGS_PASSWORD_CHANGE_SUBLABEL" desc="Sublabel for password change entry in settings. The description of the feature beneath the “Automated password change” feature title. This and the bullets beneath this paragraph represent the full description of the feature. * “public” does two things: 1) it provides distance between “Chrome” and “data breach”, because we don’t want users to associate the breach with Chrome (Chrome didn’t have a data leak, 2) and related, it might reassure the user to know that Chrome is using public information to establish these lists of compromised passwords. * “Google Password Manager can offer…”: The user has to agree to have this feature update their password for them each time. So Google Password Manager is ‘offering’ to do something for the user.">
+-        If Chrome finds one of your passwords in a public data breach, Google Password Manager can offer to change your password for you if you're signed in.
++        If Blynx finds one of your passwords in a public data breach, Google Password Manager can offer to change your password for you if you're signed in.
+       </message>
+       <message name="IDS_SETTINGS_PASSWORD_CHANGE_DATA_BREACH" desc="Bullet 1 of 2 that appears beneath the “When used” subtitle. This string is repetitive of the feature description, but we want to have a complete description of what happens when the feature is used. * “Google Password Manager asks…”: This part is similar to the general feature description above, but it’s written as if the feature is being used by the user, so we use “asks” and not “can offer”. * “Strong password”: As an existing autofill feature, Google Password Manager can offer to generate and save passwords for the user. These passwords are typically stronger than passwords the user might create on their own">
+         If one of your passwords is found in a data breach, Google Password Manager asks if you want it changed to a strong password
+@@ -4417,7 +4417,7 @@
+
+   <!-- Experimental settings strings -->
+   <message name="IDS_SETTINGS_AI_PAGE_MAIN_TITLE" desc="This string is the title of a card that sets the context for the ‘AI innovations’ section of Chrome’s settings. Here, the user can see settings related to AI (artificial intelligence) in this section; these settings include Help me write and more. This title is before the ‘Things to consider’ subheading and bullet points. We want users to read this card and understand the considerations that apply to all Chrome’s AI features. The tone should be motivating." formatter_data="android_java">
+-    Reimagine Chrome, supercharged with AI
++    Reimagine Blynx, supercharged with AI
+   </message>
+   <message name="IDS_SETTINGS_AI_PAGE_MAIN_SUBLABEL_1" desc="This is a bullet point on a card that sets the context for the ‘AI innovations’ section of Chrome’s settings. Here, the user can see settings related to AI (artificial intelligence) in this section; these settings include Help me write and more. This bullet point is after the ‘Reimagine Chrome, supercharged with AI’ title and ‘Things to consider’ subheading. We want users to read this card and understand the considerations that apply to all Chrome’s AI features. This bullet point specifically notes that AI features are actively developing and results may include errors. The tone should be informative." formatter_data="android_java">
+     These features use AI, are in early development, and won’t always get it right
+diff --git a/chrome/app/shared_settings_strings.grdp b/chrome/app/shared_settings_strings.grdp
+index 35ef542fa8..b1f7a7e6f6 100644
+--- a/chrome/app/shared_settings_strings.grdp
++++ b/chrome/app/shared_settings_strings.grdp
+@@ -101,10 +101,10 @@
+     Supported Live Caption languages
+   </message>
+   <message name="IDS_SETTINGS_CAPTIONS_MANAGE_LANGUAGES_SUBTITLE" desc="Subtitle for the caption settings section for managing language packs.">
+-    Chrome can create and translate captions for the languages shown here
++    Blynx can create and translate captions for the languages shown here
+   </message>
+   <message name="IDS_SETTINGS_CAPTIONS_MANAGE_LANGUAGES_SUBTITLE_LIVE_CAPTION_ONLY" desc="Subtitle for the caption settings section for managing language packs without live translate.">
+-    Chrome can create captions for the languages shown here
++    Blynx can create captions for the languages shown here
+   </message>
+   <message name="IDS_SETTINGS_CAPTIONS_LIVE_TRANSLATE_TARGET_LANGUAGE" desc="Description of the target language setting for the Live Translate feature.">
+     Translate captions to
+@@ -240,7 +240,7 @@
+     Enhanced spell check
+   </message>
+   <message name="IDS_SETTINGS_ENABLE_LOGGING_PREF" desc="The label of the checkbox to enable/disable crash and user metrics logging. This string does not need a Chromium counter-part because it will only be visible if Google-branded.">
+-    Help improve Chrome's features and performance
++    Help improve Blynx's features and performance
+   </message>
+   <message name="IDS_SETTINGS_ENABLE_LOGGING_PREF_DESC" desc="The description of the checkbox to enable/disable crash and user metrics logging">
+     Automatically sends usage statistics and crash reports to Google
+@@ -259,7 +259,7 @@
+     Sync is paused
+   </message>
+   <message name="IDS_SETTINGS_PEOPLE_SIGN_IN_PROMPT" desc="The text displayed to prompt users to sign in to chrome.">
+-    Get Google smarts in Chrome
++    Get Google smarts in Blynx
+   </message>
+   <message name="IDS_SETTINGS_PEOPLE_SYNC_TURN_OFF" desc="The label for the button that lets the user turn off profile syncing with their gaia account.">
+     Turn off
+@@ -423,12 +423,12 @@
+     You can turn on sync anytime in settings
+   </message>
+   <message name="IDS_SYNC_UNAVAILABLE_FOR_NON_GOOGLE_ACCOUNT" desc="Text explaining that Sync service is unavailable for Dasherless profile.">
+-    This account isn't associated with Google so features such as Chrome sync are unavailable
++    This account isn't associated with Google so features such as Blynx sync are unavailable
+   </message>
+
+   <if expr="is_chromeos">
+     <message name="IDS_BROWSER_SETTINGS_SYNC_FEATURE_LABEL" desc="Label describing the browser sync feature.">
+-      Your data will be synced across all Chrome browsers where you have turned on sync for this account. For ChromeOS sync options, go to <ph name="LINK_BEGIN">&lt;a&gt;</ph>ChromeOS settings<ph name="LINK_END">&lt;/a&gt;</ph>.
++      Your data will be synced across all Blynx browsers where you have turned on sync for this account. For ChromeOS sync options, go to <ph name="LINK_BEGIN">&lt;a&gt;</ph>ChromeOS settings<ph name="LINK_END">&lt;/a&gt;</ph>.
+     </message>
+     <message name="IDS_SETTINGS_COOKIES_CHECKBOX_LABEL" desc="Label for the checkbox which enables or disables syncing cookies between multiple browser instances.">
+       Cookies
+diff --git a/chrome/app/extensions_strings.grdp b/chrome/app/extensions_strings.grdp
+index cda942a9cc..a70c1b123c 100644
+--- a/chrome/app/extensions_strings.grdp
++++ b/chrome/app/extensions_strings.grdp
+@@ -521,7 +521,7 @@
+     Scope
+   </message>
+   <message name="IDS_EXTENSIONS_APPS_TITLE" desc="The text displayed in the sidebar to go to the apps section of the page.">
+-    Chrome Apps
++    Blynx Apps
+   </message>
+   <message name="IDS_EXTENSIONS_REMOVE" desc="The generic label for a button to remove an entry.">
+     Remove
+@@ -734,16 +734,16 @@
+     Supercharge your browser with extensions and themes
+   </message>
+   <message name="IDS_EXTENSIONS_ZERO_STATE_CHIPS_IPH_DESCRIPTION" desc="An one line description for the extensions zero state in-product-help promo.">
+-    Extensions are add-ons for Chrome that can help you do more
++    Extensions are add-ons for Blynx that can help you do more
+   </message>
+   <message name="IDS_EXTENSIONS_ZERO_STATE_CHIPS_WITH_LINK_IPH_LINK_LABEL" desc="A label of extensions links to chrome web store home page.">
+     Extensions
+   </message>
+   <message name="IDS_EXTENSIONS_ZERO_STATE_CHIPS_WITH_LINK_IPH_DESCRIPTION" desc="An one line description for the extensions zero state in-product-help promo with links to chrome web store home page.">
+-    are add-ons for Chrome that can help you do more
++    are add-ons for Blynx that can help you do more
+   </message>
+   <message name="IDS_EXTENSIONS_ZERO_STATE_PLAIN_LINK_IPH_DESCRIPTION" desc="An one line description for the extensions zero state in-product-help promo.">
+-    Extensions are add-ons to Chrome that can help you
++    Extensions are add-ons to Blynx that can help you
+   </message>
+   <message name="IDS_EXTENSIONS_ZERO_STATE_IPH_SHOPPING_CATEGORY_LABEL" desc="Label for the button that opens the Chrome Web Store shopping category page.">
+     Find coupons
+diff --git a/ui/webui/resources/cr_elements/icons.html.ts b/ui/webui/resources/cr_elements/icons.html.ts
+index d3f4f9fb26..9341f7d63f 100644
+--- a/ui/webui/resources/cr_elements/icons.html.ts
++++ b/ui/webui/resources/cr_elements/icons.html.ts
+@@ -94,9 +94,7 @@ if (document.documentElement.hasAttribute('webui-rounded-icons')) {
+       <g id="chevron-right">
+         <path d="m13.05 12-4.1-4.102a.87.87 0 0 1-.274-.636.87.87 0 0 1 .273-.637.879.879 0 0 1 1.277 0l4.75 4.75a.84.84 0 0 1 .188.29c.04.105.063.218.063.335 0 .117-.024.23-.063.336a.84.84 0 0 1-.187.289l-4.75 4.75a.822.822 0 0 1-.625.262.902.902 0 0 1-.625-.285.883.883 0 0 1-.278-.641.88.88 0 0 1 .278-.637Zm0 0"></path>
+       </g>
+-      <g id="chrome-product">
+-        <path d="M9.45 14.574c.698.7 1.55 1.051 2.55 1.051 1 0 1.852-.352 2.55-1.05.7-.7 1.052-1.552 1.052-2.552s-.352-1.847-1.051-2.546C13.85 8.773 13 8.426 12 8.426c-1 0-1.852.347-2.55 1.05-.7.7-1.052 1.547-1.052 2.547 0 1 .352 1.852 1.051 2.551ZM12 17.426c.184 0 .371-.004.563-.012.19-.012.378-.039.562-.09l-2.45 4.2c-2.402-.266-4.378-1.31-5.937-3.126-1.558-1.816-2.34-3.941-2.34-6.375 0-.714.082-1.418.239-2.109.16-.691.398-1.371.715-2.039l4 6.852A4.988 4.988 0 0 0 9.3 16.71a5.346 5.346 0 0 0 2.699.715Zm0-10.801a5.114 5.114 0 0 0-3.164 1.05 5.499 5.499 0 0 0-1.938 2.7L4.45 6.125a8.93 8.93 0 0 1 3.313-2.738A9.61 9.61 0 0 1 12 2.426c1.582 0 3.074.375 4.477 1.125a9.739 9.739 0 0 1 3.449 3.074Zm8.898 1.8c.25.583.43 1.177.54 1.774.109.602.164 1.211.164 1.824 0 2.586-.836 4.754-2.5 6.516-1.668 1.758-3.793 2.777-6.375 3.063l3.921-6.875c.235-.418.418-.852.551-1.301a5.058 5.058 0 0 0-.176-3.324A5.943 5.943 0 0 0 16 8.426Zm0 0"></path>
+-      </g>
++      <g id="chrome-product" viewBox="0 0 24 24"><path d="M2 12C5 4 16 3 22 8C16 5 7 7 5 12C8 18 17 18 22 13C18 22 7 22 2 12ZM8 12A4 4 0 1 0 16 12A4 4 0 1 0 8 12Z"></path></g>
+       <g id="close">
+         <path d="m12 13.273-4.102 4.102a.816.816 0 0 1-.625.262.91.91 0 0 1-.625-.285.879.879 0 0 1 0-1.278L10.727 12 6.625 7.898a.83.83 0 0 1-.262-.636.914.914 0 0 1 .285-.637.879.879 0 0 1 1.278 0L12 10.727l4.102-4.102a.87.87 0 0 1 .636-.273.87.87 0 0 1 .637.273.87.87 0 0 1 .273.637.87.87 0 0 1-.273.636L13.273 12l4.102 4.102c.184.183.273.39.273.625 0 .23-.09.441-.273.625a.87.87 0 0 1-.637.273.87.87 0 0 1-.636-.273Zm0 0"></path>
+       </g>
+@@ -317,10 +315,7 @@ if (document.documentElement.hasAttribute('webui-rounded-icons')) {
+       <g id="chevron-right">
+         <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+       </g>
+-      <g id="chrome-product" viewBox="0 -960 960 960">
+-        <path d="M336-479q0 60 42 102t102 42q60 0 102-42t42-102q0-60-42-102t-102-42q-60 0-102 42t-42 102Zm144 216q11 0 22.5-.5T525-267L427-99q-144-16-237.5-125T96-479q0-43 9.5-84.5T134-645l160 274q28 51 78 79.5T480-263Zm0-432q-71 0-126.5 42T276-545l-98-170q53-71 132.5-109.5T480-863q95 0 179 45t138 123H480Zm356 72q15 35 21.5 71t6.5 73q0 155-100 260.5T509-96l157-275q14-25 22-52t8-56q0-40-15-77t-41-67h196Z">
+-        </path>
+-      </g>
++      <g id="chrome-product" viewBox="0 0 24 24"><path d="M2 12C5 4 16 3 22 8C16 5 7 7 5 12C8 18 17 18 22 13C18 22 7 22 2 12ZM8 12A4 4 0 1 0 16 12A4 4 0 1 0 8 12Z"></path></g>
+       <g id="close">
+         <path
+           d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z">
+diff --git a/chrome/browser/ui/views/frame/browser_view.cc b/chrome/browser/ui/views/frame/browser_view.cc
+index 32b047fd1f..e7ffe39535 100644
+--- a/chrome/browser/ui/views/frame/browser_view.cc
++++ b/chrome/browser/ui/views/frame/browser_view.cc
+@@ -37,6 +37,7 @@
+ #include "base/task/sequenced_task_runner.h"
+ #include "base/task/single_thread_task_runner.h"
+ #include "base/trace_event/trace_event.h"
++#include "browser/ui/native_appearance_controller.h"
+ #include "build/build_config.h"
+ #include "chrome/app/chrome_command_ids.h"
+ #include "chrome/browser/actor/ui/actor_overlay_web_view.h"
+@@ -93,6 +94,7 @@
+ #include "chrome/browser/ui/browser_window/public/global_browser_collection.h"
+ #include "chrome/browser/ui/browser_window_state.h"
+ #include "chrome/browser/ui/browser_window_theme_observer.h"
++#include "chrome/browser/ui/chrome_pages.h"
+ #include "chrome/browser/ui/color/chrome_color_id.h"
+ #include "chrome/browser/ui/dialogs/browser_dialogs.h"
+ #include "chrome/browser/ui/exclusive_access/exclusive_access_context.h"
+@@ -2620,6 +2622,19 @@ void BrowserView::OnWindowDidShow() {
+     return;
+   }
+
++  if (!headless::IsHeadlessMode() &&
++      browser::ShouldShowBlynxOnboarding(*browser_->GetProfile())) {
++    base::SingleThreadTaskRunner::GetCurrentDefault()->PostTask(
++        FROM_HERE, base::BindOnce(
++                       [](base::WeakPtr<BrowserWindowInterface> window) {
++                         if (window) {
++                           chrome::ShowSettingsSubPage(window.get(),
++                                                       "appearance");
++                         }
++                       },
++                       browser_->GetWeakPtr()));
++  }
++
+   // Show any pending global error bubble.
+   GlobalErrorService* service =
+       GlobalErrorServiceFactory::GetForProfile(browser_->GetProfile());
+diff --git a/chrome/app/password_manager_ui_strings.grdp b/chrome/app/password_manager_ui_strings.grdp
+index c3ed41189b..9eea3f907b 100644
+--- a/chrome/app/password_manager_ui_strings.grdp
++++ b/chrome/app/password_manager_ui_strings.grdp
+@@ -55,7 +55,7 @@
+     Share
+   </message>
+   <message name="IDS_PASSWORD_MANAGER_UI_SHARE_PASSWORD_ERROR_DESCRIPTION" desc="The descrtiption of the unknown error dialog in the password sharing flow.">
+-    Your password wasn’t shared. Check your internet connection and make sure you’re signed in to Chrome. Then, try again.
++    Your password wasn’t shared. Check your internet connection and make sure you’re signed in to Blynx. Then, try again.
+   </message>
+   <message name="IDS_PASSWORD_MANAGER_UI_SHARE_PASSWORD_ERROR_TITLE" desc="The title of the unknown error dialog in the password sharing flow.">
+     Something went wrong
+@@ -94,7 +94,7 @@
+     View family
+   </message>
+   <message name="IDS_PASSWORD_MANAGER_UI_SHARE_PASSWORD_MEMBER_UNAVAILABLE" desc="The text on the tooltip for password sharing recipient. It is shown when the recipient (Google Family member) is unable to receive passwords.">
+-    Your family member can't receive passwords right now. Ask them to update Chrome and sync their passwords.
++    Your family member can't receive passwords right now. Ask them to update Blynx and sync their passwords.
+   </message>
+   <message name="IDS_PASSWORD_MANAGER_UI_SHARING_IS_MANAGED_BY_ADMIN" desc="The text shown on the tooltip next to the disabled password share button.">
+     Password sharing is managed by your administrator
+@@ -645,7 +645,7 @@
+     Google Password Manager on the web
+   </message>
+   <message name="IDS_PASSWORD_MANAGER_UI_WEB_PROMO_CARD_DESCRIPTION" desc="Description for the Password Manager on the web promo card.">
+-    View your passwords even when you're not using Chrome or Android by signing in to <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1"&gt;</ph>passwords.google.com<ph name="END_LINK">&lt;/a&gt;</ph>
++    View your passwords even when you're not using Blynx or Android by signing in to <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1"&gt;</ph>passwords.google.com<ph name="END_LINK">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_PASSWORD_MANAGER_UI_SHORTCUT_PROMO_CARD_TITLE" desc="Title for the Password Manager shortcut promo card.">
+     Get here quicker
+@@ -709,7 +709,7 @@
+   </message>
+   <if expr="is_macosx">
+     <message name="IDS_PASSWORD_MANAGER_UI_MANAGE_PASSKEYS_FROM_PROFILE_LABEL" desc="The label on a row that a user can click in order to see and delete passkeys saved on their computer. For consistency, the word 'passkey' is in the glossary with translations already suggested.">
+-      Manage passkeys in your Chrome profile
++      Manage passkeys in your Blynx profile
+     </message>
+   </if>
+   <if expr="is_win">
+@@ -888,7 +888,7 @@
+         Google Password Manager needs access to MacOS Keychain
+       </message>
+       <message name="IDS_PASSWORD_MANAGER_UI_RELAUNCH_CHROME_PROMO_CARD_DESCRIPTION" desc="Description for the Relaunch Chrome promo card.">
+-        To use Google Password Manager with macOS Keychain, relaunch Chrome and allow Keychain access. Your tabs will reopen after relaunching.
++        To use Google Password Manager with macOS Keychain, relaunch Blynx and allow Keychain access. Your tabs will reopen after relaunching.
+       </message>
+     </then>
+     <else>
+@@ -896,7 +896,7 @@
+         Password Manager needs access to MacOS Keychain
+       </message>
+       <message name="IDS_PASSWORD_MANAGER_UI_RELAUNCH_CHROME_PROMO_CARD_DESCRIPTION" desc="Description for not branded Relaunch ChrChromiumome promo card.">
+-        To use Password Manager with macOS Keychain, relaunch Chromium and allow Keychain access. Your tabs will reopen after relaunching.
++        To use Password Manager with macOS Keychain, relaunch Blynx and allow Keychain access. Your tabs will reopen after relaunching.
+       </message>
+     </else>
+     </if>
+@@ -908,7 +908,7 @@
+         Google Password Manager needs more access
+       </message>
+       <message name="IDS_PASSWORD_MANAGER_UI_RELAUNCH_CHROME_PROMO_CARD_DESCRIPTION_LINUX" desc="Description for the Relaunch Chrome promo card.">
+-        To use Google Password Manager with your operating system, relaunch Chrome and allow access to your computer's password manager. Your tabs will reopen after relaunching.
++        To use Google Password Manager with your operating system, relaunch Blynx and allow access to your computer's password manager. Your tabs will reopen after relaunching.
+       </message>
+     </then>
+     <else>
+@@ -916,7 +916,7 @@
+         Password Manager needs more access
+       </message>
+       <message name="IDS_PASSWORD_MANAGER_UI_RELAUNCH_CHROME_PROMO_CARD_DESCRIPTION_LINUX" desc="Description for the Relaunch Chromium promo card.">
+-        To use Password Manager with your operating system, relaunch Chromium and allow access to your computer's password manager. Your tabs will reopen after relaunching.
++        To use Password Manager with your operating system, relaunch Blynx and allow access to your computer's password manager. Your tabs will reopen after relaunching.
+       </message>
+     </else>
+     </if>
+@@ -925,12 +925,12 @@
+     <if expr="_google_chrome">
+     <then>
+       <message name="IDS_PASSWORD_MANAGER_UI_RELAUNCH_CHROME_PROMO_CARD_ACTION" desc="Action button for the Relaunch Chrome promo card.">
+-        Relaunch Chrome
++        Relaunch Blynx
+       </message>
+     </then>
+     <else>
+       <message name="IDS_PASSWORD_MANAGER_UI_RELAUNCH_CHROME_PROMO_CARD_ACTION" desc="Action button for not branded Relaunch Chrome promo card.">
+-        Relaunch Chromium
++        Relaunch Blynx
+       </message>
+     </else>
+     </if>
+@@ -1023,12 +1023,12 @@
+   <if expr="_google_chrome">
+   <then>
+     <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_TOAST_SIGN_IN_TO_CONTINUE" desc="Text displayed on the password change toast during the password change flow when the user should deal with a second-factor authentication before the flow proceeds.">
+-      You need to sign in before Chrome can finish this task
++      You need to sign in before Blynx can finish this task
+     </message>
+   </then>
+   <else>
+     <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_TOAST_SIGN_IN_TO_CONTINUE" desc="The description for the automated password change entry in Password Manager settings.">
+-      You need to sign in before Chromium can finish this task
++      You need to sign in before Blynx can finish this task
+     </message>
+   </else>
+   </if>
+@@ -1094,12 +1094,12 @@
+   <if expr="_google_chrome">
+   <then>
+     <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_SETTINGS_DESCRIPTION" desc="The description for the automated password change entry in Password Manager settings.">
+-      If Chrome finds one of your passwords in a public data breach, it can offer to change your password for you if you're signed in
++      If Blynx finds one of your passwords in a public data breach, it can offer to change your password for you if you're signed in
+     </message>
+   </then>
+   <else>
+     <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_SETTINGS_DESCRIPTION" desc="The description for the automated password change entry in Password Manager settings.">
+-      If Chromium finds one of your passwords in a public data breach, it can offer to change your password for you if you're signed in
++      If Blynx finds one of your passwords in a public data breach, it can offer to change your password for you if you're signed in
+     </message>
+   </else>
+   </if>
+@@ -1109,12 +1109,12 @@
+   <if expr="_google_chrome">
+   <then>
+     <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_SETTINGS_WITH_PRIVATE_INFERENCE_DESCRIPTION" desc="The description for the automated password change entry in Password Manager settings.">
+-      If Chrome finds one of your passwords in a public data breach, Google Password Manager can offer to change it for you when you're signed in.
++      If Blynx finds one of your passwords in a public data breach, Google Password Manager can offer to change it for you when you're signed in.
+     </message>
+   </then>
+   <else>
+     <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_SETTINGS_WITH_PRIVATE_INFERENCE_DESCRIPTION" desc="The description for the automated password change entry in Password Manager settings.">
+-      If Chromium finds one of your passwords in a public data breach, Google Password Manager can offer to change it for you when you're signed in.
++      If Blynx finds one of your passwords in a public data breach, Google Password Manager can offer to change it for you when you're signed in.
+     </message>
+   </else>
+   </if>
+@@ -1132,7 +1132,7 @@
+     </message>
+   </if>
+   <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_CHECKUP_BUTTON_ARIA_DESCRIPTION" desc="An accessibility description for the automated password change button in Password Manager checkup.">
+-    Let Chromium automatically change password for <ph name="WEBSITE">$1<ex>website.com</ex></ph>
++    Let Blynx automatically change password for <ph name="WEBSITE">$1<ex>website.com</ex></ph>
+   </message>
+   <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_ATTEMPTING_SIGN_IN" desc="Status text on the button when automated password change is attempting to sign the user in.">
+     Attempting sign-in...
+@@ -1155,12 +1155,12 @@
+   <if expr="_google_chrome">
+   <then>
+     <message name="IDS_SETTINGS_PASSWORD_CHANGE_SUBLABEL_WITH_LEARN_MORE" desc="Sublabel for password change entry in settings. The description of the feature beneath the 'Automated password change' feature title. This and the bullets beneath this paragraph represent the full description of the feature. * 'public' does two things: 1) it provides distance between 'Chrome' and 'data breach', because we don’t want users to associate the breach with Chrome (Chrome didn’t have a data leak, 2) and related, it might reassure the user to know that Chrome is using public information to establish these lists of compromised passwords. * 'Google Password Manager can offer…': The user has to agree to have this feature update their password for them each time. So Google Password Manager is ‘offering’ to do something for the user.">
+-      If Chrome finds one of your passwords in a public data breach, Google Password Manager can offer to change your password for you if you're signed in. <ph name="BEGIN_LINK">&lt;a href="$1" target="_blank"&gt;</ph>More about automated password change<ph name="END_LINK">&lt;/a&gt;</ph>
++      If Blynx finds one of your passwords in a public data breach, Google Password Manager can offer to change your password for you if you're signed in. <ph name="BEGIN_LINK">&lt;a href="$1" target="_blank"&gt;</ph>More about automated password change<ph name="END_LINK">&lt;/a&gt;</ph>
+     </message>
+   </then>
+   <else>
+     <message name="IDS_SETTINGS_PASSWORD_CHANGE_SUBLABEL_WITH_LEARN_MORE" desc="Sublabel for password change entry in settings. The description of the feature beneath the 'Automated password change' feature title. This and the bullets beneath this paragraph represent the full description of the feature. * 'public' does two things: 1) it provides distance between 'Chrome' and 'data breach', because we don’t want users to associate the breach with Chrome (Chrome didn’t have a data leak, 2) and related, it might reassure the user to know that Chrome is using public information to establish these lists of compromised passwords. * 'Google Password Manager can offer…': The user has to agree to have this feature update their password for them each time. So Google Password Manager is ‘offering’ to do something for the user.">
+-      If Chromium finds one of your passwords in a public data breach, Google Password Manager can offer to change your password for you if you're signed in. <ph name="BEGIN_LINK">&lt;a href="$1" target="_blank"&gt;</ph>More about automated password change<ph name="END_LINK">&lt;/a&gt;</ph>
++      If Blynx finds one of your passwords in a public data breach, Google Password Manager can offer to change your password for you if you're signed in. <ph name="BEGIN_LINK">&lt;a href="$1" target="_blank"&gt;</ph>More about automated password change<ph name="END_LINK">&lt;/a&gt;</ph>
+     </message>
+   </else>
+   </if>
+@@ -1176,12 +1176,12 @@
+   <if expr="_google_chrome">
+     <then>
+       <message name="IDS_PASSWORD_MANAGER_UI_USER_INTERVENTION_NEEDED_TITLE" desc="Title of a dialog shown when the automated password change stops because the website requires identity verification.">
+-        Chrome needs help changing your password
++        Blynx needs help changing your password
+       </message>
+     </then>
+     <else>
+       <message name="IDS_PASSWORD_MANAGER_UI_USER_INTERVENTION_NEEDED_TITLE" desc="Title of a dialog shown when the automated password change stops because the website requires identity verification.">
+-        Chromium needs help changing your password
++        Blynx needs help changing your password
+       </message>
+     </else>
+   </if>
+diff --git a/chrome/app/glic_strings.grdp b/chrome/app/glic_strings.grdp
+index 57e4395e56..8136869020 100644
+--- a/chrome/app/glic_strings.grdp
++++ b/chrome/app/glic_strings.grdp
+@@ -118,7 +118,7 @@
+     Your organization has turned off this feature
+   </message>
+   <message name="IDS_GLIC_INELIGIBLE_ACCOUNT_NOTICE_HEADER" desc="This is the headline on the Gemini ineligible account notice.">
+-    Your account doesn't have access to Gemini in Chrome
++    Your account doesn't have access to Gemini in Blynx
+   </message>
+   <message name="IDS_GLIC_INELIGIBLE_ACCOUNT_NOTICE" desc="This is the text of the Gemini ineligible account notice.">
+     Check that you're eligible and meet the requirements
+@@ -151,7 +151,7 @@
+     Preview
+   </message>
+   <message name="IDS_SETTINGS_GLIC_INLINE_CUE_MENU_PREVIEW_TEXT" desc="Text displayed in the preview box with highlighted words.">
+-    Chrome is made possible by the Chromium open source project and other <ph name="BEGIN_HIGHLIGHT">&lt;span class="preview-highlight-box"&gt;&lt;span class="preview-highlight-text"&gt;</ph>open source<ph name="END_HIGHLIGHT">&lt;/span&gt;&lt;/span&gt;</ph> software.
++    Blynx is made possible by the Blynx open source project and other <ph name="BEGIN_HIGHLIGHT">&lt;span class="preview-highlight-box"&gt;&lt;span class="preview-highlight-text"&gt;</ph>open source<ph name="END_HIGHLIGHT">&lt;/span&gt;&lt;/span&gt;</ph> software.
+   </message>
+   <message name="IDS_SETTINGS_GLIC_INLINE_CUE_MENU_PREVIEW_PILL" desc="Text inside the floating pill in the preview box.">
+     Explain
+@@ -325,22 +325,22 @@
+        and will be finalized and replaced next week. This also includes finalizing the links for
+        "Learn more about Gemini Spark" and "unexpected actions". -->
+   <message name="IDS_GLIC_EXPERIMENTAL_OPT_IN_TITLE" desc="Title for the experimental opt-in dialog" is_accessibility_with_no_ui="true">
+-    First, turn on Chrome auto browse for this device
++    First, turn on Blynx auto browse for this device
+   </message>
+   <message name="IDS_SETTINGS_GLIC_EXPERIMENTAL_TRIGGERING_TOGGLE" desc="Label for the Gemini experimental triggering setting">
+     Let Gemini Spark browse on this device
+   </message>
+   <message name="IDS_SETTINGS_GLIC_EXPERIMENTAL_TRIGGERING_SUB_LABEL" desc="Sublabel explaining Gemini Spark feature.">
+-    Gemini Spark can use Chrome auto browse on this device to interact with sites and complete tasks on your behalf. <ph name="LINK_BEGIN">&lt;a href="#"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
++    Gemini Spark can use Blynx auto browse on this device to interact with sites and complete tasks on your behalf. <ph name="LINK_BEGIN">&lt;a href="#"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_SETTINGS_GLIC_EXPERIMENTAL_TRIGGERING_SUB_LABEL_V2" desc="Sublabel explaining Gemini Spark feature with accessible link attributes.">
+-    Gemini Spark can use Chrome auto browse on this device to interact with sites and complete tasks on your behalf. <ph name="LINK_BEGIN">&lt;a href="$1" target="_blank" aria-label="$2" aria-description="$3"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
++    Gemini Spark can use Blynx auto browse on this device to interact with sites and complete tasks on your behalf. <ph name="LINK_BEGIN">&lt;a href="$1" target="_blank" aria-label="$2" aria-description="$3"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_SETTINGS_GLIC_EXPERIMENTAL_TRIGGERING_SUB_LABEL_LEARN_MORE_LINK_LABEL" desc="Accessible name for the 'Learn more' link in the Gemini Spark toggle sublabel." is_accessibility_with_no_ui="true">
+     Learn more about Gemini Spark
+   </message>
+   <message name="IDS_SETTINGS_GLIC_EXPERIMENTAL_TRIGGERING_WHEN_ON_1" desc="Bullet point explaining what happens when Gemini Spark is enabled.">
+-    Gemini Spark can only use auto browse on this device if the device is awake and Chrome is running.
++    Gemini Spark can only use auto browse on this device if the device is awake and Blynx is running.
+   </message>
+   <message name="IDS_SETTINGS_GLIC_EXPERIMENTAL_TRIGGERING_WHEN_ON_2" desc="Bullet point explaining notifications when Gemini Spark is enabled.">
+     Gemini Spark will decide which actions to take based on the tasks you start or update.
+@@ -349,7 +349,7 @@
+     Gemini Spark will have access to the same sites as you, including the sites you’re signed in to. It will share necessary info with third parties, which could include personal info you might find sensitive.
+   </message>
+   <message name="IDS_SETTINGS_GLIC_EXPERIMENTAL_TRIGGERING_CONSIDER_2" desc="Bullet point explaining access risk when enabling Gemini Spark.">
+-    Anybody with access to your Gemini Spark agent could control your Chrome browser.
++    Anybody with access to your Gemini Spark agent could control your Blynx browser.
+   </message>
+   <message name="IDS_SETTINGS_GLIC_EXPERIMENTAL_TRIGGERING_CONSIDER_3" desc="Bullet point explaining user responsibility and risks for Gemini Spark.">
+     Gemini Spark is experimental and may do things like share your info or make purchases without asking. <ph name="LINK_BEGIN">&lt;a href="$1" target="_blank"&gt;</ph>Review the risks<ph name="LINK_END">&lt;/a&gt;</ph>.
+@@ -361,16 +361,16 @@
+     Review the risks of Gemini Spark
+   </message>
+   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_CHROME_WEB_ACTUATION_TOGGLE" desc="Title for the Gemini feature introduction screen" formatter_data="android_java">
+-    Let Chrome browse for you
++    Let Blynx browse for you
+   </message>
+   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_CHROME_WEB_ACTUATION_TOGGLE_SUBLABEL" desc="Subheader explaining what the Gemini feature does" formatter_data="android_java">
+-    Gemini in Chrome uses auto browse to work in your tabs and complete tasks you give it. <ph name="LINK_BEGIN">&lt;a href="#"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
++    Gemini in Blynx uses auto browse to work in your tabs and complete tasks you give it. <ph name="LINK_BEGIN">&lt;a href="#"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_CHROME_WEB_ACTUATION_TOGGLE_SUBLABEL_V2" desc="Subheader explaining what the Gemini feature does (WebUI version)">
+-    Gemini in Chrome uses auto browse to work in your tabs and complete tasks you give it. <ph name="LINK_BEGIN">&lt;a href="#" target="_blank" aria-label="$1" aria-description="$2"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
++    Gemini in Blynx uses auto browse to work in your tabs and complete tasks you give it. <ph name="LINK_BEGIN">&lt;a href="#" target="_blank" aria-label="$1" aria-description="$2"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_CHROME_WEB_ACTUATION_TOGGLE_LEARN_MORE_ARIA_LABEL" desc="Accessible label for the 'Learn more' link in the Gemini auto browse sublabel." is_accessibility_with_no_ui="true">
+-    Learn more about Chrome auto browse
++    Learn more about Blynx auto browse
+   </message>
+   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_WEB_ACTUATION_TOGGLE_WHEN_ON_1" desc="First point in 'when on' column of the 'let Gemini browse for you' expands" formatter_data="android_java">
+     Gemini can help you book appointments, create shopping carts, or do other tasks you give it.
+@@ -508,7 +508,7 @@
+
+   <!-- Gemini tab strip button label -->
+   <message name="IDS_GLIC_SETTING_LABEL" desc="Label in setting list used to open Gemini in Chrome settings." formatter_data="android_java">
+-    Gemini in Chrome
++    Gemini in Blynx
+   </message>
+   <message name="IDS_GLIC_BUTTON_ENTRYPOINT_LABEL" desc="Label on the button used to open Gemini in Chrome." formatter_data="android_java">
+     Gemini
+@@ -564,7 +564,7 @@
+     Get help with your tasks
+   </message>
+   <message name="IDS_GLIC_TRYIT_BODY" desc="Text for a promo pointing to the Gemini icon in Chrome, that opens Gemini in Chrome if selected.">
+-    Chat with Gemini in Chrome to get answers, key takeaways, and more as you browse
++    Chat with Gemini in Blynx to get answers, key takeaways, and more as you browse
+   </message>
+
+   <!-- Shortcut IPH -->
+@@ -572,7 +572,7 @@
+     <ph name="message">$1<ex>Use Ctrl+⌘+G to open Gemini in Chrome</ex></ph>
+   </message>
+   <message name="IDS_GLIC_SHORTCUT_IPH_TEXT" desc="Title for a promo pointing to the Gemini icon in Chrome. It informs the user about a keyboard shortcut for quicly opening Gemini in Chrome.">
+-    Use <ph name="FOCUS_TOGGLE_HOTKEY">$1<ex>Ctrl+⌘+G</ex></ph> to open Gemini in Chrome
++    Use <ph name="FOCUS_TOGGLE_HOTKEY">$1<ex>Ctrl+⌘+G</ex></ph> to open Gemini in Blynx
+   </message>
+
+   <!-- Selection Nudge -->
+@@ -600,10 +600,10 @@
+
+   <!-- Educational Tip -->
+   <message name="IDS_EDUCATIONAL_TIP_GLIC_TITLE" desc="Title for the Glic educational tip card." formatter_data="android_java">
+-    Meet Gemini on Chrome
++    Meet Gemini on Blynx
+   </message>
+   <message name="IDS_EDUCATIONAL_TIP_GLIC_DESCRIPTION" desc="Description for the Glic educational tip card." formatter_data="android_java">
+-    Get the best of Google AI. Pin Gemini to your toolbar for easy access, or open it anytime from the Chrome menu.
++    Get the best of Google AI. Pin Gemini to your toolbar for easy access, or open it anytime from the Blynx menu.
+   </message>
+   <message name="IDS_EDUCATIONAL_TIP_GLIC_BUTTON" desc="Button text for the Glic educational tip card." formatter_data="android_java">
+     Pin on toolbar
+@@ -631,10 +631,10 @@
+     Gemini
+   </message>
+   <message name="IDS_GLIC_LOCATION_MISMATCH_NOTICE_HEADER" desc="Headline on the notice when Gemini is unavailable in the current dynamic location.">
+-    Gemini in Chrome isn't available
++    Gemini in Blynx isn't available
+   </message>
+   <message name="IDS_GLIC_LOCATION_MISMATCH_NOTICE" desc="Text of the notice explaining location mismatch for travelers or VPN users.">
+-    Gemini in Chrome is expanding to different locations but isn't available everywhere
++    Gemini in Blynx is expanding to different locations but isn't available everywhere
+   </message>
+   <message name="IDS_GLIC_GET_HELP" desc="Link or button label text to open help documentation.">
+     Get help
+diff --git a/chrome/app/actor_strings.grdp b/chrome/app/actor_strings.grdp
+index f17d7533be..d5a8717ba2 100644
+--- a/chrome/app/actor_strings.grdp
++++ b/chrome/app/actor_strings.grdp
+@@ -121,7 +121,7 @@
+    Task complete
+   </message>
+   <message name="IDS_ACTOR_NOTIFICATION_BUTTON_GO_TO_CHROME" desc="Label for the notification button for the user to go to chrome." formatter_data="android_java">
+-    Go to Chrome
++    Go to Blynx
+   </message>
+   <message name="IDS_ACTOR_NOTIFICATION_BODY_WORKING" desc="Notification body text when the actor is working on a task." formatter_data="android_java">
+     <ph name="TASK_TITLE">%s<ex>My Task</ex></ph>: Gemini is working on your task and will let you know if more action is needed
+@@ -136,7 +136,7 @@
+     <ph name="TASK_TITLE">%s<ex>My Task</ex></ph>: Gemini stopped working on this task
+   </message>
+   <message name="IDS_ACTOR_NOTIFICATION_BODY_COMPLETE" desc="Notification body text when the actor has completed a task." formatter_data="android_java">
+-    <ph name="TASK_TITLE">%s<ex>My Task</ex></ph>: Gemini completed your task, you can view it in Chrome
++    <ph name="TASK_TITLE">%s<ex>My Task</ex></ph>: Gemini completed your task, you can view it in Blynx
+   </message>
+   <message name="IDS_ACTOR_NOTIFICATION_BODY_STOPPED" desc="Notification body text when a task is stopped." formatter_data="android_java">
+     <ph name="TASK_TITLE">%s<ex>My Task</ex></ph>: Gemini stopped working on this task
+@@ -197,7 +197,7 @@
+     View
+   </message>
+   <message name="IDS_PEEK_STATE_CLOSE_BUTTON_DESCRIPTION" desc="The accessibility content description for the button that closes peek view." formatter_data="android_java">
+-    Close Gemini in Chrome
++    Close Gemini in Blynx
+   </message>
+   <message name="IDS_PEEK_STATE_PLAY_BUTTON_A11Y_LABEL" desc="Accessibility label for the button to resume/play the actor task." formatter_data="android_java" is_accessibility_with_no_ui="true">
+     Resume
+@@ -206,7 +206,7 @@
+     Pause
+   </message>
+   <message name="IDS_PEEK_STATE_ACCESSIBLE_LABEL" desc="Accessibility label for the Gemini in Chrome peek view which represents a minimized chat. The placeholder is the displayed text (e.g. title or description) of the peek view." formatter_data="android_java">
+-    <ph name="DISPLAYED_TEXT">%1$s<ex>Ask Gemini</ex></ph>, Gemini in Chrome
++    <ph name="DISPLAYED_TEXT">%1$s<ex>Ask Gemini</ex></ph>, Gemini in Blynx
+   </message>
+   <message name="IDS_ACTOR_LEAVE_SITE_DIALOG_TITLE" desc="Title of a dialog asking if the user really wants to stop the actor task." formatter_data="android_java">
+     Leave site and end task?
+diff --git a/chrome/app/certificate_manager.grdp b/chrome/app/certificate_manager.grdp
+index 080b180c42..0eca9b796c 100644
+--- a/chrome/app/certificate_manager.grdp
++++ b/chrome/app/certificate_manager.grdp
+@@ -128,7 +128,7 @@
+     </message>
+     <message name="IDS_SETTINGS_CERTIFICATE_MANAGER_V2_CRS_CERTIFICATES_DESCRIPTION" desc="Description of the Chrome Root Store certificates section of cert manager.">
+       The Chrome Root Store contains certificates from Certificate Authorities trusted by the
+-      Chrome Root Program, and is continually reviewed on an ongoing basis.
++      Blynx Root Program, and is continually reviewed on an ongoing basis.
+     </message>
+     <message name="IDS_SETTINGS_CERTIFICATE_MANAGER_V2_CRS_LEARN_MORE_LINK" desc="Link to learning more about the Chrome Root Store.">
+       Learn more
+@@ -160,7 +160,7 @@
+       </message>
+     </if>
+     <message name="IDS_SETTINGS_CERTIFICATE_MANAGER_V2_DELETE_SERVER_CERT_DESCRIPTION" desc="Contents of certificate manager dialog confirming deletion of a server certificate.">
+-        If you delete a server certificate, Chrome will no longer use it to identify servers.
++        If you delete a server certificate, Blynx will no longer use it to identify servers.
+     </message>
+     <message name="IDS_SETTINGS_CERTIFICATE_MANAGER_V2_READ_FILE_ERROR" desc="Eror message displayed in certificate manager when the user tried to import a certificate but the file could not be read.">
+       Error reading file
+diff --git a/chrome/app/skills_strings.grdp b/chrome/app/skills_strings.grdp
+index 5ae5ff90c3..b018a2cda7 100644
+--- a/chrome/app/skills_strings.grdp
++++ b/chrome/app/skills_strings.grdp
+@@ -33,7 +33,7 @@
+     Manage your custom workflows powered by
+   </message>
+   <message name="IDS_SKILLS_SIDEBAR_FOOTER_BRANDING" desc="The branding text 'Gemini in Chrome' displayed in the sidebar footer">
+-    Gemini in Chrome
++    Gemini in Blynx
+   </message>
+
+   <!-- chrome://skills error page -->
+@@ -41,10 +41,10 @@
+     Skills aren't available
+   </message>
+   <message name="IDS_SKILLS_ERROR_PAGE_DESCRIPTION" desc="Description of the error page that occurs when chrome://skills is not accessible because Glic is not enabled">
+-    To use Skills, sign in to Chrome with a Google account that has Gemini in Chrome enabled
++    To use Skills, sign in to Blynx with a Google account that has Gemini in Blynx enabled
+   </message>
+   <message name="IDS_SKILLS_DISABLED_ERROR_PAGE_DESCRIPTION" desc="Description of the error page that occurs when chrome://skills is disabled by the settings toggle">
+-    The Skills feature is currently disabled. Update your Chrome Settings to get started.
++    The Skills feature is currently disabled. Update your Blynx Settings to get started.
+   </message>
+   <message name="IDS_SKILLS_REMOTE_AUTHORITY_UNREACHABLE_DESCRIPTION" desc="Description of the error page that occurs when the remote guest skills webview cannot load or be reached.">
+     We're having trouble connecting to the server. Please try again later.
+diff --git a/chrome/app/media_router_strings.grdp b/chrome/app/media_router_strings.grdp
+index 6a79222f59..7312cd826e 100644
+--- a/chrome/app/media_router_strings.grdp
++++ b/chrome/app/media_router_strings.grdp
+@@ -93,7 +93,7 @@
+     Permission to cast is rejected. Open a help center article in a new tab to learn more.
+   </message>
+   <message name="IDS_MEDIA_ROUTER_LOCAL_DISCOVERY_PERMISSION_REJECTED_LABEL" desc="The error message including the link to the OS settings page, shown when the browser does not have the permission to connect to devices on the local network.">
+-    To cast, give Chrome access in: <ph name="IDS_MEDIA_ROUTER_LOCAL_DISCOVERY_PERMISSION_REJECTED_LINK">$1<ex>System Settings</ex></ph> > Local Network > Chrome
++    To cast, give Blynx access in: <ph name="IDS_MEDIA_ROUTER_LOCAL_DISCOVERY_PERMISSION_REJECTED_LINK">$1<ex>System Settings</ex></ph> > Local Network > Blynx
+   </message>
+   <message name="IDS_MEDIA_ROUTER_LOCAL_DISCOVERY_PERMISSION_REJECTED_LINK" desc="Text for the link to the OS settings page allowing useres to turn on the permission. This string will be embedded in a longer sentence that makes up the whole label.">
+     System Settings
+@@ -346,7 +346,7 @@
+     Send debug logs (recommended)
+   </message>
+   <message name="IDS_MEDIA_ROUTER_FEEDBACK_PRIVACY_DATA_USAGE" desc="Text with details about data usage of details submitted in the feedback page.">
+-    Your Chrome version, operating system version, Cast settings,
++    Your Blynx version, operating system version, Cast settings,
+     mirroring performance stats, and communication channel diagnostic
+     logs will be submitted in addition to any information you choose
+     to include above. This feedback is used to diagnose problems and
+diff --git a/chrome/app/profiles_strings.grdp b/chrome/app/profiles_strings.grdp
+index db742e65b5..be38c50369 100644
+--- a/chrome/app/profiles_strings.grdp
++++ b/chrome/app/profiles_strings.grdp
+@@ -171,7 +171,7 @@
+     Sync disabled
+   </message>
+   <message name="IDS_PROFILES_DASHER_FEATURE_DISABLED_TITLE" desc="Description of the profile user menu when certain features are disabled for Dasherless profile.">
+-    This isn't a Google Account. Items you save to Chrome won't be available on other devices.
++    This isn't a Google Account. Items you save to Blynx won't be available on other devices.
+   </message>
+   <message name="IDS_PROFILES_DICE_SYNC_PAUSED_TITLE" desc="Title of the profile user menu when sync is paused.">
+     Sync is paused
+diff --git a/chrome/app/app_management_strings.grdp b/chrome/app/app_management_strings.grdp
+index b225df5959..58bedb4a6c 100644
+--- a/chrome/app/app_management_strings.grdp
++++ b/chrome/app/app_management_strings.grdp
+@@ -46,7 +46,7 @@
+     Open in <ph name="APP_NAME">$1<ex>Chrome browser</ex></ph>
+   </message>
+   <message name="IDS_APP_MANAGEMENT_INTENT_SHARING_BROWSER_OPEN" desc="Label for the intent sharing option to open in the browser.">
+-    Open in Chrome browser
++    Open in Blynx browser
+   </message>
+   <message name="IDS_APP_MANAGEMENT_INTENT_SHARING_APP_OPEN_EXISTING_TAB" desc="This is an option presented to the user which makes user clicks on links that open this website to open in an existing browser tab of that website, instead of opening in a new browser tab.">
+     Open in an existing <ph name="APP_NAME">$1<ex>Gmail</ex></ph> tab
+diff --git diff --git a/chrome/app/support_tool_strings.grdp b/chrome/app/support_tool_strings.grdp
+index 0d1e5cac02..693b0953cd 100644
+--- a/chrome/app/support_tool_strings.grdp
++++ b/chrome/app/support_tool_strings.grdp
+@@ -103,7 +103,7 @@
+         </message>
+         <!-- DataCollector strings -->
+         <message name="IDS_SUPPORT_TOOL_CHROME_SYSTEM_INFO" desc="This is a data source name for internal Chrome logs.">
+-            Chrome System Information
++            Blynx System Information
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CRASH_IDS" desc="An identification number is given every time Chrome crashes on the device. This data source collects those IDs.">
+             Crash IDs
+diff --git a/chrome/app/access_code_cast_strings.grdp b/chrome/app/access_code_cast_strings.grdp
+index 79489d0e1a..c850dd166c 100644
+--- a/chrome/app/access_code_cast_strings.grdp
++++ b/chrome/app/access_code_cast_strings.grdp
+@@ -38,7 +38,7 @@
+     Something went wrong. Try again later
+   </message>
+   <message name="IDS_ACCESS_CODE_CAST_ERROR_PROFILE_SYNC" desc="Error message for profile sync error">
+-    To cast with a code, turn on Chrome browser sync settings
++    To cast with a code, turn on Blynx browser sync settings
+   </message>
+   <message name="IDS_ACCESS_CODE_CAST_INPUT_ARIA_LABEL" is_accessibility_with_no_ui="true" desc="Label for the text box where users type the access code to start casting to a Chromecast device">
+     Type the access code to start casting
