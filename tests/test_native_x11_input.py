@@ -32,3 +32,11 @@ class NativeX11InputScopeTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "ASCII"):
             driver.replace("non-ASCII \N{SNOWMAN}")
         driver.x11.XOpenDisplay.assert_not_called()
+
+    def test_negative_pointer_coordinate_is_refused_before_display_access(self):
+        driver = NativeX11Input.__new__(NativeX11Input)
+        driver.x11 = mock.Mock()
+        for action in (driver.move, driver.click):
+            with self.assertRaisesRegex(ValueError, "inside its client"):
+                action(-1, 10)
+        driver.x11.XOpenDisplay.assert_not_called()

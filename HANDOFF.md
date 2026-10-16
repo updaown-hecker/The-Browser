@@ -532,3 +532,100 @@ Validation for this fix:
 Previous broader release/IME/accessibility/platform limitations remain. No release
 claim. Restart the development browser to load the rebuilt executable; existing
 user windows/profiles were not stopped or edited by these disposable tests.
+
+### October 15 follow-up — luminous search styling
+
+User requested lighting around search inspired by Google's multicolor treatment.
+Implemented in owned native Views code, without a web surface or new dependency:
+
+- `SearchGlowBorder` derives from upstream BubbleBorder. A blue/red/yellow/green
+  sweep shader paints a crisp 1.8 DIP rim with a soft layered halo. Reserved 16 DIP
+  transparent frame insets contain the effect inside native bounds, preserving
+  bubble anchoring/hit testing and avoiding clipped paint. Corners are 22 DIP.
+- The effect is static: no animation loop/timer or offscreen blur surface. Forced
+  colors/increased contrast skip the decorative paint and retain native framing.
+- Search input is 54 DIP with a larger font; title uses native body emphasis;
+  card spacing is refined. Text, selection and result colors retain native tokens.
+  No navigation, shortcut, ownership, profile, sandbox or dismissal changes.
+
+Validation:
+- Final native build passed, 3 steps / 24.46s;
+  `.local/logs/search-glow-build-final.log`. Prior initial glow build also passed.
+- GN UI header/dependency check passed (`.local/logs/search-glow-gn.log`).
+- X11 native smoke passed 61 checks on the final build, including real outside
+  click, input after Enter/reopen/Escape, tab/tools/navigation and runtime restart
+  checks. `.local/logs/search-glow-native-x11.log`,
+  `.local/native-smoke-x11/results.json`.
+- Final normal and forced-high-contrast captures passed centered/focused field,
+  native control/shortcut and clean shutdown checks. Default, filtered and arrow
+  selection renders were inspected. Normal render shows a smooth colored halo;
+  forced-high-contrast render shows the native neutral outline and no colored
+  halo. This verifies the decorative fallback, not a broad accessibility audit.
+  Logs `.local/logs/search-glow-capture-final.log` and
+  `.local/logs/search-glow-contrast.log`; reports under
+  `.local/blynx-search-visual/` and `.local/blynx-search-glow-contrast/`.
+  Browser `[1930,10,1265,1376]`, popup `[2244,458,636,480]` centered within a pixel.
+  Cropped preview: `.local/blynx-search-visual/search-popup-detail.png`.
+- Read-only integration check, clang-format dry run and `git diff --check` passed.
+  No Python logic changed this slice; the previous 96-test tooling result remains
+  historical rather than a new run. Wayland popup interaction/visual validation
+  and other broad release/platform limitations remain as documented above.
+
+Restart Blynx to load the rebuilt binary. Existing user windows/profiles were not
+closed or edited; all native checks used disposable fixture profiles.
+
+### October 15 follow-up — moving glow, hover accents, optional AI backlog
+
+User requested motion similar to Google's colorful search treatment and an AI
+roadmap entry; the AI request was explicitly for TODO.md, not implementation.
+
+- Search halo now rotates one full turn per ten seconds. Native InfiniteAnimation
+  requests repaint at 33ms intervals only while the popup is visible; close stops
+  it before releasing frame/view references. Bounds and disposal are unchanged.
+- Native result buttons use a 180ms SlideAnimation for a gradient wash and thin
+  colorful outline on hover/press. Hovered rows share the halo's rotating phase.
+  Pointer exit fades the decoration; text/selection and commands remain native.
+- Reduced-motion settings keep the halo static and use instant color feedback.
+  Forced colors/increased contrast keep native border/hover presentation.
+- TODO.md now records optional Qwen 2.5 (0.5B Instruct), WebLLM as a candidate to
+  evaluate, local chat/user-directed browser tasks/settings updates, explicit
+  enable/disable, on-demand loading and releasing weights/workers/GPU/RAM when
+  disabled. Compatibility/quality/memory/action-isolation work remains planned.
+  No model/runtime was installed/downloaded and no AI controls were exposed.
+- Scoped X11 test driver now supports move-only pointer input through the same
+  verified client/bounds checks. Added a negative-coordinate refusal check.
+
+Validation:
+- First compile rejected missing Views metadata and a private shader helper;
+  corrected metadata registration, public interpolation construction and raw_ptr
+  iteration. Final build passed, 3 steps / 23.60s;
+  `.local/logs/search-motion-build2.log` (initial failure `search-motion-build.log`).
+- 97 tooling tests passed (`.local/logs/search-motion-tooling.log`), including the
+  new move/click refusal check. GN UI dependency check passed
+  (`.local/logs/search-motion-gn.log`).
+- Final X11 native smoke passed 61 checks, including outside-click dismissal,
+  input after Enter/reopen/Escape, tools/tabs/navigation and restart/MV3/sandbox;
+  `.local/logs/search-motion-native-x11.log` and
+  `.local/native-smoke-x11/results.json`.
+- Three sequential disposable visual runs passed (normal, forced reduced motion,
+  forced high contrast), with real scoped pointer motion, frame comparisons,
+  Escape disposal and clean shutdown. Normal halo strip changed by mean ~8.26
+  RGB units over one second; reduced-motion and contrast strips changed by 0.
+  Result-region captures demonstrate hover appearance, changing color phase and
+  exit feedback. Normal and contrast renders were visually inspected.
+  Reports `.local/blynx-search-motion/capture.json`,
+  `.local/blynx-search-motion-reduced/capture.json`,
+  `.local/blynx-search-motion-contrast/capture.json`; logs
+  `.local/logs/search-motion-visual-final.log`, `search-motion-reduced-final.log`,
+  `search-motion-contrast-final.log`.
+- Initial hover capture comparisons sampled a single row while pointer feedback
+  was on a different row, producing zero-difference assertion failures. Final
+  script uses native client coordinates and compares the result-list interior
+  separately from halo/caret. Final captures show the actual hovered row; those
+  failures were test-coordinate/sampling failures, not passing behavior evidence.
+- Read-only integration, clang-format dry run and diff whitespace checks passed.
+
+Wayland popup/motion synthesis remains unverified on this host; earlier baseline
+Wayland checks are historical, not a new animation validation. Broad platform,
+accessibility, performance and release limitations remain. Existing user profiles
+and OS motion settings were not changed. Restart Blynx to load the new binary.

@@ -1,6 +1,8 @@
 #include "browser/ui/blynx_command_center.h"
 
 #include <algorithm>
+#include <array>
+#include <cmath>
 #include <vector>
 
 #include "base/callback_list.h"
@@ -12,6 +14,9 @@
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/single_thread_task_runner.h"
+#include "base/time/time.h"
+#include "cc/paint/paint_flags.h"
+#include "cc/paint/paint_shader.h"
 #include "chrome/app/chrome_command_ids.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser_commands.h"
@@ -26,14 +31,22 @@
 #include "components/prefs/pref_service.h"
 #include "content/public/browser/web_contents.h"
 #include "ui/base/l10n/l10n_util.h"
+#include "ui/base/metadata/metadata_impl_macros.h"
 #include "ui/base/ui_base_types.h"
 #include "ui/events/event.h"
 #include "ui/events/keycodes/keyboard_codes.h"
+#include "ui/gfx/animation/animation_delegate.h"
+#include "ui/gfx/animation/infinite_animation.h"
+#include "ui/gfx/animation/slide_animation.h"
+#include "ui/gfx/canvas.h"
 #include "ui/gfx/geometry/insets.h"
 #include "ui/gfx/geometry/rect.h"
+#include "ui/gfx/geometry/rect_f.h"
 #include "ui/gfx/text_utils.h"
+#include "ui/native_theme/native_theme.h"
 #include "ui/views/accessibility/view_accessibility.h"
 #include "ui/views/bubble/bubble_dialog_delegate_view.h"
+#include "ui/views/bubble/bubble_frame_view.h"
 #include "ui/views/controls/button/md_text_button.h"
 #include "ui/views/controls/label.h"
 #include "ui/views/controls/textfield/textfield.h"
@@ -46,6 +59,131 @@
 namespace browser {
 namespace {
 constexpr size_t kRows = 7;
+
+bool UseSearchColors(const views::View& view) {
+  return view.GetNativeTheme()->forced_colors() ==
+             ui::ColorProviderKey::ForcedColors::kNone &&
+         view.GetNativeTheme()->preferred_contrast() !=
+             ui::NativeTheme::PreferredContrast::kMore;
+}
+bool AnimateSearch(const views::View& view) {
+  return UseSearchColors(view) && gfx::Animation::ShouldRenderRichAnimation() &&
+         !gfx::Animation::PrefersReducedMotion();
+}
+
+sk_sp<cc::PaintShader> SearchGradient(const gfx::RectF& bounds, float phase) {
+  const std::array<SkColor4f, 5> colors = {
+      SkColor4f::FromColor(SkColorSetRGB(0x42, 0x85, 0xf4)),
+      SkColor4f::FromColor(SkColorSetRGB(0xea, 0x43, 0x35)),
+      SkColor4f::FromColor(SkColorSetRGB(0xfb, 0xbc, 0x05)),
+      SkColor4f::FromColor(SkColorSetRGB(0x34, 0xa8, 0x53)),
+      SkColor4f::FromColor(SkColorSetRGB(0x42, 0x85, 0xf4)),
+  };
+  SkMatrix rotation;
+  rotation.setRotate(phase, bounds.CenterPoint().x(), bounds.CenterPoint().y());
+  return cc::PaintShader::MakeSweepGradient(
+      bounds.CenterPoint().x(), bounds.CenterPoint().y(), colors.data(),
+      nullptr, colors.size(), SkTileMode::kClamp, 0, 360,
+      SkGradient::Interpolation(), 0, &rotation);
+}
+
+class SearchResultButton : public views::MdTextButton {
+  METADATA_HEADER(SearchResultButton, views::MdTextButton)
+
+ public:
+  explicit SearchResultButton(PressedCallback callback)
+      : views::MdTextButton(std::move(callback), u"") {
+    color_hover_.SetSlideDuration(base::Milliseconds(180));
+  }
+  void AdvancePhase(float phase) {
+    phase_ = phase;
+    if (GetVisible() && color_hover_.GetCurrentValue() > 0) {
+      SchedulePaint();
+    }
+  }
+
+  void StateChanged(ButtonState old_state) override {
+    views::MdTextButton::StateChanged(old_state);
+    const bool active =
+        GetState() == STATE_HOVERED || GetState() == STATE_PRESSED;
+    if (!AnimateSearch(*this)) {
+      color_hover_.Reset(active ? 1 : 0);
+      SchedulePaint();
+    } else if (active) {
+      color_hover_.Show();
+    } else {
+      color_hover_.Hide();
+    }
+  }
+
+ private:
+  void AnimationProgressed(const gfx::Animation* animation) override {
+    views::MdTextButton::AnimationProgressed(animation);
+    SchedulePaint();
+  }
+  void PaintButtonContents(gfx::Canvas* canvas) override {
+    views::MdTextButton::PaintButtonContents(canvas);
+    const float amount = color_hover_.GetCurrentValue();
+    if (!UseSearchColors(*this) || amount <= 0) {
+      return;
+    }
+    gfx::RectF bounds(GetLocalBounds());
+    bounds.Inset(1.5f);
+    cc::PaintFlags flags;
+    flags.setAntiAlias(true);
+    flags.setShader(SearchGradient(bounds, phase_));
+    flags.setAlphaf(0.12f * amount);
+    canvas->DrawRoundRect(bounds, 11, flags);
+    flags.setStyle(cc::PaintFlags::kStroke_Style);
+    flags.setStrokeWidth(1.4f);
+    flags.setAlphaf(0.8f * amount);
+    canvas->DrawRoundRect(bounds, 11, flags);
+  }
+  float phase_ = 0;
+  gfx::SlideAnimation color_hover_{this};
+};
+
+BEGIN_METADATA(SearchResultButton)
+END_METADATA
+
+// Paint inside reserved transparent frame space so native bounds include the
+// halo.
+class SearchGlowBorder : public views::BubbleBorder {
+ public:
+  SearchGlowBorder() : views::BubbleBorder(FLOAT, DIALOG_SHADOW) {
+    set_insets(gfx::Insets(16));
+    set_rounded_corners(gfx::RoundedCornersF(22));
+  }
+
+  void SetPhase(float phase) { phase_ = phase; }
+
+  void Paint(const views::View& view, gfx::Canvas* canvas) override {
+    views::BubbleBorder::Paint(view, canvas);
+    if (!UseSearchColors(view)) {
+      return;
+    }
+    gfx::RectF rim(view.GetLocalBounds());
+    rim.Inset(gfx::InsetsF(GetInsets()));
+    cc::PaintFlags flags;
+    flags.setAntiAlias(true);
+    flags.setStyle(cc::PaintFlags::kStroke_Style);
+    flags.setShader(SearchGradient(rim, phase_));
+    // Nested translucent strokes give a smooth falloff without an offscreen
+    // blur surface; the final narrow stroke keeps the luminous edge crisp.
+    for (int spread = 14; spread >= 1; --spread) {
+      flags.setStrokeWidth(2.0f * spread);
+      flags.setAlphaf(0.012f + 0.026f * (14 - spread) / 13.0f);
+      canvas->DrawRoundRect(rim, 22, flags);
+    }
+    flags.setStrokeWidth(1.8f);
+    flags.setAlphaf(0.92f);
+    canvas->DrawRoundRect(rim, 22, flags);
+  }
+
+ private:
+  float phase_ = 0;
+};
+
 std::u16string String(int id) {
   return l10n_util::GetStringUTF16(id);
 }
@@ -84,7 +222,8 @@ constexpr Command kCommands[] = {
 }  // namespace
 
 class BlynxCommandCenter::Delegate : public views::BubbleDialogDelegate,
-                                     public views::TextfieldController {
+                                     public views::TextfieldController,
+                                     public gfx::AnimationDelegate {
  public:
   Delegate(BrowserWindowInterface& browser, views::View* anchor)
       : views::BubbleDialogDelegate(anchor, views::BubbleBorder::FLOAT),
@@ -96,26 +235,25 @@ class BlynxCommandCenter::Delegate : public views::BubbleDialogDelegate,
     set_close_on_deactivate(true);
     set_highlight_button_when_shown(false);
     set_margins(gfx::Insets());
-    set_corner_radius(20);
+    set_corner_radius(22);
     const int width = std::clamp(
         anchor->GetWidget()->GetWindowBoundsInScreen().width() - 96, 240, 560);
     auto root = std::make_unique<views::View>();
     root->SetLayoutManager(std::make_unique<views::BoxLayout>(
-        views::BoxLayout::Orientation::kVertical, gfx::Insets(20), 6));
+        views::BoxLayout::Orientation::kVertical, gfx::Insets(22), 7));
     auto* heading = root->AddChildView(
         std::make_unique<views::Label>(String(IDS_BLYNX_COMMAND_TITLE)));
     heading->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-    heading->SetTextStyle(views::style::STYLE_CAPTION);
+    heading->SetTextStyle(views::style::STYLE_BODY_3_EMPHASIS);
     search_ = root->AddChildView(std::make_unique<views::Textfield>());
-    search_->SetPreferredSize(gfx::Size(width, 48));
-    search_->SetFontList(search_->GetFontList().DeriveWithSizeDelta(3));
+    search_->SetPreferredSize(gfx::Size(width, 54));
+    search_->SetFontList(search_->GetFontList().DeriveWithSizeDelta(4));
     search_->SetPlaceholderText(String(IDS_BLYNX_COMMAND_SEARCH));
     search_->GetViewAccessibility().SetName(String(IDS_BLYNX_COMMAND_SEARCH));
     search_->SetController(this);
     for (size_t i = 0; i < kRows; ++i) {
-      auto* row = root->AddChildView(std::make_unique<views::MdTextButton>(
-          base::BindRepeating(&Delegate::Choose, base::Unretained(this), i),
-          u""));
+      auto* row = root->AddChildView(std::make_unique<SearchResultButton>(
+          base::BindRepeating(&Delegate::Choose, base::Unretained(this), i)));
       row->SetPreferredSize(gfx::Size(width, 36));
       row->SetHorizontalAlignment(gfx::ALIGN_LEFT);
       row->SetCornerRadius(12);
@@ -131,8 +269,28 @@ class BlynxCommandCenter::Delegate : public views::BubbleDialogDelegate,
         base::BindRepeating(&Delegate::Refresh, base::Unretained(this)));
     Refresh();
   }
+  std::unique_ptr<views::FrameView> CreateFrameView(
+      views::Widget* widget) override {
+    auto frame = views::BubbleDialogDelegate::CreateFrameView(widget);
+    auto border = std::make_unique<SearchGlowBorder>();
+    border->SetColor(background_color());
+    glow_ = border.get();
+    static_cast<views::BubbleFrameView*>(frame.get())
+        ->SetBubbleBorder(std::move(border));
+    return frame;
+  }
+
+  void StartAnimations() {
+    if (AnimateSearch(*GetBubbleFrameView())) {
+      animation_start_ = base::TimeTicks::Now();
+      glow_animation_.Start();
+    }
+  }
+
   // Close callbacks dispose of the Widget before this window-owned delegate.
   void PrepareToClose() {
+    glow_animation_.Stop();
+    glow_ = nullptr;
     search_subscription_ = {};
     if (search_) {
       search_->SetController(nullptr);
@@ -149,6 +307,20 @@ class BlynxCommandCenter::Delegate : public views::BubbleDialogDelegate,
   views::View* GetInitiallyFocusedView() override { return search_; }
 
  private:
+  void AnimationProgressed(const gfx::Animation*) override {
+    auto* frame = GetBubbleFrameView();
+    if (!glow_ || !GetWidget()->IsVisible() || !AnimateSearch(*frame)) {
+      glow_animation_.Stop();
+      return;
+    }
+    const float phase = std::fmod(
+        (base::TimeTicks::Now() - animation_start_).InSecondsF() * 36.0, 360.0);
+    glow_->SetPhase(phase);
+    frame->SchedulePaint();
+    for (auto& row : rows_) {
+      row->AdvancePhase(phase);
+    }
+  }
   struct Result {
     std::u16string label;
     int command = 0;
@@ -289,7 +461,10 @@ class BlynxCommandCenter::Delegate : public views::BubbleDialogDelegate,
   std::vector<Result> matches_;
   size_t selected_ = 0;
   raw_ptr<views::Textfield> search_ = nullptr;
-  std::vector<raw_ptr<views::MdTextButton>> rows_;
+  std::vector<raw_ptr<SearchResultButton>> rows_;
+  raw_ptr<SearchGlowBorder> glow_ = nullptr;
+  base::TimeTicks animation_start_;
+  gfx::InfiniteAnimation glow_animation_{this, base::Milliseconds(33)};
 };
 
 BlynxCommandCenter::BlynxCommandCenter(BrowserWindowInterface& browser,
@@ -318,5 +493,6 @@ void BlynxCommandCenter::Show() {
   delegate_->SizeToContents();
   widget_->Show();
   widget_->Activate();
+  delegate_->StartAnimations();
 }
 }  // namespace browser

@@ -35,10 +35,12 @@
   tool/tab rows, arrows/Enter/Escape, address/web-query routing through upstream
   omnibox and a Focus address bar tool. Toolbar entry removed. Weak tab handles,
   private/policy guards and post-dismissal action dispatch remain. See HANDOFF.md
-  for current validation and input-platform limits (96 tooling, 46 runtime,
+  for current validation and input-platform limits (97 tooling, 46 runtime,
   61 X11 native and 52 Wayland native checks; popup key synthesis is X11-only).
   Fixed outside-click dismissal and removed window modality/backdrop; compact
-  bubble framing follows the browser root. Pointer checks cover dismissal and
+  bubble framing follows the browser root. Added an animated multicolor rim/halo
+  and fading colored result hovers, with reduced-motion and native contrast fallbacks
+  and a larger search field. Pointer checks cover dismissal and
   input after Enter/reopen/Escape. Richer ranking, live omnibox
   suggestions and cross-window search remain future work.
 - Per-profile persistent workspaces; modular isolated side panels; shortcut
@@ -47,6 +49,21 @@
   Add custom wallpaper file selection, widget visibility and further search controls.
 - Test existing secure passwords/autofill, import/export safeguards, media/codecs,
   accessibility/localization and platform privacy permissions.
+
+## Optional local AI assistant (planned; not implemented)
+- Evaluate **Qwen 2.5 (0.5B Instruct)** for local chat and browser tasks, with
+  **WebLLM** as a candidate runtime; confirm model/runtime compatibility, licensing,
+  hardware support and measured memory usage before choosing the integration.
+- Provide an explicit enable/disable setting. Load on demand; disabling must stop
+  inference and release model weights, workers and GPU/RAM resources so users can
+  save memory. Keep normal browsing usable without the model loaded.
+- Add a chat UI and user-directed browser control/settings updates through narrow,
+  browser-owned commands with existing profile/policy guards. Preview consequential
+  changes and confirm destructive actions; page content cannot grant permissions
+  or issue privileged commands. Preserve the native Chromium stack and avoid an
+  arbitrary website-to-native bridge.
+- Validate chat/task quality, action cancellation, private-profile isolation,
+  startup cost and actual RAM/GPU release on disable before advertising support.
 
 ## Privacy/performance
 - Upstream service/network/telemetry audit and transparent feature availability.

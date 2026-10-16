@@ -187,7 +187,16 @@ contrast. Up/Down changes the selected result, Enter runs it, Escape or Ctrl+Spa
 closes it. Clicking outside or activating another window also dismisses it.
 Result-row buttons use the same action handler. The bubble anchors to the browser
 root view and centers its bounds within that window, following moves/resizes. It
-sizes to results, with compact rows and rounded native framing. No Go/Cancel form.
+sizes to results, with compact rows and rounded native framing. A custom native
+BubbleBorder paints a blue/red/yellow/green sweep rim and a soft halo inside
+16 DIPs of reserved transparent frame space. Layered translucent strokes provide
+the falloff without an offscreen blur surface. A native InfiniteAnimation rotates
+the gradient once per ten seconds at a 33ms interval only while the popup is
+visible. Disposal stops it before releasing frame/view references. Native button
+hover transitions fade a gradient wash/rim in and out over 180ms; hovered rows
+share the rotating color phase. Reduced-motion settings keep the colors static;
+forced colors and increased contrast retain the standard native border instead. Search text,
+selection and result colors remain upstream theme tokens. No Go/Cancel form.
 
 Commands are filtered from a fixed table using Chromium's enabled state, including
 address-bar focus, new tab, history, downloads, bookmarks, settings, tab layout,

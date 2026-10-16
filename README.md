@@ -21,8 +21,10 @@ preference recreation and managed/read-only write refusal. Full native policy,
 incognito and inherited browser regression suites have not been executed.
 
 Implemented browser-specific source:
-- **Ctrl+Space** opens centered native Blynx search, with a compact search field,
-  tool/tab result rows and keyboard selection. Enter opens a result; Escape closes.
+- **Ctrl+Space** opens centered native Blynx search, with a luminous multicolor rim,
+  gently moving halo, animated colored hovers, larger search field, tool/tab rows
+  and keyboard selection. Enter
+  opens a result; Escape or clicking outside closes it.
   Addresses and web queries use Chromium's normal omnibox classifier/search engine;
   Focus address bar hands control to the top omnibox. There is no toolbar button.
 - Separate branding and Linux/Windows profile-path patches.

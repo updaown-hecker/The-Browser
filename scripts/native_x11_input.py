@@ -115,7 +115,15 @@ class NativeX11Input:
             self.x11.XCloseDisplay(display)
 
     def click(self, x, y):
-        """Click a client-relative point only inside this verified fixture window."""
+        """Click only inside this verified fixture window."""
+        self._pointer(x, y, click=True)
+
+    def move(self, x, y):
+        """Move without clicking, only inside this verified fixture window."""
+        self._pointer(x, y, click=False)
+
+    def _pointer(self, x, y, click):
+        """Use client-relative coordinates, validating bounds before any input."""
         if x < 0 or y < 0:
             raise ValueError("Fixture click must be inside its client window")
         x11, xtest = self.x11, self.xtest
@@ -144,8 +152,9 @@ class NativeX11Input:
                                               ctypes.byref(sx), ctypes.byref(sy), ctypes.byref(child)):
                 raise RuntimeError("Cannot translate fixture click")
             xtest.XTestFakeMotionEvent(display, -1, sx.value, sy.value, 0)
-            xtest.XTestFakeButtonEvent(display, 1, 1, 0)
-            xtest.XTestFakeButtonEvent(display, 1, 0, 0)
+            if click:
+                xtest.XTestFakeButtonEvent(display, 1, 1, 0)
+                xtest.XTestFakeButtonEvent(display, 1, 0, 0)
             x11.XSync(display, 0)
         finally:
             x11.XCloseDisplay(display)

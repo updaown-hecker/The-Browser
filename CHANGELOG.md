@@ -1,5 +1,18 @@
 # Changelog
 
+## October 15, 2026 — search motion and AI roadmap
+
+- Added slow motion to the search halo and fading multicolor hover accents on
+  result rows. Motion stops on close and respects reduced-motion settings.
+- Added the planned optional Qwen 2.5 0.5B Instruct assistant to TODO.md: chat,
+  browser tasks, WebLLM evaluation, and disable/unload controls to save memory.
+
+## October 15, 2026 — luminous search
+
+- Added a blue/red/yellow/green rim and soft halo around native Blynx search,
+  with a larger input and refined spacing. The glow is static; forced colors
+  and increased contrast use the native border.
+
 ## October 15, 2026 — search popover fixes
 
 - Replaced the modal search dialog with a browser-anchored native bubble.
