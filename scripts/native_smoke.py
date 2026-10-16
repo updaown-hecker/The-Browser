@@ -57,7 +57,7 @@ def check_native_chrome(pid, output, port, platform="wayland"):
                                 "native toolbar has no Customize Blynx popup button",
                             ])
                             report["visible_address"] = text
-                            check_command_center(app, report, port, pid, platform)
+                            check_command_center(app, report, port, pid, platform, output)
                             report["passed"] = True
                             report.pop("error", None)
                             return
@@ -76,7 +76,7 @@ def check_native_chrome(pid, output, port, platform="wayland"):
         report_path.write_text(json.dumps(report, indent=2) + "\n")
 
 
-def check_command_center(app, report, port, pid, platform):
+def check_command_center(app, report, port, pid, platform, output):
     """Exercise browser-local search through scoped X11 key and pointer events."""
     def visible():
         app.clear_cache()
@@ -163,6 +163,27 @@ def check_command_center(app, report, port, pid, platform):
     names = [node.get_name() for node in controls(visible())]
     assert "Go" not in names and "Cancel" not in names
     assert "Focus address bar" in names and "Open downloads" in names
+    # Verify the actual native consumer, independently of the Settings preview.
+    saved_search = report.get("expectedSearchAppearance", {})
+    if saved_search.get("custom_colors"):
+        import subprocess
+        from PIL import Image
+        popup = dialog(visible())
+        frame = next(node for node in visible() if node.get_role() == Atspi.Role.FRAME)
+        rect = Atspi.Component.get_extents(popup, Atspi.CoordType.SCREEN)
+        parent = Atspi.Component.get_extents(frame, Atspi.CoordType.SCREEN)
+        driver = NativeX11Input(pid, "Blynx search")
+        time.sleep(.5)
+        image_path = output / "custom-search.png"
+        subprocess.run(["import", "-window", hex(driver.window), str(image_path)],
+                       check=True, capture_output=True, timeout=5)
+        with Image.open(image_path) as screenshot:
+            sample = screenshot.convert("RGB").getpixel(
+                (rect.x - parent.x + rect.width // 2, rect.y - parent.y + 60))
+        color = saved_search["colors"]["surface"]
+        expected = tuple(int(color[i:i + 2], 16) for i in (1, 3, 5))
+        assert max(abs(actual - target) for actual, target in zip(sample, expected)) <= 2, (sample, expected)
+        report["checks"].append("native search card renders the custom surface color saved through Settings")
     search("unmatched-search-fixture-472901")
     wait_for("web search fallback", lambda nodes: any(
         node.get_name().startswith("Search or open address · unmatched-search") for node in controls(nodes)))

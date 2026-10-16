@@ -2,7 +2,7 @@ diff --git a/chrome/app/browser_final_customization_strings.grdp b/chrome/app/br
 new file mode 100644
 --- /dev/null
 +++ b/chrome/app/browser_final_customization_strings.grdp
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,122 @@
 +<?xml version="1.0" encoding="utf-8"?>
 +<!-- 0002-customization.patch installs this catalog beside generated_resources.grd
 +     as required by that upstream GRD's part-location contract. -->
@@ -43,8 +43,8 @@ new file mode 100644
 +  <message name="IDS_BLYNX_NEWTAB_MIDNIGHT" desc="Blynx browser newtab midnight UI label.">Midnight</message>
 +  <message name="IDS_BLYNX_NEWTAB_PAPER" desc="Blynx browser newtab paper UI label.">Paper</message>
 +  <message name="IDS_BLYNX_NEWTAB_LINKS" desc="Blynx browser newtab links UI label.">Show browser shortcuts</message>
-+  <message name="IDS_BLYNX_SETTINGS_SAVED" desc="Blynx browser settings saved UI label.">Saved. Open a new tab to see your canvas.</message>
-+  <message name="IDS_BLYNX_SETTINGS_ERROR" desc="Blynx browser settings error UI label.">Changes could not be saved. Check the accent color and whether these settings are managed.</message>
++  <message name="IDS_BLYNX_SETTINGS_SAVED" desc="Blynx browser settings saved UI label.">Saved.</message>
++  <message name="IDS_BLYNX_SETTINGS_ERROR" desc="Blynx browser settings error UI label.">Changes could not be saved. Check the colors and whether these settings are managed.</message>
 +  <message name="IDS_BLYNX_SETTINGS_READ_ONLY" desc="Blynx browser settings read only UI label.">These settings cannot be changed in this profile or are managed.</message>
 +  <message name="IDS_BLYNX_NEWTAB_TAGLINE" desc="Blynx browser newtab tagline UI label.">Find your focus. Make room for what matters.</message>
 +  <message name="IDS_BLYNX_EXTENSION_STORE" desc="Blynx browser extension store UI label.">Extensions · Chrome Web Store</message>
@@ -81,6 +81,49 @@ new file mode 100644
 +  <message name="IDS_BLYNX_COMMAND_BOOKMARKS" desc="Command to show the bookmark manager.">Open bookmarks</message>
 +  <message name="IDS_BLYNX_COMMAND_SETTINGS" desc="Command to open browser settings.">Open settings</message>
 +  <message name="IDS_BLYNX_COMMAND_TABS" desc="Command to toggle native tab layout.">Switch horizontal / vertical tabs</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_TITLE" desc="Search appearance settings: Search appearance.">Search appearance</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_DESCRIPTION" desc="Search appearance settings: Customize Ctrl+Space search. Changes take effect the next time you open it..">Customize Ctrl+Space search. Changes take effect the next time you open it.</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_OUTER" desc="Search appearance settings: Popup beam style.">Popup beam style</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_HOVER" desc="Search appearance settings: Result hover beam style.">Result hover beam style</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_INPUT" desc="Search appearance settings: Search field beam style.">Search field beam style</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_MEDIUM" desc="Search appearance settings: Medium glow.">Medium glow</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_SMALL" desc="Search appearance settings: Small glow.">Small glow</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_LINE" desc="Search appearance settings: Thin line.">Thin line</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_INSIDE" desc="Search appearance settings: Inside pulse.">Inside pulse</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_OUTSIDE" desc="Search appearance settings: Outside pulse.">Outside pulse</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_PALETTE" desc="Search appearance settings: Beam palette.">Beam palette</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_COLORFUL" desc="Search appearance settings: Colorful.">Colorful</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_MONO" desc="Search appearance settings: Monochrome.">Monochrome</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_OCEAN" desc="Search appearance settings: Ocean.">Ocean</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_SUNSET" desc="Search appearance settings: Sunset.">Sunset</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_CUSTOM" desc="Search appearance settings: Custom.">Custom</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_STRENGTH" desc="Search appearance settings: Glow intensity.">Glow intensity</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_ACTIVE" desc="Search appearance settings: Animate beams.">Animate beams</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_DURATION" desc="Search appearance settings: Seconds per revolution.">Seconds per revolution</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_CUSTOM_COLORS" desc="Search appearance settings: Use custom interface colors.">Use custom interface colors</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_COLORS" desc="Search appearance settings: Interface colors.">Interface colors</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_BEAM_COLORS" desc="Search appearance settings: Custom beam colors.">Custom beam colors</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_PREVIEW" desc="Search appearance settings: Color preview.">Color preview</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_PREVIEW_NOTICE" desc="Search appearance settings: Illustrative color preview. Open Ctrl+Space after Apply to see the native effects..">Illustrative color preview. Open Ctrl+Space after Apply to see the native effects.</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_SURFACE" desc="Search appearance settings: Card background.">Card background</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_HEADING" desc="Search appearance settings: Heading text.">Heading text</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_HINT" desc="Search appearance settings: Keyboard hint text.">Keyboard hint text</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_INPUT_BACKGROUND" desc="Search appearance settings: Input background.">Input background</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_INPUT_TEXT" desc="Search appearance settings: Input text and caret.">Input text and caret</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_PLACEHOLDER" desc="Search appearance settings: Placeholder text.">Placeholder text</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_SELECTION" desc="Search appearance settings: Input text selection.">Input text selection</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_SELECTION_TEXT" desc="Search appearance settings: Selected input text.">Selected input text</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_ROW" desc="Search appearance settings: Result background.">Result background</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_ROW_TEXT" desc="Search appearance settings: Result text.">Result text</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_SELECTED" desc="Search appearance settings: Selected result background.">Selected result background</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_SELECTED_TEXT" desc="Search appearance settings: Selected result text.">Selected result text</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_HOVER_BACKGROUND" desc="Search appearance settings: Hovered result background.">Hovered result background</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_HOVER_TEXT" desc="Search appearance settings: Hovered result text.">Hovered result text</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_OUTLINE" desc="Search appearance settings: Border outlines.">Border outlines</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_BEAM1" desc="Search appearance settings: Beam color 1.">Beam color 1</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_BEAM2" desc="Search appearance settings: Beam color 2.">Beam color 2</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_BEAM3" desc="Search appearance settings: Beam color 3.">Beam color 3</message>
++  <message name="IDS_BLYNX_SEARCH_CUSTOM_BEAM4" desc="Search appearance settings: Beam color 4.">Beam color 4</message>
 +</grit-part>
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
 index d718a56fe4..cfbde9bf1a 100644

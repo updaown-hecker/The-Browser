@@ -2948,10 +2948,10 @@ literal 0
 HcmV?d00001
 
 diff --git a/chrome/browser/resources/settings/appearance_page/appearance_page.css b/chrome/browser/resources/settings/appearance_page/appearance_page.css
-index 77a109485a..97b37c8198 100644
+index 77a109485a..a2f85561e2 100644
 --- a/chrome/browser/resources/settings/appearance_page/appearance_page.css
 +++ b/chrome/browser/resources/settings/appearance_page/appearance_page.css
-@@ -46,3 +46,213 @@
+@@ -46,3 +46,269 @@
  .indented-rows .cr-row {
    padding-inline-start: 0;
  }
@@ -3165,11 +3165,67 @@ index 77a109485a..97b37c8198 100644
 +
 +.blynx-setup-links a:focus-visible { outline: 2px solid var(--cr-focus-outline-color);
 + outline-offset: 4px; }
++
++#blynxSearchAppearance { margin: 8px 20px 28px;
++ padding: 24px;
++ border: 1px solid var(--cr-separator-color);
++ border-radius: 20px;
++ accent-color: var(--cr-link-color);
++ color-scheme: light dark; }
++
++#blynxSearchAppearance fieldset { border: 0;
++ margin: 0;
++ padding: 0;
++ min-width: 0; }
++
++#blynxSearchAppearance h2 { margin-top: 0; }
++
++#blynxSearchAppearance details { margin-block: 20px; }
++
++#blynxSearchAppearance summary { cursor: pointer;
++ font-weight: 500;
++ margin-block-end: 12px; }
++
++.blynx-search-color-grid { display: grid;
++ grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
++ gap: 16px; }
++
++.blynx-search-color { display: grid;
++ grid-template-columns: 40px minmax(100px, 1fr);
++ gap: 8px; }
++
++.blynx-search-color label { grid-column: 1 / -1; }
++
++.blynx-search-color input[type=color] { width: 40px;
++ height: 36px;
++ padding: 2px; }
++
++.blynx-search-color input[type=text] { font: inherit;
++ width: 100%;
++ box-sizing: border-box; }
++
++.blynx-search-preview { border: 1px solid;
++ border-radius: 16px;
++ margin: 20px 0 0;
++ padding: 20px;
++ display: grid;
++ gap: 10px; }
++
++.blynx-search-preview div { border-radius: 8px;
++ padding: 12px; }
++@media (forced-colors: active) {
++  .blynx-search-preview { background: Canvas !important;
++ color: CanvasText !important;
++ border-color: CanvasText !important; }
++  .blynx-search-preview div { background: Canvas !important;
++ color: CanvasText !important;
++ border: 1px solid ButtonText; }
++}
 diff --git a/chrome/browser/resources/settings/appearance_page/appearance_page.html.ts b/chrome/browser/resources/settings/appearance_page/appearance_page.html.ts
-index eba0ba1ebb..c7ff097cd7 100644
+index eba0ba1ebb..cd013ad922 100644
 --- a/chrome/browser/resources/settings/appearance_page/appearance_page.html.ts
 +++ b/chrome/browser/resources/settings/appearance_page/appearance_page.html.ts
-@@ -11,6 +11,86 @@ export function getHtml(this: SettingsAppearancePageElement) {
+@@ -11,6 +11,152 @@ export function getHtml(this: SettingsAppearancePageElement) {
    return html`<!--_html_template_start_-->
  <settings-section page-title="$i18n{appearancePageTitle}">
    <div route-path="default">
@@ -3253,11 +3309,77 @@ index eba0ba1ebb..c7ff097cd7 100644
 +        <p id="blynxStatus" role="status">${this.blynxStatus_}</p>
 +      ` : ''}
 +    </section>
++    <section id="blynxSearchAppearance" aria-labelledby="blynxSearchHeading">
++      <h2 id="blynxSearchHeading">$i18n{blynxSearchTitle}</h2>
++      <p>$i18n{blynxSearchDescription}</p>
++      ${this.blynxSearch_ ? html`
++        <fieldset ?disabled="${!this.blynxSearch_.editable || this.blynxSearchBusy_}">
++          <div class="blynx-fields">
++            ${(['outer_style', 'hover_style', 'input_style'] as const).map((key, index) => html`
++              <label for="search-${key}">${this.i18n(['blynxSearchOuter', 'blynxSearchHover', 'blynxSearchInput'][index])}
++                <select id="search-${key}" data-key="${key}" .value="${this.blynxSearch_!.config[key]}" @change="${this.onBlynxSearchChange_}">
++                  ${this.blynxSearchStyles_.map(([value, label]) => html`<option value="${value}" .selected="${this.blynxSearch_?.config[key] === value}">${this.i18n(label)}</option>`)}
++                </select>
++              </label>`)}
++            <label for="search-palette">$i18n{blynxSearchPalette}<select id="search-palette" data-key="palette" .value="${this.blynxSearch_.config.palette}" @change="${this.onBlynxSearchChange_}">
++              ${['colorful', 'mono', 'ocean', 'sunset', 'custom'].map((value, index) => html`<option value="${value}" .selected="${this.blynxSearch_?.config.palette === value}">${this.i18n(['blynxSearchColorful', 'blynxSearchMono', 'blynxSearchOcean', 'blynxSearchSunset', 'blynxSearchCustom'][index])}</option>`)}
++            </select></label>
++            <label for="search-theme">$i18n{blynxTheme}<select id="search-theme" data-key="theme" .value="${this.blynxSearch_.config.theme}" @change="${this.onBlynxSearchChange_}">
++              <option value="system">$i18n{blynxSystem}</option><option value="light">$i18n{blynxLight}</option><option value="dark">$i18n{blynxDark}</option>
++            </select></label>
++            <label for="search-strength">$i18n{blynxSearchStrength}: <output>${Math.round(this.blynxSearch_.config.strength * 100)}%</output>
++              <input id="search-strength" data-key="strength" type="range" min="0" max="1" step="0.05" .value="${String(this.blynxSearch_.config.strength)}" @input="${this.onBlynxSearchInput_}">
++            </label>
++            <label for="search-duration">$i18n{blynxSearchDuration}: <output>${this.blynxSearch_.config.duration}</output>
++              <input id="search-duration" data-key="duration" type="range" min="2" max="30" step="1" .value="${String(this.blynxSearch_.config.duration)}" @input="${this.onBlynxSearchInput_}">
++            </label>
++          </div>
++          <div class="blynx-toggles">
++            <label for="search-active"><input id="search-active" data-key="active" type="checkbox" .checked="${this.blynxSearch_.config.active}" @change="${this.onBlynxSearchChange_}">$i18n{blynxSearchActive}</label>
++            <label for="search-custom-colors"><input id="search-custom-colors" data-key="custom_colors" type="checkbox" .checked="${this.blynxSearch_.config.custom_colors}" @change="${this.onBlynxSearchChange_}">$i18n{blynxSearchCustomColors}</label>
++          </div>
++          <details><summary>$i18n{blynxSearchColors}</summary>
++            <fieldset class="blynx-search-color-grid" ?disabled="${!this.blynxSearch_.config.custom_colors}">
++              ${this.blynxSearchColors_.map(([key, label]) => html`
++                <div class="blynx-search-color">
++                  <label for="search-color-${key}">${this.i18n(label)}</label>
++                  <input type="color" aria-label="${this.i18n(label)}" data-color="${key}" .value="${this.blynxSearchColor_(key)}" @input="${this.onBlynxSearchInput_}">
++                  <input id="search-color-${key}" type="text" data-color="${key}" maxlength="7" pattern="#[0-9a-fA-F]{6}" .value="${(this.blynxSearch_?.config.colors[key] || '')}" @input="${this.onBlynxSearchInput_}">
++                </div>`)}
++            </fieldset>
++          </details>
++          <details><summary>$i18n{blynxSearchBeamColors}</summary>
++            <div class="blynx-search-color-grid">
++              ${[1, 2, 3, 4].map(index => html`<div class="blynx-search-color">
++                <label for="search-beam-${index}">${this.i18n('blynxSearchBeam' + index)}</label>
++                <input type="color" aria-label="${this.i18n('blynxSearchBeam' + index)}" data-color="beam_${index}" .value="${this.blynxSearchColor_('beam_' + index)}" @input="${this.onBlynxSearchInput_}">
++                <input id="search-beam-${index}" type="text" data-color="beam_${index}" maxlength="7" pattern="#[0-9a-fA-F]{6}" .value="${(this.blynxSearch_?.config.colors['beam_' + index] || '')}" @input="${this.onBlynxSearchInput_}">
++              </div>`)}
++            </div>
++          </details>
++          <figure aria-label="$i18n{blynxSearchPreview}" class="blynx-search-preview"
++              style="background:${this.blynxSearchPreviewColor_('surface')};color:${this.blynxSearchPreviewColor_('heading')};border-color:${this.blynxSearchPreviewColor_('outline')}">
++            <strong>$i18n{blynxSearchPopupTitle}</strong>
++            <div style="background:${this.blynxSearchPreviewColor_('input')};color:${this.blynxSearchPreviewColor_('placeholder')}">$i18n{blynxSearchInput}</div>
++            <div style="background:${this.blynxSearchPreviewColor_('selected')};color:${this.blynxSearchPreviewColor_('selected_text')}">$i18n{blynxSearchSelected}</div>
++            <div style="background:${this.blynxSearchPreviewColor_('hover')};color:${this.blynxSearchPreviewColor_('hover_text')}">$i18n{blynxSearchHover}</div>
++          </figure>
++          <p>$i18n{blynxSearchPreviewNotice}</p>
++          <div class="blynx-actions">
++            <cr-button id="search-reset" ?disabled="${!this.blynxSearch_.editable || this.blynxSearchBusy_}" @click="${this.onBlynxSearchResetClick_}">$i18n{resetToDefault}</cr-button>
++            <cr-button id="search-cancel" ?disabled="${!this.blynxSearch_.editable || this.blynxSearchBusy_}" @click="${this.onBlynxSearchCancelClick_}">$i18n{blynxCancel}</cr-button>
++            <cr-button id="search-apply" ?disabled="${!this.blynxSearch_.editable || this.blynxSearchBusy_}" class="action-button" @click="${this.onBlynxSearchApplyClick_}">$i18n{blynxApply}</cr-button>
++          </div>
++        </fieldset>
++        ${!this.blynxSearch_.editable ? html`<p>$i18n{blynxReadOnly}</p>` : ''}
++      ` : ''}
++      <p role="status" id="search-status">${this.blynxSearchStatus_}</p>
++    </section>
      <div class="settings-row first" id="themeRow"
          ?hidden="${!this.pageVisibility_.setTheme}">
        <cr-link-row id="openTheme" class="first"
 diff --git a/chrome/browser/resources/settings/appearance_page/appearance_page.ts b/chrome/browser/resources/settings/appearance_page/appearance_page.ts
-index 8b7ea61313..e04b2076af 100644
+index 8b7ea61313..8ee0ac39ee 100644
 --- a/chrome/browser/resources/settings/appearance_page/appearance_page.ts
 +++ b/chrome/browser/resources/settings/appearance_page/appearance_page.ts
 @@ -18,6 +18,7 @@ import {PrefServiceObserverMixinLit} from '/shared/settings/prefs2/pref_service_
@@ -3268,12 +3390,32 @@ index 8b7ea61313..e04b2076af 100644
  import {assert, assertNotReached} from 'chrome://resources/js/assert.js';
  import {CrLitElement} from 'chrome://resources/lit/v3_0/lit.rollup.js';
  import type {PropertyValues} from 'chrome://resources/lit/v3_0/lit.rollup.js';
-@@ -114,6 +115,21 @@ function normalizePageVisibility(
+@@ -114,6 +115,41 @@ function normalizePageVisibility(
  const SettingsAppearancePageElementBase = SettingsViewMixinLit(
      RelaunchMixinLit(I18nMixinLit(PrefServiceObserverMixinLit(CrLitElement))));
 
 +interface BlynxSetupState {
 +  step: number;
++  editable: boolean;
++  saved: boolean;
++}
++
++interface BlynxSearchConfig {
++  version: number;
++  outer_style: string;
++  hover_style: string;
++  input_style: string;
++  palette: string;
++  strength: number;
++  active: boolean;
++  duration: number;
++  theme: string;
++  custom_colors: boolean;
++  colors: Record<string, string>;
++}
++interface BlynxSearchState {
++  config: BlynxSearchConfig;
++  defaults: BlynxSearchConfig;
 +  editable: boolean;
 +  saved: boolean;
 +}
@@ -3290,11 +3432,14 @@ index 8b7ea61313..e04b2076af 100644
  export class SettingsAppearancePageElement extends
      SettingsAppearancePageElementBase {
    static get is() {
-@@ -130,6 +146,11 @@ export class SettingsAppearancePageElement extends
+@@ -130,6 +166,14 @@ export class SettingsAppearancePageElement extends
 
    static override get properties() {
      return {
 +      blynxState_: {type: Object},
++      blynxSearch_: {type: Object},
++      blynxSearchBusy_: {type: Boolean},
++      blynxSearchStatus_: {type: String},
 +      blynxSetup_: {type: Object},
 +      blynxSetupBusy_: {type: Boolean},
 +      blynxSetupError_: {type: String},
@@ -3302,7 +3447,7 @@ index 8b7ea61313..e04b2076af 100644
        pageVisibility_: {type: Object},
        defaultZoom_: {type: Number},
 
-@@ -314,6 +335,148 @@ export class SettingsAppearancePageElement extends
+@@ -314,6 +358,226 @@ export class SettingsAppearancePageElement extends
        Array<{id: string, label: string}> =
            JSON.parse(loadTimeData.getString('configurableSidePanelAlignments'));
 
@@ -3337,6 +3482,84 @@ index 8b7ea61313..e04b2076af 100644
 +
 +  protected onBlynxSetupImportClick_() {
 +    Router.getInstance().navigateTo(routes.IMPORT_DATA);
++  }
++
++  protected accessor blynxSearch_: BlynxSearchState|null = null;
++  protected accessor blynxSearchBusy_: boolean = false;
++  protected accessor blynxSearchStatus_: string = '';
++  private blynxSearchSaved_: BlynxSearchConfig|null = null;
++  protected readonly blynxSearchStyles_ = [
++    ['md', 'blynxSearchMedium'], ['sm', 'blynxSearchSmall'],
++    ['line', 'blynxSearchLine'], ['pulse-inner', 'blynxSearchInside'],
++    ['pulse-outside', 'blynxSearchOutside'],
++  ];
++  protected readonly blynxSearchColors_ = [['surface', 'blynxSearchSurface'],['heading', 'blynxSearchHeading'],['hint', 'blynxSearchHint'],['input', 'blynxSearchInputBackground'],['input_text', 'blynxSearchInputText'],['placeholder', 'blynxSearchPlaceholder'],['selection', 'blynxSearchSelection'],['selection_text', 'blynxSearchSelectionText'],['row', 'blynxSearchRow'],['row_text', 'blynxSearchRowText'],['selected', 'blynxSearchSelected'],['selected_text', 'blynxSearchSelectedText'],['hover', 'blynxSearchHoverBackground'],['hover_text', 'blynxSearchHoverText'],['outline', 'blynxSearchOutline']];
++  protected blynxSearchColor_(key: string): string {
++    const state = this.blynxSearch_!;
++    const value = state.config.colors[key] || '';
++    return /^#[0-9a-fA-F]{6}$/.test(value) ? value : state.defaults.colors[key];
++  }
++  protected blynxSearchPreviewColor_(key: string): string {
++    const state = this.blynxSearch_!;
++    if (state.config.custom_colors) return this.blynxSearchColor_(key);
++    const dark = state.config.theme === 'dark' ||
++        (state.config.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
++    const light: Record<string, string> = {
++      surface: '#FFFFFF', heading: '#202124', input: '#F5F7FB',
++      placeholder: '#5F6368', selected: '#D5E7FC', selected_text: '#142D47',
++      hover: '#E6ECF5', hover_text: '#1A2738', outline: '#7B8492',
++    };
++    return dark ? state.defaults.colors[key] : (light[key] || state.defaults.colors[key]);
++  }
++  protected onBlynxSearchInput_(event: Event) { this.onBlynxSearchChange_(event); }
++  protected onBlynxSearchChange_(event: Event) {
++    if (!this.blynxSearch_?.editable || this.blynxSearchBusy_) return;
++    const field = event.currentTarget as HTMLInputElement;
++    const config = structuredClone(this.blynxSearch_.config);
++    const key = field.dataset['key'];
++    const color = field.dataset['color'];
++    if (color) {
++      config.colors[color] = field.value;
++      if (color.startsWith('beam_')) config.palette = 'custom';
++    } else if (key === 'strength' || key === 'duration') {
++      config[key] = Number(field.value);
++    } else if (key === 'active' || key === 'custom_colors') {
++      config[key] = field.checked;
++    } else if (key === 'outer_style' || key === 'hover_style' ||
++               key === 'input_style' || key === 'palette' || key === 'theme') {
++      config[key] = field.value;
++    }
++    this.blynxSearch_ = {...this.blynxSearch_, config};
++    this.blynxSearchStatus_ = '';
++  }
++  protected onBlynxSearchCancelClick_() {
++    if (!this.blynxSearch_ || this.blynxSearchBusy_ || !this.blynxSearchSaved_) return;
++    this.blynxSearch_ = {...this.blynxSearch_, config: structuredClone(this.blynxSearchSaved_)};
++    this.blynxSearchStatus_ = '';
++  }
++  protected onBlynxSearchResetClick_() {
++    if (!this.blynxSearch_?.editable || this.blynxSearchBusy_) return;
++    this.blynxSearch_ = {...this.blynxSearch_, config: structuredClone(this.blynxSearch_.defaults)};
++    this.blynxSearchStatus_ = '';
++  }
++  protected async onBlynxSearchApplyClick_() {
++    if (!this.blynxSearch_?.editable || this.blynxSearchBusy_) return;
++    this.blynxSearchBusy_ = true;
++    try {
++      const result = await sendWithPromise<BlynxSearchState>('applyBlynxSearchAppearance', this.blynxSearch_.config);
++      if (!this.isConnected) return;
++      if (result.saved) {
++        this.blynxSearch_ = result;
++        this.blynxSearchSaved_ = structuredClone(result.config);
++      } else if (this.blynxSearch_) {
++        this.blynxSearch_ = {...this.blynxSearch_, editable: result.editable};
++      }
++      this.blynxSearchStatus_ = this.i18n(result.saved ? 'blynxSaved' : 'blynxError');
++    } catch {
++      this.blynxSearchStatus_ = this.i18n('blynxError');
++    } finally {
++      this.blynxSearchBusy_ = false;
++    }
 +  }
 +
 +  protected accessor blynxState_: BlynxAppearanceState|null = null;
@@ -3451,13 +3674,18 @@ index 8b7ea61313..e04b2076af 100644
    private appearanceBrowserProxy_: AppearanceBrowserProxy =
        AppearanceBrowserProxyImpl.getInstance();
    private colorSchemeModeBrowserProxy_: CustomizeColorSchemeModeBrowserProxy =
-@@ -324,6 +487,14 @@ export class SettingsAppearancePageElement extends
+@@ -324,6 +588,19 @@ export class SettingsAppearancePageElement extends
 
    override connectedCallback() {
      super.connectedCallback();
 +    sendWithPromise<BlynxSetupState>('blynxOnboarding', 'get').then(state => {
 +      if (this.isConnected) this.blynxSetup_ = state;
 +    });
++    sendWithPromise<BlynxSearchState>('getBlynxSearchAppearance').then(state => {
++      if (!this.isConnected) return;
++      this.blynxSearch_ = state;
++      this.blynxSearchSaved_ = structuredClone(state.config);
++    }).catch(() => { if (this.isConnected) this.blynxSearchStatus_ = this.i18n('blynxError'); });
 +    sendWithPromise<BlynxAppearanceState>('getBlynxAppearance').then(state => {
 +      if (!this.isConnected) return;
 +      this.blynxSaved_ = state;
@@ -3529,7 +3757,7 @@ index 9c9878f..017e2af 100644
      "//chrome/app:command_ids",
      "//chrome/app:generated_resources",
 diff --git a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-index e8a171fb21..d201ae9bf4 100644
+index e8a171fb21..84417aba54 100644
 --- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 +++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 @@ -227,7 +227,7 @@ void AddCommonStrings(content::WebUIDataSource* html_source, Profile* profile) {
@@ -3541,10 +3769,54 @@ index e8a171fb21..d201ae9bf4 100644
        {"settingsAltPageTitle", IDS_SETTINGS_ALT_PAGE_TITLE},
        {"subpageArrowRoleDescription", IDS_SETTINGS_SUBPAGE_BUTTON},
        {"subpageBackButtonAriaLabel",
-@@ -576,6 +576,47 @@ void AddAiStrings(content::WebUIDataSource* html_source) {
+@@ -576,6 +576,91 @@ void AddAiStrings(content::WebUIDataSource* html_source) {
  void AddAppearanceStrings(content::WebUIDataSource* html_source,
                            Profile* profile) {
    static constexpr webui::LocalizedString kLocalizedStrings[] = {
++      {"blynxSearchPopupTitle", IDS_BLYNX_COMMAND_TITLE},
++      {"blynxSearchTitle", IDS_BLYNX_SEARCH_CUSTOM_TITLE},
++      {"blynxSearchDescription", IDS_BLYNX_SEARCH_CUSTOM_DESCRIPTION},
++      {"blynxSearchOuter", IDS_BLYNX_SEARCH_CUSTOM_OUTER},
++      {"blynxSearchHover", IDS_BLYNX_SEARCH_CUSTOM_HOVER},
++      {"blynxSearchInput", IDS_BLYNX_SEARCH_CUSTOM_INPUT},
++      {"blynxSearchMedium", IDS_BLYNX_SEARCH_CUSTOM_MEDIUM},
++      {"blynxSearchSmall", IDS_BLYNX_SEARCH_CUSTOM_SMALL},
++      {"blynxSearchLine", IDS_BLYNX_SEARCH_CUSTOM_LINE},
++      {"blynxSearchInside", IDS_BLYNX_SEARCH_CUSTOM_INSIDE},
++      {"blynxSearchOutside", IDS_BLYNX_SEARCH_CUSTOM_OUTSIDE},
++      {"blynxSearchPalette", IDS_BLYNX_SEARCH_CUSTOM_PALETTE},
++      {"blynxSearchColorful", IDS_BLYNX_SEARCH_CUSTOM_COLORFUL},
++      {"blynxSearchMono", IDS_BLYNX_SEARCH_CUSTOM_MONO},
++      {"blynxSearchOcean", IDS_BLYNX_SEARCH_CUSTOM_OCEAN},
++      {"blynxSearchSunset", IDS_BLYNX_SEARCH_CUSTOM_SUNSET},
++      {"blynxSearchCustom", IDS_BLYNX_SEARCH_CUSTOM_CUSTOM},
++      {"blynxSearchStrength", IDS_BLYNX_SEARCH_CUSTOM_STRENGTH},
++      {"blynxSearchActive", IDS_BLYNX_SEARCH_CUSTOM_ACTIVE},
++      {"blynxSearchDuration", IDS_BLYNX_SEARCH_CUSTOM_DURATION},
++      {"blynxSearchCustomColors", IDS_BLYNX_SEARCH_CUSTOM_CUSTOM_COLORS},
++      {"blynxSearchColors", IDS_BLYNX_SEARCH_CUSTOM_COLORS},
++      {"blynxSearchBeamColors", IDS_BLYNX_SEARCH_CUSTOM_BEAM_COLORS},
++      {"blynxSearchPreview", IDS_BLYNX_SEARCH_CUSTOM_PREVIEW},
++      {"blynxSearchPreviewNotice", IDS_BLYNX_SEARCH_CUSTOM_PREVIEW_NOTICE},
++      {"blynxSearchSurface", IDS_BLYNX_SEARCH_CUSTOM_SURFACE},
++      {"blynxSearchHeading", IDS_BLYNX_SEARCH_CUSTOM_HEADING},
++      {"blynxSearchHint", IDS_BLYNX_SEARCH_CUSTOM_HINT},
++      {"blynxSearchInputBackground", IDS_BLYNX_SEARCH_CUSTOM_INPUT_BACKGROUND},
++      {"blynxSearchInputText", IDS_BLYNX_SEARCH_CUSTOM_INPUT_TEXT},
++      {"blynxSearchPlaceholder", IDS_BLYNX_SEARCH_CUSTOM_PLACEHOLDER},
++      {"blynxSearchSelection", IDS_BLYNX_SEARCH_CUSTOM_SELECTION},
++      {"blynxSearchSelectionText", IDS_BLYNX_SEARCH_CUSTOM_SELECTION_TEXT},
++      {"blynxSearchRow", IDS_BLYNX_SEARCH_CUSTOM_ROW},
++      {"blynxSearchRowText", IDS_BLYNX_SEARCH_CUSTOM_ROW_TEXT},
++      {"blynxSearchSelected", IDS_BLYNX_SEARCH_CUSTOM_SELECTED},
++      {"blynxSearchSelectedText", IDS_BLYNX_SEARCH_CUSTOM_SELECTED_TEXT},
++      {"blynxSearchHoverBackground", IDS_BLYNX_SEARCH_CUSTOM_HOVER_BACKGROUND},
++      {"blynxSearchHoverText", IDS_BLYNX_SEARCH_CUSTOM_HOVER_TEXT},
++      {"blynxSearchOutline", IDS_BLYNX_SEARCH_CUSTOM_OUTLINE},
++      {"blynxSearchBeam1", IDS_BLYNX_SEARCH_CUSTOM_BEAM1},
++      {"blynxSearchBeam2", IDS_BLYNX_SEARCH_CUSTOM_BEAM2},
++      {"blynxSearchBeam3", IDS_BLYNX_SEARCH_CUSTOM_BEAM3},
++      {"blynxSearchBeam4", IDS_BLYNX_SEARCH_CUSTOM_BEAM4},
 +      {"blynxAppearanceTitle", IDS_BLYNX_APPEARANCE_TITLE},
 +      {"blynxAppearanceDescription", IDS_BLYNX_APPEARANCE_DESCRIPTION},
 +      {"blynxAccent", IDS_BROWSER_FINAL_CUSTOMIZE_ACCENT_LABEL},
@@ -3589,7 +3861,7 @@ index e8a171fb21..d201ae9bf4 100644
        {"appearancePageTitle", IDS_SETTINGS_APPEARANCE},
        {"ctrlTabMru", IDS_SETTINGS_CTRL_TAB_MRU},
        {"glassEffect", IDS_SETTINGS_TAB_STYLING},
-@@ -797,7 +838,8 @@ void AddClearBrowsingDataStrings(content::WebUIDataSource* html_source,
+@@ -797,7 +882,8 @@ void AddClearBrowsingDataStrings(content::WebUIDataSource* html_source,
 
  #if !BUILDFLAG(IS_CHROMEOS)
    html_source->AddBoolean("isClearPrimaryAccountAllowed",
@@ -4542,3 +4814,18 @@ index 79489d0e1a..c850dd166c 100644
    </message>
    <message name="IDS_ACCESS_CODE_CAST_INPUT_ARIA_LABEL" is_accessibility_with_no_ui="true" desc="Label for the text box where users type the access code to start casting to a Chromecast device">
      Type the access code to start casting
+diff --git a/ui/views/bubble/bubble_dialog_delegate_view.cc b/ui/views/bubble/bubble_dialog_delegate_view.cc
+index 16d2770cc0..59a8051fc2 100644
+--- a/ui/views/bubble/bubble_dialog_delegate_view.cc
++++ b/ui/views/bubble/bubble_dialog_delegate_view.cc
+@@ -135,6 +135,10 @@ class BubbleWidget : public Widget {
+   }
+
+   const ui::ColorProvider* GetColorProvider() const override {
++    // Explicit bubble themes must not be replaced by the anchor palette.
++    if (color_mode_override().has_value()) {
++      return Widget::GetColorProvider();
++    }
+     const Widget* const primary = GetPrimaryWindowWidget();
+     return (primary && primary != this) ? primary->GetColorProvider()
+                                         : Widget::GetColorProvider();

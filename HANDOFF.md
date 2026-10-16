@@ -1,6 +1,6 @@
 # Blynx — live handoff
 
-Updated October 15, 2026. Native Chromium development distribution, not a
+Updated October 16, 2026. Native Chromium development distribution, not a
 completed daily-driver release. User explicitly selected the company/product
 name **Blynx**. Preserve Chromium/Views/C++23/GN/Clang/libc++, sandbox/isolation,
 pins, OS policy, credentials and existing profiles. No Electron/WebView shell.
@@ -11,7 +11,7 @@ KDE neon 24.04 x86-64, KDE Wayland, Ryzen 7 5700, 31 GiB RAM. Existing repositor
 commits are preserved; session changes are unstaged. Never stage `.local/`,
 PROMPT.txt, secrets, browser data or crash dumps. No OS security change or package
 installation was made. Owned code is `browser/`; five reviewed patches in
-`patches/series`; pins in `config/`. Integration installs 38 owned files and records
+`patches/series`; pins in `config/`. Integration installs 40 owned files and records
 hashes in `.local/chromium/src/.browser-final-overlay.json`.
 
 Pinned Chromium 154.0.8037.97 / `b510e9d7cd3a2fbd78d0ddc42234103206c5f78d`,
@@ -629,3 +629,135 @@ Wayland popup/motion synthesis remains unverified on this host; earlier baseline
 Wayland checks are historical, not a new animation validation. Broad platform,
 accessibility, performance and release limitations remain. Existing user profiles
 and OS motion settings were not changed. Restart Blynx to load the new binary.
+
+### October 16 — segmented beam treatment from supplied reference
+
+User supplied `/home/blynx/Pictures/Screenshots/Screenshot_20261016_161826.png`
+and https://libraries.dev/beam.html as visual references: pulse-outside on the
+popup, pulse-inner on hovered results, pulse-inner or line on the input. Read the
+public documentation and viewed the screenshot. Implemented the appearance in
+native Views/Skia; no React/npm package, web shell or stack change was introduced.
+
+- Replaced the continuous rainbow with localized cyan/lime/gold/violet highlights
+  separated by transparent/dark gaps. The existing ten-second phase now drives
+  travelling beams plus subtle brightness pulses.
+- Outside: rounded clipping excludes the card interior; 24 DIP transparent frame
+  insets contain a soft 7 DIP blurred stroke and narrow light edge.
+- Inside: hovered/pressed results retain the 180ms fade but clip the beam and a
+  3 DIP blur inside the row. Removed the previous full-row colored wash.
+- Input: native FocusableBorder plus a thin moving beam / 1 DIP soft edge. The
+  native focus ring is restored after Textfield::SetBorder (which removes it),
+  then used for contrast mode; color mode uses the beam. Input text padding and
+  native text/selection colors remain owned by Views. Input/frame beam pointers
+  are detached after stopping animation and before Widget disposal.
+- Reduced motion freezes beams with immediate hover feedback; forced colors and
+  increased contrast retain native focus/border/hover styling. No command,
+  profile, search-routing or dismissal changes. AI remains only a TODO entry.
+
+Validation and repairs:
+- Initial build passed, but opening the popup crashed in the first real test:
+  custom Textfield::SetBorder removed the FocusRing before it was configured.
+  Fixed by reinstalling the native ring before setting its focus predicate.
+  Failed fixture/report preserved under `.local/logs/search-beam-visual.log`.
+- Final build passed, 3 steps / 22.66s;
+  `.local/logs/search-beam-build3.log`. Final GN UI dependency check passed
+  (`.local/logs/search-beam-gn-final.log`).
+- Final native X11 smoke passed 61 checks, including Ctrl+Space, tool/tab/URL
+  actions, click-away dismissal, Enter/reopen/Escape, restart/MV3/sandbox checks;
+  `.local/logs/search-beam-native-x11.log`, `.local/native-smoke-x11/results.json`.
+- Final normal visual run passed moving outside/input beams, result hover color
+  and motion, exit feedback, Escape disposal and clean shutdown. Outer-strip
+  mean RGB change ~4.53 over one second, input-line change ~21.59; hovered result
+  region changes ~6.28 and its continuing beam phase changes ~0.32.
+  `.local/logs/search-beam-visual-final.log`,
+  `.local/blynx-search-beam/capture.json`; actual hover preview
+  `.local/blynx-search-beam/hover-moving-popup.png` visually inspected.
+- Final forced reduced-motion and forced high-contrast visual runs passed: outer
+  and input strip changes are exactly 0, with working hover feedback and clean
+  disposal. Contrast render was inspected: native ring/hover, no colored beams.
+  `.local/logs/search-beam-reduced2.log`, `search-beam-contrast2.log`; reports under
+  `.local/blynx-search-beam-reduced/` and `.local/blynx-search-beam-contrast/`.
+- Capture attempts before final runs were invalidated by desktop input changing
+  the fixture query, changing popup geometry/hover, or by an initial window-paint
+  transition. Final captures clear/check the fixture query and wait for settled
+  paint. A temporary XWarpPointer test-driver experiment was reverted; the tracked
+  input driver has no change. No separate Xvfb/Xephyr server was installed.
+- Read-only integration check, clang-format dry run and diff whitespace check
+  passed. No tooling test rerun was needed for this C++ styling slice; prior 97
+  tooling result is historical. No user profile or OS setting was changed.
+
+Wayland popup/beam interaction remains unverified, as do the previously documented
+broad performance/accessibility/platform/release audits. No performance claim is
+made for native blur painting. Restart Blynx to load this build.
+
+
+## October 16 — configurable search appearance
+
+Settings → Appearance → Search appearance exposes every Beam option natively:
+md/sm/line/pulse-inner/pulse-outside independently for popup, input and result
+hover; colorful/mono/ocean/sunset/custom palettes; strength 0–1, animation on/off,
+2–30 second revolutions and system/light/dark themes. Fifteen optional UI colors
+cover surfaces, text/caret, placeholder, selection, results and outline; four
+custom beam stops are independent. Apply saves one profile preference, Cancel
+restores the saved draft and Reset stages defaults. Reopen Ctrl+Space to apply.
+No React package or renderer-to-native control API was introduced.
+
+Owned `appearance/search_appearance.{h,cc}` registers and validates the versioned
+`blynx.search_appearance` dictionary. Unknown keys/types/enums/ranges/colors fail
+atomically; managed/future preferences remain preserved. Trusted Settings writes
+refuse private/guest profiles. Native views load one immutable snapshot per popup.
+Zero strength restores the native focus ring; reduced-motion/high-contrast guards
+remain. The Settings color preview is illustrative, not a live beam simulation.
+
+Patch 0005 includes Settings controls/localized labels and a Views bubble fix:
+explicit color-mode overrides use the bubble's color provider instead of silently
+inheriting its anchor's palette. Default bubbles keep upstream palette inheritance.
+An actual native surface pixel check caught and repaired BubbleDialogDelegate's
+frame-color overwrite; SetBackgroundColor now synchronizes frame/client surfaces.
+The render matrix also caught the inherited light-theme override issue. GTK
+OS-only background/label tokens are replaced with upstream scheme-aware surface/
+on-surface tokens only for an explicit light/dark search theme. Native contrast
+still uses OS tokens. Custom outlines paint underneath the beam so thin line
+styles remain visible.
+
+Validation this slice:
+- Browser builds passed, including the final surface fix (3 steps / 35.77s);
+  `.local/logs/search-options-build-surface.log`. Later theme fix evidence below.
+- All 12 PrefService tests passed, including three new configuration/guard tests;
+  `.local/logs/search-options-prefs-tests-final.log`.
+- All 97 Python tooling tests passed; `search-options-tooling-final.log`.
+- Headless runtime passed 53 checks with no page errors: staged edit/cancel/reset,
+  atomic save/rejection, all option lists, private refusal, persisted selections
+  after restart. `.local/logs/search-options-runtime.log`.
+- Native X11 passed 69 checks, including actual saved surface RGB, navigation,
+  click-away/Enter/reopen/Escape and clean shutdown;
+  `.local/logs/search-options-native-x11-final.log`.
+- GN UI dependency check passed (`search-options-gn.log`). Settings TypeScript,
+  CSS lint and native compilation failures during development were repaired before
+  these successful runs. Initial 4-job build was interrupted cleanly and resumed
+  serially with 8 jobs. No two GN builds ran concurrently.
+
+Wayland popup interaction, Windows runtime and broad performance/accessibility/
+release audits remain unverified. No user profile, OS policy, pin or toolchain was
+changed. Restart Blynx to load this build.
+
+Final render/build follow-up:
+- Final browser build passed, 3 steps / 23.32s;
+  `.local/logs/search-options-build-release-final.log`.
+- Six native X11 render cases passed across all five styles, all four named
+  palettes plus custom, light/dark/system modes, paused/active animation and zero
+  strength. Actual background RGB and input-beam motion/pause were checked, plus
+  hover rendering, Escape and clean disposal. Light/default and custom/dark
+  captures were inspected. `.local/logs/search-options-matrix-release.log` and
+  `.local/search-options-case-{0..5}/capture.json`.
+- An earlier matrix sampled a band too far outside the thin outer beam; corrected
+  to the input border. Another launch correctly refused an incomplete build
+  receipt while the final build was underway; all final cases ran after success.
+- Both UI and Views GN dependency checks passed (`search-options-gn-release.log`,
+  `search-options-gn-views.log`). Final 97-tooling rerun, overlay read-only check,
+  clang-format dry run and diff whitespace check passed. Initial light-mode render
+  failures were repaired, not accepted as successful validation.
+- Final-build X11 interaction rerun passed all 69 checks with no page errors,
+  including custom surface pixels, search/navigation, dismissal and restart;
+  `.local/logs/search-options-native-release.log` and
+  `.local/native-smoke-x11/results.json`.

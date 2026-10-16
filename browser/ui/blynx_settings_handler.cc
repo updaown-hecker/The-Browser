@@ -5,6 +5,7 @@
 
 #include "base/functional/bind.h"
 #include "browser/appearance/appearance_pref_store.h"
+#include "browser/appearance/search_appearance.h"
 #include "browser/ui/native_appearance_controller.h"
 #include "chrome/browser/profiles/profile.h"
 #include "components/prefs/pref_service.h"
@@ -25,6 +26,15 @@ bool CanEditNewTab(PrefService* prefs) {
 
 void BlynxSettingsHandler::RegisterMessages() {
   web_ui()->RegisterMessageCallback(
+      "getBlynxSearchAppearance",
+      base::BindRepeating(&BlynxSettingsHandler::GetSearchAppearance,
+                          base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "applyBlynxSearchAppearance",
+      base::BindRepeating(&BlynxSettingsHandler::ApplySearchAppearance,
+                          base::Unretained(this)));
+
+  web_ui()->RegisterMessageCallback(
       "blynxOnboarding", base::BindRepeating(&BlynxSettingsHandler::Onboarding,
                                              base::Unretained(this)));
   web_ui()->RegisterMessageCallback(
@@ -41,6 +51,38 @@ void BlynxSettingsHandler::RegisterMessages() {
       "exportBlynxAppearancePreset",
       base::BindRepeating(&BlynxSettingsHandler::ExportSavedPreset,
                           base::Unretained(this)));
+}
+
+base::DictValue BlynxSettingsHandler::SearchState(bool saved) {
+  auto* profile = Profile::FromWebUI(web_ui());
+  auto* prefs = profile->GetPrefs();
+  const bool editable =
+      profile->IsRegularProfile() && !profile->IsOffTheRecord() &&
+      !profile->IsGuestSession() && CanWriteSearchAppearance(*prefs);
+  return base::DictValue()
+      .Set("config", LoadSearchAppearance(*prefs))
+      .Set("defaults", DefaultSearchAppearance())
+      .Set("editable", editable)
+      .Set("saved", saved);
+}
+void BlynxSettingsHandler::GetSearchAppearance(const base::ListValue& args) {
+  if (args.size() != 1 || !args[0].is_string()) {
+    return;
+  }
+  AllowJavascript();
+  ResolveJavascriptCallback(args[0], SearchState(false));
+}
+void BlynxSettingsHandler::ApplySearchAppearance(const base::ListValue& args) {
+  if (args.size() != 2 || !args[0].is_string()) {
+    return;
+  }
+  AllowJavascript();
+  auto state = SearchState(false);
+  const bool saved =
+      args[1].is_dict() && state.FindBool("editable").value_or(false) &&
+      WriteSearchAppearance(*Profile::FromWebUI(web_ui())->GetPrefs(),
+                            args[1].GetDict());
+  ResolveJavascriptCallback(args[0], SearchState(saved));
 }
 
 void BlynxSettingsHandler::Onboarding(const base::ListValue& args) {

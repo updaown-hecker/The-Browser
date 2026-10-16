@@ -1,5 +1,20 @@
 # Changelog
 
+## October 16, 2026 — configurable search appearance
+
+- Added per-profile search customization under Settings → Appearance: five beam
+  styles independently for popup/hover/input, named/custom palettes, intensity,
+  pause/speed, light/dark/system and custom UI/beam colors.
+- Added color previews and staged Apply/Cancel/Reset, with RGB/schema/range
+  validation, policy/future-version preservation and private/guest write refusal.
+
+## October 16, 2026 — search beam treatment
+
+- Replaced the full rainbow rim with softer moving beams and dark gaps, following
+  the supplied Libraries.dev reference: outside pulse on the card, inside pulse
+  on hovered rows, and a thin beam on the native search field.
+- Preserved native contrast and reduced-motion fallbacks, centering and dismissal.
+
 ## October 15, 2026 — search motion and AI roadmap
 
 - Added slow motion to the search halo and fading multicolor hover accents on

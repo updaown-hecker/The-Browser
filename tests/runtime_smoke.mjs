@@ -142,6 +142,15 @@ try {
     const restored = await evaluate(page, `import('chrome://resources/js/cr.js').then(m => m.sendWithPromise('getBlynxAppearance'))`);
     assert.deepEqual(restored, report.expectedSavedAppearance);
     report.checks.push('saved appearance, vertical tabs and canvas preferences survive a clean browser restart');
+    const searchRestored=await evaluate(page, `import('chrome://resources/js/cr.js').then(m=>m.sendWithPromise('getBlynxSearchAppearance'))`);
+    assert.deepEqual(searchRestored.config, report.expectedSearchAppearance);
+    await evaluate(page, `window.blynxFind = ${deepFind}`);
+    await waitFor(page, `!!window.blynxFind('#search-outer_style')`);
+    assert.deepEqual(await evaluate(page, `['outer_style','hover_style','input_style','palette'].map(key=>window.blynxFind('#search-'+key).value)`),
+        ['md','sm','pulse-inner','custom']);
+
+    report.checks.push('custom search beam and interface colors survive clean browser restart');
+
     await page.send('Page.navigate', {url:'blynx://newtab/'});
     await waitFor(page, `document.querySelector('ntp-app')?.shadowRoot?.querySelector('#content.midnight')`);
     report.checks.push('saved new-tab canvas renders in the restarted browser');
@@ -211,6 +220,65 @@ try {
   await waitFor(page, `!!window.blynxFind('#blynxAccent')`);
   report.checks.push('blynx://settings/appearance resolves to the original trusted Chromium Settings origin');
   const getState = `import('chrome://resources/js/cr.js').then(m => m.sendWithPromise('getBlynxAppearance'))`;
+  const getSearch = `import('chrome://resources/js/cr.js').then(m => m.sendWithPromise('getBlynxSearchAppearance'))`;
+  await waitFor(page, `!!window.blynxFind('#search-outer_style')`);
+  const searchInitial = await evaluate(page, getSearch);
+  assert.equal(searchInitial.editable, true);
+  assert.deepEqual(await evaluate(page, `['outer_style','hover_style','input_style'].map(key=>window.blynxFind('#search-'+key).value)`),
+      ['pulse-outside','pulse-inner','line']);
+
+  assert.deepEqual(await evaluate(page, `Array.from(window.blynxFind('#search-outer_style').options, o => o.value)`), ['md','sm','line','pulse-inner','pulse-outside']);
+  assert.deepEqual(await evaluate(page, `Array.from(window.blynxFind('#search-palette').options, o => o.value)`), ['colorful','mono','ocean','sunset','custom']);
+  report.checks.push('search settings expose all five beam styles, four palettes plus custom, theme, strength and motion');
+  await evaluate(page, `(() => {
+    const field = window.blynxFind('#search-outer_style'); field.value='sm'; field.dispatchEvent(new Event('change', {bubbles:true}));
+  })()`);
+  assert.deepEqual((await evaluate(page,getSearch)).config,searchInitial.config);
+  await evaluate(page, `window.blynxFind('#search-cancel').click()`);
+  await waitFor(page, `window.blynxFind('#search-outer_style').value === 'pulse-outside'`);
+  report.checks.push('search appearance edits are staged and Cancel restores saved settings without writing');
+  await evaluate(page, `(() => {
+    const change=(selector,value,event='change')=>{const el=window.blynxFind(selector); if(el.type==='checkbox')el.checked=value;else el.value=String(value);el.dispatchEvent(new Event(event,{bubbles:true}));};
+    change('#search-custom-colors',true);change('#search-active',false);
+    change('#search-outer_style','md');change('#search-hover_style','sm');change('#search-input_style','pulse-inner');
+    change('#search-theme','dark');change('#search-strength',.45,'input');change('#search-duration',14,'input');
+    window.blynxFind('#blynxSearchAppearance').querySelectorAll('details').forEach(d=>d.open=true);
+  })()`);
+  await waitFor(page, `!window.blynxFind('#search-color-surface').matches(':disabled')`);
+  await evaluate(page, `(() => {
+    for(const [selector,value] of [['#search-color-surface','#102030'],['#search-color-input_text','#F0E0D0'],['#search-beam-1','#FF44AA']]) {
+      const el=window.blynxFind(selector);el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+  })()`);
+  await waitFor(page, `window.blynxFind('#search-palette').value === 'custom'`);
+  assert.equal(await evaluate(page, `getComputedStyle(window.blynxFind('.blynx-search-preview')).backgroundColor`),'rgb(16, 32, 48)');
+  await evaluate(page, `window.blynxFind('#search-apply').click()`);
+  await waitFor(page, `!window.blynxFind('settings-appearance-page').blynxSearchBusy_ && window.blynxFind('#search-status').textContent.trim() !== ''`);
+  const searchSaved = await evaluate(page,getSearch);
+  assert.equal(searchSaved.config.colors.surface,'#102030');assert.equal(searchSaved.config.colors.input_text,'#F0E0D0');
+  assert.equal(searchSaved.config.palette,'custom');assert.equal(searchSaved.config.strength,.45);assert.equal(searchSaved.config.duration,14);
+  assert.equal(searchSaved.config.active,false);assert.equal(searchSaved.config.custom_colors,true);
+  report.expectedSearchAppearance=searchSaved.config;
+  report.checks.push('search appearance Apply saves component styles, custom colors, strength, speed, theme and paused animation');
+  for (const invalid of [
+    {...searchSaved.config,strength:1.1}, {...searchSaved.config,input_style:'invalid'},
+    {...searchSaved.config,colors:{...searchSaved.config.colors,surface:'url(x)'}}, {...searchSaved.config,extra:true},
+  ]) {
+    const result=await evaluate(page, `import('chrome://resources/js/cr.js').then(m=>m.sendWithPromise('applyBlynxSearchAppearance',${JSON.stringify(invalid)}))`);
+    assert.equal(result.saved,false);assert.deepEqual(result.config,searchSaved.config);
+  }
+  report.checks.push('native search settings reject out-of-range strength, unknown styles/fields and non-RGB colors atomically');
+  await evaluate(page, `window.blynxFind('#search-reset').click()`);
+  await waitFor(page, `window.blynxFind('#search-palette').value === 'colorful'`);
+  assert.deepEqual((await evaluate(page,getSearch)).config,searchSaved.config);
+  await evaluate(page, `window.blynxFind('#search-cancel').click()`);
+  await waitFor(page, `window.blynxFind('#search-palette').value === 'custom'`);
+  report.checks.push('Reset to defaults is staged and Cancel restores the saved custom search design');
+  await evaluate(page, `window.blynxFind('#blynxSearchHeading').scrollIntoView({block:'start'})`);
+  await fs.writeFile(`${output}/search-appearance.png`,Buffer.from((await page.send('Page.captureScreenshot')).data,'base64'));
+  await evaluate(page, `window.blynxFind('#search-color-surface').scrollIntoView({block:'center'})`);
+  await fs.writeFile(`${output}/search-colors.png`,Buffer.from((await page.send('Page.captureScreenshot')).data,'base64'));
+
   const identityLabels = await evaluate(page, `import('chrome://resources/js/load_time_data.js').then(m => [m.loadTimeData.getString('peoplePageTitle'), m.loadTimeData.getString('googleServicesPageTitle')])`);
   assert.deepEqual(identityLabels, ['You and Blynx', 'Services and connections']);
   await waitFor(page, `window.blynxFind('#about-menu')?.querySelector('cr-icon')?.shadowRoot?.querySelector('path')?.getAttribute('d')?.startsWith('M2 12C5 4')`);
@@ -533,6 +601,12 @@ try {
     const privateApply = await evaluate(privatePage, `import('chrome://resources/js/cr.js').then(m => m.sendWithPromise('applyBlynxAppearance', ${JSON.stringify(saved.preset)}, false, 'paper', false))`);
     assert.equal(privateApply.saved, false);
     report.checks.push('private Settings refuses preset validation/export and appearance writes through native guards');
+    const privateSearch=await evaluate(privatePage, `import('chrome://resources/js/cr.js').then(m=>m.sendWithPromise('getBlynxSearchAppearance'))`);
+    assert.equal(privateSearch.editable,false);
+    const privateSearchSave=await evaluate(privatePage, `import('chrome://resources/js/cr.js').then(m=>m.sendWithPromise('applyBlynxSearchAppearance',${JSON.stringify(report.expectedSearchAppearance)}))`);
+    assert.equal(privateSearchSave.saved,false);
+    report.checks.push('private Settings refuses search appearance writes');
+
   } catch (error) {
     contextFailed = true;
     throw error;

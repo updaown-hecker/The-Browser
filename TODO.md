@@ -35,12 +35,15 @@
   tool/tab rows, arrows/Enter/Escape, address/web-query routing through upstream
   omnibox and a Focus address bar tool. Toolbar entry removed. Weak tab handles,
   private/policy guards and post-dismissal action dispatch remain. See HANDOFF.md
-  for current validation and input-platform limits (97 tooling, 46 runtime,
-  61 X11 native and 52 Wayland native checks; popup key synthesis is X11-only).
+  for current validation and input-platform limits (97 tooling, 53 runtime,
+  69 X11 native checks and 12 preference tests; popup key synthesis is X11-only).
   Fixed outside-click dismissal and removed window modality/backdrop; compact
-  bubble framing follows the browser root. Added an animated multicolor rim/halo
-  and fading colored result hovers, with reduced-motion and native contrast fallbacks
-  and a larger search field. Pointer checks cover dismissal and
+  bubble framing follows the browser root. Added segmented outer beam pulses,
+  inner hover pulses and a thin input beam, with reduced-motion and native contrast fallbacks
+  and a larger search field. Added profile-local Search appearance controls for
+  all five beam styles per component, named/custom palettes, motion/strength/speed,
+  theme and UI/beam colors, with staged Apply/Cancel/Reset and native validation.
+  Pointer checks cover dismissal and
   input after Enter/reopen/Escape. Richer ranking, live omnibox
   suggestions and cross-window search remain future work.
 - Per-profile persistent workspaces; modular isolated side panels; shortcut

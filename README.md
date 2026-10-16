@@ -21,12 +21,18 @@ preference recreation and managed/read-only write refusal. Full native policy,
 incognito and inherited browser regression suites have not been executed.
 
 Implemented browser-specific source:
-- **Ctrl+Space** opens centered native Blynx search, with a luminous multicolor rim,
-  gently moving halo, animated colored hovers, larger search field, tool/tab rows
+- **Ctrl+Space** opens centered native Blynx search, with soft moving outer beams,
+  inner hover pulses, a thin beam around the search field, tool/tab rows
   and keyboard selection. Enter
   opens a result; Escape or clicking outside closes it.
   Addresses and web queries use Chromium's normal omnibox classifier/search engine;
   Focus address bar hands control to the top omnibox. There is no toolbar button.
+  **Settings → Appearance → Search appearance** saves each profile's popup,
+  hover and input styles (`md`, `sm`, `line`, `pulse-inner`, `pulse-outside`),
+  Colorful/Mono/Ocean/Sunset/custom palettes, intensity, motion/speed and light/dark
+  mode. Optional custom colors cover surfaces, text/caret, placeholder, selection,
+  result states, outlines and four beam colors. Apply saves; Cancel discards;
+  Reset is staged until Apply. Reopen Ctrl+Space to use the saved design.
 - Separate branding and Linux/Windows profile-path patches.
 - Designed new-tab canvas using the Blynx eye logo, Aurora/Midnight/Paper
   backgrounds and optional shortcuts; retains Chromium search and most-visited.

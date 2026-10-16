@@ -15,6 +15,9 @@ class BlynxSettingsHandler : public settings::SettingsPageUIHandler {
   void OnJavascriptDisallowed() override {}
 
  private:
+  void GetSearchAppearance(const base::ListValue& args);
+  void ApplySearchAppearance(const base::ListValue& args);
+  base::DictValue SearchState(bool saved);
   void Onboarding(const base::ListValue& args);
   void Get(const base::ListValue& args);
   void Apply(const base::ListValue& args);

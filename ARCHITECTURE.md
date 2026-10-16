@@ -188,14 +188,17 @@ closes it. Clicking outside or activating another window also dismisses it.
 Result-row buttons use the same action handler. The bubble anchors to the browser
 root view and centers its bounds within that window, following moves/resizes. It
 sizes to results, with compact rows and rounded native framing. A custom native
-BubbleBorder paints a blue/red/yellow/green sweep rim and a soft halo inside
-16 DIPs of reserved transparent frame space. Layered translucent strokes provide
-the falloff without an offscreen blur surface. A native InfiniteAnimation rotates
-the gradient once per ten seconds at a 33ms interval only while the popup is
-visible. Disposal stops it before releasing frame/view references. Native button
-hover transitions fade a gradient wash/rim in and out over 180ms; hovered rows
-share the rotating color phase. Reduced-motion settings keep the colors static;
-forced colors and increased contrast retain the standard native border instead. Search text,
+BubbleBorder paints localized cyan/lime/gold/violet beams with dark gaps, inspired
+by the Libraries.dev beam reference. The popup clips its pulse outside the card
+inside 24 DIPs of transparent native frame space. Hovered result buttons clip
+soft pulses inside their rounded edges and fade over 180ms. A custom native
+FocusableBorder gives the input a thin moving beam; its native focus ring is
+reinstalled after SetBorder and retained for contrast mode. A native Skia blur filter softens only the decorative stroke (7 DIP outside,
+3 DIP inside, 1 DIP for the input), followed by a crisp narrow beam. A native
+InfiniteAnimation advances the phase once per ten seconds at a 33ms interval
+only while visible. Disposal stops it and detaches frame/input references before
+Widget destruction. Reduced-motion settings keep the beams static; forced colors
+and increased contrast retain native borders/hover styling. Search text,
 selection and result colors remain upstream theme tokens. No Go/Cancel form.
 
 Commands are filtered from a fixed table using Chromium's enabled state, including
@@ -220,3 +223,25 @@ backdrop, and cannot leave a modal scrim behind after an action.
 Cancel/Escape queues nothing. No search history, preference store or renderer API
 is added. The layout action additionally requires a regular profile and a
 user-modifiable preference, consistent with the owned Settings write guards.
+
+
+Search customization uses the separate versioned dictionary preference
+`blynx.search_appearance`, registered with the existing profile prefs. Its strict
+validator allows only the known fields, five component styles, five palettes
+(including custom), system/light/dark, finite strength 0–1, duration 2–30 seconds,
+boolean motion/custom-color switches, and 19 exact #RRGGBB colors (15 UI roles,
+four beam stops). Unknown versions are preserved and read with safe defaults;
+policy-managed/future values cannot be overwritten. Regular-profile access is
+required by the trusted Settings handler; OTR/guest profiles are read-only.
+
+The Settings card stages a deep copy; Apply validates and writes atomically,
+Cancel restores the saved copy, Reset only stages defaults. It has independent
+Apply/Cancel controls from browser theme/preset import. Search settings are not
+part of the older flat theme-preset JSON format. The native popup snapshots the
+profile dictionary when created, so changes appear on the next Ctrl+Space open.
+The snapshot is shared immutably between native labels, input, rows and borders;
+light/dark mode uses Widget color-mode overrides, not global browser theme writes.
+Forced contrast suppresses custom colors/decorative beams. Native focus remains
+visible when strength is zero. The WebUI uses native select/range/color/checkbox
+controls, explicit labels, a status region, guarded RGB-only preview styles and
+system-color fallbacks for forced colors.

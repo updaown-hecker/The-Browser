@@ -3,12 +3,14 @@
 #include <utility>
 
 #include "base/json/json_reader.h"
+#include "browser/appearance/search_appearance.h"
 #include "components/prefs/pref_registry_simple.h"
 #include "components/prefs/pref_service.h"
 
 namespace browser {
 
 void RegisterAppearanceProfilePrefs(PrefRegistrySimple* registry) {
+  RegisterSearchAppearancePrefs(registry);
   registry->RegisterIntegerPref(kOnboardingStepPref, 0);
   registry->RegisterStringPref(kAppearanceJsonPref, "");
   registry->RegisterStringPref(kNewTabStylePref, "aurora");

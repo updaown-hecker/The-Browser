@@ -24,6 +24,8 @@ source_set("appearance_prefs") {
   sources = [
     "appearance/appearance_pref_store.cc",
     "appearance/appearance_pref_store.h",
+    "appearance/search_appearance.cc",
+    "appearance/search_appearance.h",
   ]
   public_deps = [
     ":browser_identity_appearance",

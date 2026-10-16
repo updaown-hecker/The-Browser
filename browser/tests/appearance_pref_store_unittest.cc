@@ -9,6 +9,7 @@
 #include "base/task/sequenced_task_runner.h"
 #include "base/test/task_environment.h"
 #include "base/values.h"
+#include "browser/appearance/search_appearance.h"
 #include "components/prefs/pref_registry_simple.h"
 #include "components/prefs/pref_service.h"
 #include "components/prefs/pref_service_factory.h"
@@ -147,4 +148,54 @@ TEST_F(AppearancePrefStoreTest, FileBackedPrefServiceSurvivesRecreation) {
 }
 
 }  // namespace
+}  // namespace browser
+
+namespace browser {
+TEST(SearchAppearanceTest, DefaultsAndRoundTrip) {
+  TestingPrefServiceSimple prefs;
+  RegisterAppearanceProfilePrefs(prefs.registry());
+  EXPECT_TRUE(ValidateSearchAppearance(DefaultSearchAppearance()));
+  EXPECT_FALSE(prefs.HasPrefPath(kSearchAppearancePref));
+  auto value = DefaultSearchAppearance();
+  value.Set("outer_style", "md");
+  value.Set("hover_style", "sm");
+  value.Set("palette", "custom");
+  value.Set("theme", "light");
+  value.Set("strength", 1);
+  value.Set("active", false);
+  value.Set("custom_colors", true);
+  value.FindDict("colors")->Set("input_text", "#123abc");
+  EXPECT_TRUE(WriteSearchAppearance(prefs, value));
+  EXPECT_EQ(LoadSearchAppearance(prefs), value);
+}
+TEST(SearchAppearanceTest, RejectsInvalidOrUnknownInput) {
+  auto value = DefaultSearchAppearance();
+  value.Set("strength", 1.01);
+  EXPECT_FALSE(ValidateSearchAppearance(value));
+  value = DefaultSearchAppearance();
+  value.Set("outer_style", "unknown");
+  EXPECT_FALSE(ValidateSearchAppearance(value));
+  value = DefaultSearchAppearance();
+  value.FindDict("colors")->Set("surface", "url(secret)");
+  EXPECT_FALSE(ValidateSearchAppearance(value));
+  value = DefaultSearchAppearance();
+  value.Set("active", "yes");
+  EXPECT_FALSE(ValidateSearchAppearance(value));
+  value = DefaultSearchAppearance();
+  value.Set("extra", 1);
+  EXPECT_FALSE(ValidateSearchAppearance(value));
+}
+TEST(SearchAppearanceTest, ManagedAndFutureVersionsArePreserved) {
+  TestingPrefServiceSimple prefs;
+  RegisterAppearanceProfilePrefs(prefs.registry());
+  auto future = DefaultSearchAppearance();
+  future.Set("version", 2);
+  prefs.SetDict(kSearchAppearancePref, future.Clone());
+  EXPECT_FALSE(WriteSearchAppearance(prefs, DefaultSearchAppearance()));
+  EXPECT_EQ(prefs.GetDict(kSearchAppearancePref), future);
+  prefs.RemoveUserPref(kSearchAppearancePref);
+  prefs.SetManagedPref(kSearchAppearancePref,
+                       base::Value(DefaultSearchAppearance()));
+  EXPECT_FALSE(WriteSearchAppearance(prefs, DefaultSearchAppearance()));
+}
 }  // namespace browser

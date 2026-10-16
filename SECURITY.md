@@ -111,3 +111,13 @@ Accepted actions close the popup before posting work, with weak browser/tab
 references and a fresh access/index check. Escape queues no action. A stale-tab
 selection refreshes rather than silently navigating or activating a different tab.
 The accelerator is local to normal browser windows; OS input settings are untouched.
+
+
+Search appearance is a bounded-shape profile dictionary, not executable CSS or a
+website/native API. The trusted Settings messages validate exact keys/types,
+RGB-only colors, enum allowlists and finite numeric bounds before one preference
+write. Invalid values cannot partially change the saved design. Managed/future
+settings and private/guest writes are refused. Reading malformed data does not
+repair or overwrite it. Settings preview colors are rechecked against #RRGGBB
+before inserting CSS values. This preference contains appearance data only;
+typed queries, tab content and browsing history are not persisted by it.

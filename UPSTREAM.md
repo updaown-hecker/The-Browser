@@ -77,3 +77,11 @@ method without a visible button; patch 0005 registers/handles Ctrl+Space in
 BrowserView. Owned GRIT IDs are reused for the search UI. The popup delegates to
 upstream tab/command/omnibox services. No engine, profile-root, pin, toolchain or
 OS-input change is introduced. See HANDOFF.md for current validation.
+
+
+The October 16 search-appearance follow-on installs 40 owned files with the same
+five-patch series and pins. Patch 0005 extends trusted Settings appearance controls
+and fixes Views BubbleWidget palette resolution only when an explicit color-mode
+override exists. Review that branch against upstream bubble theme behavior during
+rebases. Strict versioned PrefService validation and native rendering remain owned
+under `browser/`; no React runtime or engine change is added.
