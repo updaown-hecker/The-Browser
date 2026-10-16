@@ -171,6 +171,9 @@ python3 -B scripts/runtime_smoke.py
 
 # Native Wayland: page checks plus actual browser chrome through AT-SPI.
 python3 -B scripts/native_smoke.py
+
+# X11/XWayland: also types into and executes native Blynx-search controls.
+python3 -B scripts/native_smoke.py --platform x11
 ```
 
 To save their console output:
@@ -183,6 +186,13 @@ python3 -B scripts/native_smoke.py > .local/logs/native-smoke.log 2>&1
 Run the second command only after checking the first result. Native smoke needs
 this desktop's Wayland session, Python GI and AT-SPI support. It is not a generic
 Windows or headless CI test.
+
+The optional X11 command uses `.local/native-smoke-x11/` for its separate report,
+log and screenshots. It requires the existing `xprop`, libX11 and libXtst plus an
+ASCII-compatible X11 keyboard layout. Its input driver verifies the fixture PID
+and client window before focusing or sending keys. Wayland verifies the removed toolbar button; Ctrl+Space and detailed native
+input run under X11 because Chromium's
+AT-SPI EditableText setter is unsupported here. No OS/input policy is changed.
 
 Both runners create their own profiles and local HTTP fixtures, test browser
 behavior, then cleanly restart the browser to verify persistence. Current coverage
@@ -306,6 +316,12 @@ terminal open: `$BLYNX_TEST_PROFILE` identifies this specific test profile.
 9. Test valid and invalid appearance preset files using disposable files. Imports
    stage choices; exporting reads the saved preset.
 10. Check a private window: Blynx appearance/setup writes should be refused.
+11. Press **Ctrl+Space** in a normal browser window. Confirm the centered search
+    field is focused and the toolbar has no Blynx search button. Type a tool or
+    tab name, use Up/Down and Enter, and Escape to cancel. Test an address and a
+    web query using the configured search provider. Focus address bar should hand
+    control to the real top omnibox; Ctrl+Space also opens from there.
+
 
 For actual data transfer, use a disposable source profile and known test files.
 The pinned Linux direct profile detector supports Firefox. Other browsers can
@@ -674,3 +690,5 @@ complete transfer of every source browser's data.
 
 Related project references: `HANDOFF.md`, `TODO.md`, `BUILD_LINUX.md`,
 `BUILD_WINDOWS.md`, `EXTENSIONS.md`, `PERFORMANCE.md`, `SECURITY.md`, `UPSTREAM.md`.
+
+Native search pointer regressions run with `python3 -B scripts/native_smoke.py --platform x11`: outside-click dismissal and real omnibox focus after Enter and reopen/Escape. Wayland baseline smoke does not synthesize these popup interactions on this host.

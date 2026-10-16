@@ -1,5 +1,24 @@
 # Changelog
 
+## October 15, 2026 — search popover fixes
+
+- Replaced the modal search dialog with a browser-anchored native bubble.
+  Clicking outside dismisses it; actions dispose it before dispatch. No grey
+  modal backdrop is created or left behind.
+- Tightened spacing, typography and row heights, added rounded framing, and
+  centered the bubble within the browser bounds on initial show and resize.
+- Added pointer regressions for outside dismissal and input after Enter/Escape.
+
+## October 15, 2026 — centered keyboard search
+
+- Ctrl+Space opens native Blynx search; the initial toolbar button is removed.
+- Added a large search field, visible tool/tab rows, arrow-key selection,
+  Enter/Escape, centered adaptive sizing and native theme colors.
+- Address/web queries use Chromium's omnibox; a tool focuses the real top bar.
+  Added Developer Tools, Task Manager, extension and password-manager commands.
+- Preserved private/policy guards and weak tab identity; actions run after popup
+  dismissal. Build/runtime outcomes and platform limits are in HANDOFF.md.
+
 ## October 14, 2026 — appearance preset file controls
 
 - Added Settings preset import through Chromium file selection, strict size/UTF-8/

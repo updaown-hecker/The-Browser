@@ -2,7 +2,7 @@ diff --git a/chrome/app/browser_final_customization_strings.grdp b/chrome/app/br
 new file mode 100644
 --- /dev/null
 +++ b/chrome/app/browser_final_customization_strings.grdp
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,79 @@
 +<?xml version="1.0" encoding="utf-8"?>
 +<!-- 0002-customization.patch installs this catalog beside generated_resources.grd
 +     as required by that upstream GRD's part-location contract. -->
@@ -68,6 +68,19 @@ new file mode 100644
 +  <message name="IDS_BLYNX_SETUP_FINISH" desc="Blynx first-run setup finish.">Start browsing</message>
 +  <message name="IDS_BLYNX_SETUP_SKIP" desc="Blynx first-run setup skip.">Skip setup</message>
 +  <message name="IDS_BLYNX_SETUP_ERROR" desc="Blynx first-run setup error.">Setup could not be saved. Try again in a regular, unmanaged profile.</message>
++  <message name="IDS_BLYNX_COMMAND_TITLE" desc="Title of the native Blynx search and toolbar entry.">Blynx search</message>
++  <message name="IDS_BLYNX_COMMAND_HINT" desc="Keyboard instructions for the native command center.">↑ ↓ Choose · Enter Open · Esc Close · Ctrl+Space Search</message>
++  <message name="IDS_BLYNX_COMMAND_SEARCH" desc="Accessible name and placeholder of command search.">Search or enter an address</message>
++  <message name="IDS_BLYNX_COMMAND_RESULTS" desc="Accessible name of the command results selector.">Focus address bar</message>
++  <message name="IDS_BLYNX_COMMAND_GO" desc="Execute the selected command or activate the selected tab.">Search or open address</message>
++  <message name="IDS_BLYNX_COMMAND_EMPTY" desc="Empty command-search results.">Search the web, your tabs, and browser tools</message>
++  <message name="IDS_BLYNX_COMMAND_TAB" desc="Prefix identifying an open-tab result.">Switch to tab</message>
++  <message name="IDS_BLYNX_COMMAND_NEW_TAB" desc="Command to open a new tab.">New tab</message>
++  <message name="IDS_BLYNX_COMMAND_HISTORY" desc="Command to show browsing history.">Open history</message>
++  <message name="IDS_BLYNX_COMMAND_DOWNLOADS" desc="Command to show downloads.">Open downloads</message>
++  <message name="IDS_BLYNX_COMMAND_BOOKMARKS" desc="Command to show the bookmark manager.">Open bookmarks</message>
++  <message name="IDS_BLYNX_COMMAND_SETTINGS" desc="Command to open browser settings.">Open settings</message>
++  <message name="IDS_BLYNX_COMMAND_TABS" desc="Command to toggle native tab layout.">Switch horizontal / vertical tabs</message>
 +</grit-part>
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
 index d718a56fe4..cfbde9bf1a 100644
@@ -970,10 +983,10 @@ index 085b77c..458a13a 100644
    certificate_transparency::prefs::RegisterPrefs(registry);
    ChromeContentBrowserClient::RegisterProfilePrefs(registry);
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index 0ab25c6..dffe83c 100644
+index 0ab25c63c9..a1752a4b1f 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -2472,6 +2472,27 @@ static_library("ui") {
+@@ -2472,6 +2472,28 @@ static_library("ui") {
      }
    }
 
@@ -981,6 +994,7 @@ index 0ab25c6..dffe83c 100644
 +  # never on ui itself. This preserves the existing dependency graph direction.
 +  if (toolkit_views && !is_android) {
 +    sources += [
++      "//browser/ui/blynx_command_center.cc",
 +      "//browser/ui/customize_browser_dialog.cc",
 +      "//browser/ui/internal_page_alias.cc",
 +      "//browser/ui/internal_page_alias.h",
@@ -1014,39 +1028,63 @@ index 25eaf42..1ea297f 100644
      "//chrome/app:branded_strings",
      "//chrome/app:branded_strings_grit",
 diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.cc b/chrome/browser/ui/views/toolbar/toolbar_view.cc
-index c824f20..41f3ec2 100644
+index c824f203b2..033f828122 100644
 --- a/chrome/browser/ui/views/toolbar/toolbar_view.cc
 +++ b/chrome/browser/ui/views/toolbar/toolbar_view.cc
-@@ -21,7 +21,9 @@
+@@ -21,7 +21,10 @@
  #include "base/strings/utf_string_conversions.h"
  #include "base/trace_event/trace_event.h"
  #include "build/build_config.h"
++#include "browser/ui/blynx_command_center.h"
 +#include "browser/ui/customize_browser_dialog.h"
  #include "chrome/app/chrome_command_ids.h"
 +#include "chrome/app/vector_icons/vector_icons.h"
  #include "chrome/browser/actor/ui/actor_ui_metrics.h"
  #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble.h"
  #include "chrome/browser/actor/ui/task_list_bubble/actor_task_list_bubble_controller.h"
+@@ -2025,3 +2028,11 @@ gfx::Size ToolbarView::GetBackForwardButtonSize(bool minimum_size) const {
+ BEGIN_METADATA(ToolbarView)
+ ADD_READONLY_PROPERTY_METADATA(bool, AppMenuFocused)
+ END_METADATA
++
++void ToolbarView::ShowBlynxSearch() {
++  if (!command_center_ || command_center_->IsClosed()) {
++    command_center_ = std::make_unique<browser::BlynxCommandCenter>(
++        *browser_, GetWidget()->GetNativeWindow(), GetWidget()->GetNativeView());
++  }
++  command_center_->Show();
++}
 diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.h b/chrome/browser/ui/views/toolbar/toolbar_view.h
-index 51f0301..e384bc9 100644
+index 51f030104c..f4e69c0098 100644
 --- a/chrome/browser/ui/views/toolbar/toolbar_view.h
 +++ b/chrome/browser/ui/views/toolbar/toolbar_view.h
-@@ -66,6 +66,10 @@ class ToolbarDivider;
+@@ -66,6 +66,11 @@ class ToolbarDivider;
  class OverflowButton;
  class PerformanceInterventionButton;
 
 +namespace browser {
++class BlynxCommandCenter;
 +class CustomizeBrowserDialog;
 +}  // namespace browser
 +
  namespace views {
  class FlexLayout;
  class LabelButton;
-@@ -427,6 +431,7 @@ class ToolbarView : public views::AccessiblePaneView,
+@@ -117,6 +122,8 @@ class ToolbarView : public views::AccessiblePaneView,
+   ~ToolbarView() override;
+
+   // Create the contents of the Browser Toolbar.
++  void ShowBlynxSearch();
++
+   void Init();
+
+   // Forces the toolbar (and transitively the location bar) to update its
+@@ -427,6 +434,8 @@ class ToolbarView : public views::AccessiblePaneView,
 
    const raw_ptr<BrowserWindowInterface> browser_;
    const raw_ptr<BrowserView> browser_view_;
 +  std::unique_ptr<browser::CustomizeBrowserDialog> customization_dialog_;
++  std::unique_ptr<browser::BlynxCommandCenter> command_center_;
    base::WeakPtr<glic::GlicSplitButtonController> glic_split_button_controller_;
 
    // ToolbarView may or may not serve as the `ToolbarButtonProvider` for a given

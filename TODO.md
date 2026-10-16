@@ -6,7 +6,7 @@
 - Complete broader browsing/profile/bookmark/session, F11, DevTools, GPU/media,
   renderer-crash and accessibility tests; investigate Wayland/Vulkan warnings.
   Focused smoke now also covers Back/Forward, bookmark create/search/reload/delete,
-  the history route and regular/private-context site-storage separation. These
+  the history route and regular/private-context site-storage separation.
   Clean process restart now also verifies saved appearance/canvas/tab prefs, site
   storage, bookmarks and MV3 storage in both smoke modes. These checks do not
   replace inherited suites or full tab/session/crash-recovery coverage.
@@ -31,8 +31,18 @@
   radius, spacing, motion and colors remain pending.
 - Native vertical tabs positions, DnD/groups/pinning/audio/keyboard/collapsed mode;
   evaluate upstream vertical/split tab infrastructure instead of duplicating it.
-- Per-profile persistent workspaces; modular isolated side panels; command palette,
-  tab search, shortcut conflict editing and optional gestures.
+- Implemented native Blynx search on Ctrl+Space: centered search field, visible
+  tool/tab rows, arrows/Enter/Escape, address/web-query routing through upstream
+  omnibox and a Focus address bar tool. Toolbar entry removed. Weak tab handles,
+  private/policy guards and post-dismissal action dispatch remain. See HANDOFF.md
+  for current validation and input-platform limits (96 tooling, 46 runtime,
+  61 X11 native and 52 Wayland native checks; popup key synthesis is X11-only).
+  Fixed outside-click dismissal and removed window modality/backdrop; compact
+  bubble framing follows the browser root. Pointer checks cover dismissal and
+  input after Enter/reopen/Escape. Richer ranking, live omnibox
+  suggestions and cross-window search remain future work.
+- Per-profile persistent workspaces; modular isolated side panels; shortcut
+  conflict editing and optional gestures.
 - Completed initial local new-tab canvases/shortcut controls and eye branding.
   Add custom wallpaper file selection, widget visibility and further search controls.
 - Test existing secure passwords/autofill, import/export safeguards, media/codecs,

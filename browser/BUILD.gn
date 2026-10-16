@@ -39,6 +39,7 @@ if (!is_android) {
   source_set("customization_dialog_headers") {
     sources = [
       "ui/customize_browser_dialog.h",
+      "ui/blynx_command_center.h",
       "ui/native_appearance_controller.h",
     ]
     public_deps = [

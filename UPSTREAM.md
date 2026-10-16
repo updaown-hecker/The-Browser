@@ -69,3 +69,11 @@ Patch 0004 also adapts the native payment-footer product mark to the owned vecto
 and declares the icon dependency explicitly. The pinned Linux importer currently
 detects Firefox profiles; setup links to upstream bookmarks HTML and password CSV
 paths without pretending to implement universal source-profile migration.
+
+
+The October 15 Blynx-search slice retains the five-patch series and 38-file
+overlay. Patch 0002 connects the owned Views popup to a window-owned toolbar
+method without a visible button; patch 0005 registers/handles Ctrl+Space in
+BrowserView. Owned GRIT IDs are reused for the search UI. The popup delegates to
+upstream tab/command/omnibox services. No engine, profile-root, pin, toolchain or
+OS-input change is introduced. See HANDOFF.md for current validation.

@@ -171,3 +171,43 @@ profile detector supports Firefox; exported bookmarks HTML and password CSV
 provide upstream import paths for other browsers. Extensions and unsupported
 history/sessions are not silently copied. Native payment footer branding uses the
 same product eye vector with `ui::kColorIcon`, replacing its inherited wordmark.
+
+
+## Native Blynx search
+
+Ctrl+Space is registered with the normal browser window's Views FocusManager and
+handled by BrowserView. Its existing unknown-command accelerator path also handles
+renderer focus, while the native focus manager handles the top omnibox. App/kiosk
+windows are excluded. This is a browser-local accelerator, with no OS-wide hotkey
+or input-policy change. The toolbar owns the popup lifetime but adds no button.
+
+Blynx search is a centered, nonmodal native Views bubble with a search field and up to
+seven visible result rows. A tonal selected row and native theme colors preserve
+contrast. Up/Down changes the selected result, Enter runs it, Escape or Ctrl+Space
+closes it. Clicking outside or activating another window also dismisses it.
+Result-row buttons use the same action handler. The bubble anchors to the browser
+root view and centers its bounds within that window, following moves/resizes. It
+sizes to results, with compact rows and rounded native framing. No Go/Cancel form.
+
+Commands are filtered from a fixed table using Chromium's enabled state, including
+address-bar focus, new tab, history, downloads, bookmarks, settings, tab layout,
+Developer Tools, Task Manager, extensions and Password Manager. Menu accelerator
+markup is removed using the upstream gfx utility. Tab title/host search inspects
+only the invoking window. Weak WebContents handles resolve their live tab index;
+closing/moving a tab cannot select another tab by an obsolete index. Navigation
+is a separate result, so a failed stale-tab action refreshes without web search.
+
+Nonempty text also offers an address/search result. On acceptance it calls the
+current LocationBar's OmniboxEditModel CanPasteAndGo/PasteAndGo path. Chromium owns
+URL classification, configured search-provider routing and navigation safeguards;
+Blynx adds no independent URL parser or search backend. This initial popup does
+not clone full omnibox autocomplete/history/bookmark suggestions. Focus address
+bar uses the upstream native command and leaves the real omnibox in control.
+
+Before execution a synchronous close callback disposes the client-owned Widget,
+then posts an action with weak browser/tab handles. Availability and live tab
+identity are checked again. The bubble never installs window modality or a dimming
+backdrop, and cannot leave a modal scrim behind after an action.
+Cancel/Escape queues nothing. No search history, preference store or renderer API
+is added. The layout action additionally requires a regular profile and a
+user-modifiable preference, consistent with the owned Settings write guards.

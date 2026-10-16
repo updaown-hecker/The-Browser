@@ -43,9 +43,12 @@ class Fixture(http.server.BaseHTTPRequestHandler):
         pass
 
 
-def main(native=False):
+def main(native=False, native_platform="wayland"):
     root = Path(__file__).resolve().parents[1]
-    output = root / (".local/native-smoke" if native else ".local/runtime-smoke")
+    if native_platform not in ("wayland", "x11"):
+        raise ValueError("Unsupported native smoke platform")
+    output = root / ((".local/native-smoke-x11" if native_platform == "x11" else
+                      ".local/native-smoke") if native else ".local/runtime-smoke")
     output.mkdir(parents=True, exist_ok=True)
     report_path = output / "results.json"
     report_path.write_text(json.dumps({
@@ -78,7 +81,7 @@ def main(native=False):
         with (output / "browser.log").open("w") as log:
             command = [
                 str(source / "out/linux-release/chrome"), "--user-data-dir=" + profile,
-                *( ["--ozone-platform=wayland", "--force-renderer-accessibility"] if native else ["--headless"] ),
+                *( ["--ozone-platform=" + native_platform, "--force-renderer-accessibility"] if native else ["--headless"] ),
                 "--no-first-run", "--remote-debugging-port=0",
                 "--remote-debugging-address=127.0.0.1",
                 "--load-extension=" + str(root / "browser/tests/runtime_extension"),
@@ -109,7 +112,7 @@ def main(native=False):
                     if phase != "completed":
                         if native and phase == "initial":
                             from native_smoke import check_native_chrome
-                            check_native_chrome(browser.pid, output)
+                            check_native_chrome(browser.pid, output, port, native_platform)
                         # Chromium's POSIX SIGINT handler performs normal UI
                         # shutdown. Restart only after the exact process exits;
                         # no forced kill can count as persistence validation.

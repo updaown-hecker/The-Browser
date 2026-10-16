@@ -81,6 +81,7 @@ Additional actual-browser smoke checks (disposable profiles, local fixtures):
 ```sh
 python3 -B scripts/runtime_smoke.py
 python3 -B scripts/native_smoke.py
+python3 -B scripts/native_smoke.py --platform x11
 ```
 
 The runtime smoke uses the pinned Chromium Node runtime and a loopback-only,
@@ -177,3 +178,13 @@ per GN output. Setup smoke now includes three process launches (initial,
 unfinished setup restart, completed setup restart); test profiles and screenshots
 remain under ignored `.local/`. Browser-data import through the OS chooser is a
 separate test from appearance-preset HTML file-input import.
+
+
+The October 15 native Blynx-search keyboard checks run separately under
+X11/XWayland (`--platform x11`, output `.local/native-smoke-x11/`). The input
+driver accepts only fixture ASCII, verifies the disposable browser's PID/window,
+and refuses ambiguous clients. Existing xprop/libX11/libXtst are required; it does
+not install packages or change Wayland/OS security settings. Wayland native smoke
+checks the removed toolbar entry; Ctrl+Space and detailed keyboard behavior are
+covered separately under X11. Chromium's AT-SPI text setter is not
+available for the detailed input scenarios on this host. See HANDOFF.md for results.

@@ -93,3 +93,21 @@ not import data or touch existing browser profiles. Transfer delegates to
 Chromium's standard importer and its explicit source/data confirmation, using
 upstream credential services. No password file parser, custom encryption,
 external-site branding injection, service impersonation or install bypass is added.
+
+
+Native Blynx search (Ctrl+Space) enumerates only the invoking window's tabs,
+using weak handles and live index lookup. Tab results display title/host rather than
+raw URL paths/queries/fragments. Typed text is not persisted by the popup. Tool
+actions come from a fixed native command table and recheck upstream availability;
+tab-layout writes also require a regular profile and user-modifiable preference.
+
+The explicit address/search result delegates to the existing omnibox
+CanPasteAndGo/PasteAndGo classifier and configured provider. It does not add a
+URL parser, credentials handling, service endpoint or website-to-native bridge.
+Navigation retains upstream policy, certificate, permissions and sandbox checks.
+The actual top omnibox remains available through its normal focus command.
+
+Accepted actions close the popup before posting work, with weak browser/tab
+references and a fresh access/index check. Escape queues no action. A stale-tab
+selection refreshes rather than silently navigating or activating a different tab.
+The accelerator is local to normal browser windows; OS input settings are untouched.

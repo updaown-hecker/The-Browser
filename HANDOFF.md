@@ -1,6 +1,6 @@
 # Blynx — live handoff
 
-Updated October 14, 2026. Native Chromium development distribution, not a
+Updated October 15, 2026. Native Chromium development distribution, not a
 completed daily-driver release. User explicitly selected the company/product
 name **Blynx**. Preserve Chromium/Views/C++23/GN/Clang/libc++, sandbox/isolation,
 pins, OS policy, credentials and existing profiles. No Electron/WebView shell.
@@ -11,7 +11,7 @@ KDE neon 24.04 x86-64, KDE Wayland, Ryzen 7 5700, 31 GiB RAM. Existing repositor
 commits are preserved; session changes are unstaged. Never stage `.local/`,
 PROMPT.txt, secrets, browser data or crash dumps. No OS security change or package
 installation was made. Owned code is `browser/`; five reviewed patches in
-`patches/series`; pins in `config/`. Integration installs 36 owned files and records
+`patches/series`; pins in `config/`. Integration installs 38 owned files and records
 hashes in `.local/chromium/src/.browser-final-overlay.json`.
 
 Pinned Chromium 154.0.8037.97 / `b510e9d7cd3a2fbd78d0ddc42234103206c5f78d`,
@@ -385,3 +385,150 @@ for the extension inspection notes; no extension publication was performed.
 Documentation verification: Bash block syntax, Python block syntax, CLI help/dry
 runs and repository whitespace were checked. Browser build/runtime suites were
 not rerun for this documentation-only change.
+
+
+## October 15 — Ctrl+Space native Blynx search
+
+Read all 14 repository Markdown files. Continued the pending command-palette /
+tab-search work. The user then explicitly replaced the initial toolbar-button
+concept with a centered, clean Ctrl+Space search popup. The final toolbar has no
+Blynx search button. The original button/form prototype and its failing expanded
+smoke runs are superseded by the final implementation and results below.
+
+Current behavior:
+- Browser-local Ctrl+Space registration/handling in BrowserView; normal windows
+  only, including private windows. Renderer and top-omnibox focus are supported.
+  No desktop/global hotkey, OS input setting, toolchain or pin change.
+- Centered native Views popup with large search field, up to seven visible result
+  rows, tonal selection, native theme colors, adaptive height, arrow keys, Enter,
+  Escape, Ctrl+Space toggle and row clicks. No Go/Cancel form or results combobox.
+- Tool search: top address-bar focus, new tab, history, downloads, bookmarks,
+  settings, tab layout, Developer Tools, Task Manager, extensions, saved passwords.
+  Uses upstream command availability and strips native menu mnemonic markup.
+- Current-window title/host tab search with weak handles and live index lookup.
+  A stale tab refreshes without activating a different tab or silently searching.
+- Explicit address/web-query result delegates to the actual LocationBar's
+  OmniboxEditModel CanPasteAndGo/PasteAndGo classifier and configured provider.
+  No separate parser, search backend or full omnibox autocomplete clone. The
+  Focus address bar tool hands control to the real omnibox.
+- Accepted actions close the native popup synchronously before posting work with
+  weak references and fresh access/index checks. Private/guest and controlled
+  tab-layout writes are refused. Escape queues no action; IME composition is left
+  to the native textfield instead of submitting incomplete composition.
+
+Owned source: `browser/ui/blynx_command_center.{h,cc}`. Patch 0002 owns the toolbar
+method/header and GRIT wiring; patch 0005 adds the BrowserView shortcut. Same five
+patches, 38-file overlay and Chromium/depot_tools pins. Reintegrated through
+`scripts/integrate.py`; no personal profile, credentials, OS policy or toolchain
+changes. Consulted both current local development skills; this is native C++
+Views and Python/Node testing, so no client-side web guide or extension-publishing
+workflow applied. No new extension code or public/native renderer bridge.
+
+Build history and fixes:
+- Initial command-center build deliberately stopped after 805 completed actions,
+  zero compile failures, to consolidate sources; resumed browser link passed.
+- Final requested shortcut/popup build passed in 276 actions / 3m11.02s
+  (`.local/logs/blynx-search-build1.log`). Tool/size polish passed in 3 actions /
+  21.09s (`blynx-search-build2.log`).
+- Actual second-monitor geometry check found incorrect screen coordinates passed
+  to a child-widget positioning API. Replaced this with Views CenterWindow, which
+  understands the native parent/display transforms. Fix passed in 3 actions /
+  23.79s (`blynx-search-build3.log`). The final native IME guard rebuild passed in
+  3 actions / 21.61s (`blynx-search-build4.log`). Current build receipt is valid.
+- Earlier prototype checks exposed unsupported AT-SPI text setters, ambiguous
+  global control names, async dismissal and the upstream Downloads bubble/page
+  distinction. Final tests use scoped X11 keyboard events and popup-local control
+  lookup, retaining actual upstream Downloads behavior. Accessibility traversal
+  is breadth-first so large page trees do not hide native controls at its cap.
+  An uncached-accessibility experiment was stopped after hanging; only its own
+  test process/fixture was stopped, without OS/accessibility policy changes.
+
+Validation on the final slice:
+- 96 Python tooling tests passed, including three keyboard-driver refusal tests:
+  unrelated PID, ambiguous owned windows and unsupported non-ASCII fixture input.
+  Log `.local/logs/blynx-search-tooling-final.log`.
+- GN UI header/dependency check passed (`.local/logs/blynx-search-gn.log`).
+- Headless runtime smoke passed 46 checks with no page errors; log
+  `.local/logs/blynx-search-runtime-final.log`, report `.local/runtime-smoke/results.json`.
+- Expanded X11/XWayland smoke passed 59 checks with no page errors, including the
+  real shortcut from page and address-bar focus, URL classification, tool Enter,
+  tab activation, Escape/reopen, tab-layout round-trip and stale-tab refusal.
+  Log `.local/logs/blynx-search-native-x11-final.log`; report
+  `.local/native-smoke-x11/results.json`.
+- Wayland native smoke passed 52 checks with no page errors, including existing
+  browsing/Settings/MV3/restart/sandbox coverage and removal of the toolbar entry.
+  Detailed popup keyboard synthesis is X11-only on this host; do not call it a
+  tested Wayland shortcut. Log `.local/logs/blynx-search-native-wayland-final.log`;
+  report `.local/native-smoke/results.json`.
+- Eight isolated X11 visual/manual checks passed on the final build. Popup
+  geometry on monitor two is `[2251,425,622,546]` inside browser
+  `[1930,10,1265,1376]`, within one pixel horizontally and exact vertically at the
+  window center. Down+Enter selected the second tool. Plain text generated the
+  configured provider's search URL; provider page content is not asserted. The
+  popup toggled closed with Ctrl+Space. Private search excluded regular tabs,
+  found its own private tab and omitted layout writes. Clean shutdown passed.
+  Evidence `.local/blynx-search-visual/results.json`, log
+  `.local/logs/blynx-search-visual2.log`. No personal provider account was used.
+- Default/filtered/keyboard-selected screenshots were captured and visually
+  inspected. Capture initially preceded native paint; a repaint delay fixes that.
+  One capture briefly overlapped a keyboard smoke; a final sequential capture
+  avoids shared-focus interference. Images stay under `.local/blynx-search-visual/`.
+
+Still not executed: full inherited unit/browser/policy/security suites, Windows,
+OS-native importer/portal, real Web Store installation, separate pointer-click
+coverage of the new rows, broad IME/accessibility /
+localization, GPU/media/privacy/network/performance audits and release packaging.
+No release or speed/privacy advantage claim. Existing Wayland/Mesa/GCM/GLib logs
+and an AT-SPI cache denial for an unrelated sandboxed desktop app are not resolved
+platform audits. Full omnibox suggestions, cross-window search, workspaces and
+native appearance token consumers remain TODOs. Restart the development browser
+to load the new binary, then press Ctrl+Space.
+
+### October 15 follow-up — search dismissal and placement regression
+
+User reported off-center/unfinished presentation, inability to click outside to
+close, and a grey scrim persisting after Enter. The previous tests observed popup
+visibility but did not test pointer input after dismissal. Those checks were
+insufficient to establish correct modal teardown on the user's session.
+
+- Replaced window-modal DialogDelegate with the upstream BubbleDialogDelegate,
+  anchored to the browser root view. FLOAT framing has no arrow; overridden bubble
+  bounds center within the actual browser window and inherit anchor move/resize
+  notifications. Native bubble placement replaces CenterWindow on a modal child.
+- No window modality or dimming scrim is installed. Upstream close-on-deactivate
+  dismisses on outside clicks/window switching. Preferred client-owned CreateBubble
+  plus a synchronous close callback resets the Widget before an accepted action
+  posts. Escape, Ctrl+Space and native row activation share disposal. Search
+  callbacks/controllers/raw view references are detached before Widget disposal.
+- Compact 48px input, 36px rows, smaller gaps/captions, 20px rounded frame, and width
+  selected from browser size. Native theme colors/contrast remain upstream-owned.
+- Added real pointer coverage to X11 smoke: click the top omnibox outside the open
+  popup; assert dismissal AND real omnibox focus. Click again after Enter URL
+  navigation, then after reopening/Escape. The scoped X11 driver refuses points
+  outside its verified fixture client; no desktop keymap/settings changes.
+
+Validation for this fix:
+- Native Chromium build passed, 4 steps / 33.93s;
+  `.local/logs/search-popover-build.log`. Integration succeeded with 38 owned files.
+- 96 tooling tests passed (`.local/logs/search-popover-tooling.log`).
+- GN UI header/dependency check passed (`.local/logs/search-popover-gn.log`).
+- X11 native smoke passed 61 checks, including new pointer regressions, upstream
+  tools, navigation, tabs, restart persistence, MV3 fixture and sandbox checks;
+  `.local/logs/search-popover-x11.log`, `.local/native-smoke-x11/results.json`.
+- Wayland baseline native smoke passed 52 checks, including restart/MV3/sandbox;
+  `.local/logs/search-popover-wayland.log`, `.local/native-smoke/results.json`.
+  Actual native Wayland popup shortcut/pointer synthesis remains unverified.
+- Sequential X11 capture passed two visual checks. Browser bounds
+  `[1930,10,1265,1376]`, popup `[2255,479,614,437]`: within one pixel of its center.
+  Default, filtered and keyboard-selected screenshots were inspected; page remains
+  white behind the popup (no dimming). `.local/blynx-search-visual/capture.json`
+  and `.local/logs/search-popover-capture.log`.
+- An additional disposable Wayland experiment attempted to open via DevTools
+  renderer keyboard injection. It did not produce a focused native popup and
+  failed its timeout; this is not Wayland popup validation. Fixture was closed.
+  `.local/logs/search-popover-wayland-popup.log`,
+  `.local/blynx-search-wayland/capture.json` record the failed experiment.
+
+Previous broader release/IME/accessibility/platform limitations remain. No release
+claim. Restart the development browser to load the rebuilt executable; existing
+user windows/profiles were not stopped or edited by these disposable tests.

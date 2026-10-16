@@ -4004,7 +4004,7 @@ index d3f4f9fb26..9341f7d63f 100644
          <path
            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z">
 diff --git a/chrome/browser/ui/views/frame/browser_view.cc b/chrome/browser/ui/views/frame/browser_view.cc
-index 32b047fd1f..e7ffe39535 100644
+index 32b047fd1f..63d05b5191 100644
 --- a/chrome/browser/ui/views/frame/browser_view.cc
 +++ b/chrome/browser/ui/views/frame/browser_view.cc
 @@ -37,6 +37,7 @@
@@ -4043,6 +4043,36 @@ index 32b047fd1f..e7ffe39535 100644
    // Show any pending global error bubble.
    GlobalErrorService* service =
        GlobalErrorServiceFactory::GetForProfile(browser_->GetProfile());
+@@ -5227,6 +5242,14 @@ bool BrowserView::AcceleratorPressed(const ui::Accelerator& accelerator) {
+     return true;
+   }
+
++  if (accelerator.key_code() == ui::VKEY_SPACE &&
++      accelerator.modifiers() == ui::EF_CONTROL_DOWN &&
++      browser_->GetType() == BrowserWindowInterface::Type::TYPE_NORMAL &&
++      toolbar_) {
++    toolbar_->ShowBlynxSearch();
++    return true;
++  }
++
+   int command_id;
+   // Though AcceleratorManager should not send unknown |accelerator| to us, it's
+   // still possible the command cannot be executed now.
+@@ -5611,6 +5634,14 @@ void BrowserView::LoadAccelerators() {
+   views::FocusManager* focus_manager = GetFocusManager();
+   DCHECK(focus_manager);
+
++  // Browser-local shortcut; no desktop-wide hotkey or OS input setting.
++  if (!IsRunningInForcedAppMode() &&
++      browser_->GetType() == BrowserWindowInterface::Type::TYPE_NORMAL) {
++    focus_manager->RegisterAccelerator(
++        ui::Accelerator(ui::VKEY_SPACE, ui::EF_CONTROL_DOWN),
++        ui::AcceleratorManager::kNormalPriority, this);
++  }
++
+   // Let's fill our own accelerator table.
+   const bool is_app_mode = IsRunningInForcedAppMode();
+ #if BUILDFLAG(IS_CHROMEOS)
 diff --git a/chrome/app/password_manager_ui_strings.grdp b/chrome/app/password_manager_ui_strings.grdp
 index c3ed41189b..9eea3f907b 100644
 --- a/chrome/app/password_manager_ui_strings.grdp

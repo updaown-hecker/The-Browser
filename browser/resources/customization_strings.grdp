@@ -63,4 +63,17 @@
   <message name="IDS_BLYNX_SETUP_FINISH" desc="Blynx first-run setup finish.">Start browsing</message>
   <message name="IDS_BLYNX_SETUP_SKIP" desc="Blynx first-run setup skip.">Skip setup</message>
   <message name="IDS_BLYNX_SETUP_ERROR" desc="Blynx first-run setup error.">Setup could not be saved. Try again in a regular, unmanaged profile.</message>
+  <message name="IDS_BLYNX_COMMAND_TITLE" desc="Title of the native Blynx search and toolbar entry.">Blynx search</message>
+  <message name="IDS_BLYNX_COMMAND_HINT" desc="Keyboard instructions for the native command center.">↑ ↓ Choose · Enter Open · Esc Close · Ctrl+Space Search</message>
+  <message name="IDS_BLYNX_COMMAND_SEARCH" desc="Accessible name and placeholder of command search.">Search or enter an address</message>
+  <message name="IDS_BLYNX_COMMAND_RESULTS" desc="Accessible name of the command results selector.">Focus address bar</message>
+  <message name="IDS_BLYNX_COMMAND_GO" desc="Execute the selected command or activate the selected tab.">Search or open address</message>
+  <message name="IDS_BLYNX_COMMAND_EMPTY" desc="Empty command-search results.">Search the web, your tabs, and browser tools</message>
+  <message name="IDS_BLYNX_COMMAND_TAB" desc="Prefix identifying an open-tab result.">Switch to tab</message>
+  <message name="IDS_BLYNX_COMMAND_NEW_TAB" desc="Command to open a new tab.">New tab</message>
+  <message name="IDS_BLYNX_COMMAND_HISTORY" desc="Command to show browsing history.">Open history</message>
+  <message name="IDS_BLYNX_COMMAND_DOWNLOADS" desc="Command to show downloads.">Open downloads</message>
+  <message name="IDS_BLYNX_COMMAND_BOOKMARKS" desc="Command to show the bookmark manager.">Open bookmarks</message>
+  <message name="IDS_BLYNX_COMMAND_SETTINGS" desc="Command to open browser settings.">Open settings</message>
+  <message name="IDS_BLYNX_COMMAND_TABS" desc="Command to toggle native tab layout.">Switch horizontal / vertical tabs</message>
 </grit-part>
