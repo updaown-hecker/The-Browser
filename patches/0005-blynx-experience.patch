@@ -3716,7 +3716,7 @@ index 4de5112..869254a 100644
 
    // SessionTabHelper comes first because it sets up the tab ID, and other
 diff --git a/chrome/browser/ui/webui/new_tab_page/BUILD.gn b/chrome/browser/ui/webui/new_tab_page/BUILD.gn
-index b0e1a49..9ca00c8 100644
+index b0e1a49416..270c3d86ae 100644
 --- a/chrome/browser/ui/webui/new_tab_page/BUILD.gn
 +++ b/chrome/browser/ui/webui/new_tab_page/BUILD.gn
 @@ -67,6 +67,7 @@ source_set("impl") {
@@ -3727,6 +3727,14 @@ index b0e1a49..9ca00c8 100644
      ":mojo_bindings",
      ":new_tab_page",
      "//base",
+@@ -74,6 +75,7 @@ source_set("impl") {
+     "//build:branding_buildflags",
+     "//chrome/app:branded_strings",
+     "//chrome/app:generated_resources_grit",
++    "//chrome/app/theme:chrome_unscaled_resources",
+     "//chrome/app/theme:theme_resources",
+     "//chrome/browser:browser_features",
+     "//chrome/browser:browser_process",
 diff --git a/chrome/browser/ui/webui/settings/BUILD.gn b/chrome/browser/ui/webui/settings/BUILD.gn
 index 9c9878f..017e2af 100644
 --- a/chrome/browser/ui/webui/settings/BUILD.gn
@@ -4276,18 +4284,19 @@ index d3f4f9fb26..9341f7d63f 100644
          <path
            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z">
 diff --git a/chrome/browser/ui/views/frame/browser_view.cc b/chrome/browser/ui/views/frame/browser_view.cc
-index 32b047fd1f..63d05b5191 100644
+index 32b047fd1f..640b9d671e 100644
 --- a/chrome/browser/ui/views/frame/browser_view.cc
 +++ b/chrome/browser/ui/views/frame/browser_view.cc
-@@ -37,6 +37,7 @@
+@@ -37,6 +37,8 @@
  #include "base/task/sequenced_task_runner.h"
  #include "base/task/single_thread_task_runner.h"
  #include "base/trace_event/trace_event.h"
++#include "browser/ui/blynx_assistant_panel.h"
 +#include "browser/ui/native_appearance_controller.h"
  #include "build/build_config.h"
  #include "chrome/app/chrome_command_ids.h"
  #include "chrome/browser/actor/ui/actor_overlay_web_view.h"
-@@ -93,6 +94,7 @@
+@@ -93,6 +95,7 @@
  #include "chrome/browser/ui/browser_window/public/global_browser_collection.h"
  #include "chrome/browser/ui/browser_window_state.h"
  #include "chrome/browser/ui/browser_window_theme_observer.h"
@@ -4295,7 +4304,7 @@ index 32b047fd1f..63d05b5191 100644
  #include "chrome/browser/ui/color/chrome_color_id.h"
  #include "chrome/browser/ui/dialogs/browser_dialogs.h"
  #include "chrome/browser/ui/exclusive_access/exclusive_access_context.h"
-@@ -2620,6 +2622,19 @@ void BrowserView::OnWindowDidShow() {
+@@ -2620,6 +2623,19 @@ void BrowserView::OnWindowDidShow() {
      return;
    }
 
@@ -4315,10 +4324,17 @@ index 32b047fd1f..63d05b5191 100644
    // Show any pending global error bubble.
    GlobalErrorService* service =
        GlobalErrorServiceFactory::GetForProfile(browser_->GetProfile());
-@@ -5227,6 +5242,14 @@ bool BrowserView::AcceleratorPressed(const ui::Accelerator& accelerator) {
+@@ -5227,6 +5243,21 @@ bool BrowserView::AcceleratorPressed(const ui::Accelerator& accelerator) {
      return true;
    }
 
++  if (accelerator.key_code() == ui::VKEY_A &&
++      accelerator.modifiers() == (ui::EF_CONTROL_DOWN | ui::EF_ALT_DOWN) &&
++      browser_->GetType() == BrowserWindowInterface::Type::TYPE_NORMAL) {
++    browser::ToggleBlynxAssistant(*browser_);
++    return true;
++  }
++
 +  if (accelerator.key_code() == ui::VKEY_SPACE &&
 +      accelerator.modifiers() == ui::EF_CONTROL_DOWN &&
 +      browser_->GetType() == BrowserWindowInterface::Type::TYPE_NORMAL &&
@@ -4330,13 +4346,16 @@ index 32b047fd1f..63d05b5191 100644
    int command_id;
    // Though AcceleratorManager should not send unknown |accelerator| to us, it's
    // still possible the command cannot be executed now.
-@@ -5611,6 +5634,14 @@ void BrowserView::LoadAccelerators() {
+@@ -5611,6 +5642,17 @@ void BrowserView::LoadAccelerators() {
    views::FocusManager* focus_manager = GetFocusManager();
    DCHECK(focus_manager);
 
 +  // Browser-local shortcut; no desktop-wide hotkey or OS input setting.
 +  if (!IsRunningInForcedAppMode() &&
 +      browser_->GetType() == BrowserWindowInterface::Type::TYPE_NORMAL) {
++    focus_manager->RegisterAccelerator(
++        ui::Accelerator(ui::VKEY_A, ui::EF_CONTROL_DOWN | ui::EF_ALT_DOWN),
++        ui::AcceleratorManager::kNormalPriority, this);
 +    focus_manager->RegisterAccelerator(
 +        ui::Accelerator(ui::VKEY_SPACE, ui::EF_CONTROL_DOWN),
 +        ui::AcceleratorManager::kNormalPriority, this);
@@ -4829,3 +4848,117 @@ index 16d2770cc0..59a8051fc2 100644
      const Widget* const primary = GetPrimaryWindowWidget();
      return (primary && primary != this) ? primary->GetColorProvider()
                                          : Widget::GetColorProvider();
+diff --git a/chrome/browser/ui/side_panel/side_panel_entry_id.h b/chrome/browser/ui/side_panel/side_panel_entry_id.h
+index 3e9dc27c0b..f8d21ed49b 100644
+--- a/chrome/browser/ui/side_panel/side_panel_entry_id.h
++++ b/chrome/browser/ui/side_panel/side_panel_entry_id.h
+@@ -17,6 +17,7 @@
+ // is persisted to logs.
+ // LINT.IfChange(SIDE_PANEL_ENTRY_IDS)
+ #define SIDE_PANEL_ENTRY_IDS(V)                                               \
++  V(kBlynxAssistant, std::nullopt, "BlynxAssistant")                          \
+   /* Global Entries */                                                        \
+   V(kReadingList, kActionSidePanelShowReadingList, "ReadingList")             \
+   V(kBookmarks, kActionSidePanelShowBookmarks, "Bookmarks")                   \
+diff --git a/chrome/browser/ui/views/side_panel/side_panel_toolbar_pinning_controller.cc b/chrome/browser/ui/views/side_panel/side_panel_toolbar_pinning_controller.cc
+index 54a18e3af6..2ddfe74259 100644
+--- a/chrome/browser/ui/views/side_panel/side_panel_toolbar_pinning_controller.cc
++++ b/chrome/browser/ui/views/side_panel/side_panel_toolbar_pinning_controller.cc
+@@ -161,6 +161,10 @@ bool SidePanelToolbarPinningController::ShouldShowActiveInToolbar(
+       return true;
+     }
+   }
++  if (entry && !SidePanelEntryIdToActionId(entry->key().id()).has_value() &&
++      entry->key().id() != SidePanelEntryId::kExtension) {
++    return false;
++  }
+   return entry && (entry->should_show_ephemerally_in_toolbar() ||
+                    GetPinnedStateFor(entry->key()));
+ }
+@@ -203,7 +207,9 @@ void SidePanelToolbarPinningController::UpdateActiveState(
+
+     std::optional<actions::ActionId> action_id =
+         SidePanelEntryIdToActionId(target_id);
+-    CHECK(action_id.has_value());
++    if (!action_id.has_value()) {
++      return;  // Entries without toolbar actions have no active/pinned state.
++    }
+     toolbar_container->UpdateActionState(*action_id, show_active_in_toolbar);
+
+     if (other_id.has_value()) {
+diff --git a/tools/metrics/histograms/metadata/browser/histograms.xml b/tools/metrics/histograms/metadata/browser/histograms.xml
+index f2417b90b6..3d14a9939d 100644
+--- a/tools/metrics/histograms/metadata/browser/histograms.xml
++++ b/tools/metrics/histograms/metadata/browser/histograms.xml
+@@ -59,6 +59,7 @@ chromium-metrics-reviews@google.com.
+ <!-- LINT.IfChange(SidePanelEntry) -->
+
+ <variants name="SidePanelEntry">
++  <variant name="BlynxAssistant" summary="Blynx assistant"/>
+   <variant name="AboutThisSite" summary="about this site"/>
+   <variant name="Assistant" summary="assistant"/>
+   <variant name="Bookmarks" summary="bookmarks"/>
+diff --git a/chrome/app/blynx_assistant_strings.grdp b/chrome/app/blynx_assistant_strings.grdp
+new file mode 100644
+--- /dev/null
++++ b/chrome/app/blynx_assistant_strings.grdp
+@@ -0,0 +1,59 @@
++<?xml version="1.0" encoding="utf-8"?>
++<grit-part>
++  <message name="IDS_BLYNX_AI_TITLE" desc="Blynx assistant panel title.">Blynx assistant</message>
++  <message name="IDS_BLYNX_AI_SETUP" desc="Blynx assistant panel settings button.">Settings</message>
++  <message name="IDS_BLYNX_AI_CLOSE" desc="Blynx assistant panel close.">Close</message>
++  <message name="IDS_BLYNX_AI_ENABLE" desc="Blynx assistant panel enable.">Turn on Blynx assistant</message>
++  <message name="IDS_BLYNX_AI_API" desc="Blynx assistant panel api.">Use an API key provider</message>
++  <message name="IDS_BLYNX_AI_ENDPOINT" desc="Blynx assistant panel endpoint.">Endpoint URL</message>
++  <message name="IDS_BLYNX_AI_MODEL" desc="Blynx assistant panel model.">Custom model name</message>
++  <message name="IDS_BLYNX_AI_MODELS" desc="Blynx assistant panel installed model selector.">Installed models</message>
++  <message name="IDS_BLYNX_AI_REFRESH_MODELS" desc="Blynx assistant panel refresh model list.">Refresh models</message>
++  <message name="IDS_BLYNX_AI_MODEL_HINT" desc="Blynx assistant panel model hint.">Models are detected from Ollama when Settings opens. Choose one, or enter a custom name.</message>
++  <message name="IDS_BLYNX_AI_KEY" desc="Blynx assistant panel key.">API key (session only)</message>
++  <message name="IDS_BLYNX_AI_KEY_NOTE" desc="Blynx assistant panel key note.">Keys and chat stay in memory. Closing the panel clears the key. Ollama uses no key and unloads after each completed reply.</message>
++  <message name="IDS_BLYNX_AI_SPEAK" desc="Blynx assistant panel speech toggle.">Read replies aloud</message>
++  <message name="IDS_BLYNX_AI_SPEECH_NOTE" desc="Blynx assistant panel speech note.">Uses the browser's available speech engine. Speech is not sent to the model.</message>
++  <message name="IDS_BLYNX_AI_SAVE" desc="Blynx assistant panel save.">Save settings</message>
++  <message name="IDS_BLYNX_AI_WELCOME" desc="Blynx assistant panel welcome.">Think it through. Explore the web. Get things done. Connect your model in Settings to start chatting. Enter sends · Shift+Enter adds a line.</message>
++  <message name="IDS_BLYNX_AI_SHARE_TABS" desc="Blynx assistant panel share tabs.">Share web tabs</message>
++  <message name="IDS_BLYNX_AI_SHARE_PAGE" desc="Blynx assistant panel share page.">Include page text</message>
++  <message name="IDS_BLYNX_AI_PLACEHOLDER" desc="Blynx assistant panel placeholder.">Ask me anything…</message>
++  <message name="IDS_BLYNX_AI_SEND" desc="Blynx assistant panel send.">Send</message>
++  <message name="IDS_BLYNX_AI_STOP" desc="Blynx assistant panel stop.">Stop</message>
++  <message name="IDS_BLYNX_AI_NEW_CHAT" desc="Blynx assistant panel new chat.">New chat</message>
++  <message name="IDS_BLYNX_AI_READY" desc="Blynx assistant panel ready.">Ready</message>
++  <message name="IDS_BLYNX_AI_UNAVAILABLE" desc="Blynx assistant panel unavailable.">Assistant unavailable for this profile or managed/unsupported settings.</message>
++  <message name="IDS_BLYNX_AI_STOPPED" desc="Blynx assistant panel stopped.">Stopped</message>
++  <message name="IDS_BLYNX_AI_INVALID" desc="Blynx assistant panel invalid.">Check the model and endpoint. Use loopback for Ollama, or HTTPS for an API provider.</message>
++  <message name="IDS_BLYNX_AI_SAVED" desc="Blynx assistant panel saved.">Connection saved</message>
++  <message name="IDS_BLYNX_AI_ENABLE_FIRST" desc="Blynx assistant panel enable first.">Turn on the assistant in Settings, then save your connection.</message>
++  <message name="IDS_BLYNX_AI_PROMPT_LIMIT" desc="Blynx assistant panel prompt limit.">Enter a message up to 8,000 UTF-8 bytes.</message>
++  <message name="IDS_BLYNX_AI_KEY_REQUIRED" desc="Blynx assistant panel key required.">Enter your API key in Connection.</message>
++  <message name="IDS_BLYNX_AI_THINKING" desc="Blynx assistant panel thinking.">Thinking…</message>
++  <message name="IDS_BLYNX_AI_DISCOVERING" desc="Blynx assistant panel model discovery.">Finding your local Ollama models…</message>
++  <message name="IDS_BLYNX_AI_MODELS_FOUND" desc="Blynx assistant panel model discovery success.">Models updated</message>
++  <message name="IDS_BLYNX_AI_NO_MODELS" desc="Blynx assistant panel no models.">No installed Ollama models found yet.</message>
++  <message name="IDS_BLYNX_AI_MODELS_ERROR" desc="Blynx assistant panel model discovery error.">Couldn't reach Ollama. Check that it is running, then refresh.</message>
++  <message name="IDS_BLYNX_AI_SPEECH_UNAVAILABLE" desc="Blynx assistant panel speech unavailable.">Speech is unavailable in this browser session.</message>
++  <message name="IDS_BLYNX_AI_YOU" desc="Blynx assistant panel you.">You</message>
++  <message name="IDS_BLYNX_AI_PAGE_UNAVAILABLE" desc="Blynx assistant panel page unavailable.">The page changed or its text is unavailable. Try again on a web page.</message>
++  <message name="IDS_BLYNX_AI_REDIRECT" desc="Blynx assistant panel redirect.">Redirect blocked. Set the final chat endpoint directly.</message>
++  <message name="IDS_BLYNX_AI_NETWORK_ERROR" desc="Blynx assistant panel network error.">Connection failed. Check the server, endpoint, model and key; the request may have timed out.</message>
++  <message name="IDS_BLYNX_AI_BAD_REPLY" desc="Blynx assistant panel bad reply.">The model returned an unsupported response. No actions were run.</message>
++  <message name="IDS_BLYNX_AI_REVIEW" desc="Blynx assistant panel review.">Review proposed browser actions</message>
++  <message name="IDS_BLYNX_AI_APPROVE" desc="Blynx assistant panel approve.">Run these actions</message>
++  <message name="IDS_BLYNX_AI_DISMISS" desc="Blynx assistant panel dismiss.">Dismiss actions</message>
++  <message name="IDS_BLYNX_AI_STALE" desc="Blynx assistant panel stale.">A target tab changed or closed. Ask again before running actions.</message>
++  <message name="IDS_BLYNX_AI_ACTIONS_DONE" desc="Blynx assistant panel actions done.">Browser actions dispatched. Check the tabs or settings for the result.</message>
++  <message name="IDS_BLYNX_AI_OPEN_TAB" desc="Blynx assistant panel open tab.">Open a new tab</message>
++  <message name="IDS_BLYNX_AI_ACTIVATE_TAB" desc="Blynx assistant panel activate tab.">Switch to tab</message>
++  <message name="IDS_BLYNX_AI_CLOSE_TAB" desc="Blynx assistant panel close tab.">Close tab</message>
++  <message name="IDS_BLYNX_AI_BACK" desc="Blynx assistant panel back.">Go back in tab</message>
++  <message name="IDS_BLYNX_AI_FORWARD" desc="Blynx assistant panel forward.">Go forward in tab</message>
++  <message name="IDS_BLYNX_AI_RELOAD" desc="Blynx assistant panel reload.">Reload tab</message>
++  <message name="IDS_BLYNX_AI_SET_THEME" desc="Blynx assistant panel set theme.">Set browser theme</message>
++  <message name="IDS_BLYNX_AI_SET_VERTICAL_TABS" desc="Blynx assistant panel set vertical tabs.">Set vertical tabs</message>
++  <message name="IDS_BLYNX_AI_ON" desc="Blynx assistant panel on.">On</message>
++  <message name="IDS_BLYNX_AI_OFF" desc="Blynx assistant panel off.">Off</message>
++</grit-part>

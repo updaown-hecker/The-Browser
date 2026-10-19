@@ -29,3 +29,25 @@ monochrome eye geometry for shared WebUI and native product glyphs. Existing
 these are not recolored provider logos or site favicons. `../product-icon.svg`
 now uses the eye on a charcoal circular field rather than the earlier B artwork.
 The generated taskbar PNG and its derivatives are unchanged.
+
+The October 17 product-resource pass adds the remaining unscaled 16/24/48/64/
+128/256 PNGs, Linux large/shortcut/XPM icons, light/dark 1x/2x wordmarks, monochrome
+tray eye, standard/fallback SVGs, Windows application/document/PDF ICOs and macOS
+ICNS. The shared dark-mode WebUI product mark uses `../blynx-eye-light.svg`.
+`chromium-replacements.json` maps the 24 upstream resource paths to owned assets;
+patch 0006 carries their reviewed binary/text replacements. Existing scaled
+16/32 resources and the native product vector remain in patch 0004.
+
+`scripts/generate_product_icons.py` regenerates these owned derivatives from
+`blynx-taskbar.png` and the eye vectors, with Pillow, GI/librsvg/cairo and the
+existing DejaVu Sans font and ImageMagick convert. It never writes the Chromium tree; refresh/review the
+binary patch separately and use normal integration. The animation fallback is a
+static Blynx mark. ICO/ICNS files are generated assets, not Windows/macOS runtime
+or installer validation. External provider/store logos and functional incognito/
+isolation glyphs retain their identities.
+
+The version-page follow-on adds six `blynx-version-*` assets and
+`version-replacements.json`. These replace the separate components-resource
+wordmarks (171×32 and 342×64, light/dark) and 16/32 favicons used by
+`blynx://version`; patch 0007 carries those replacements. The version page keeps
+Chromium Authors attribution and reports the engine version truthfully.

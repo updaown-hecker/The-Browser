@@ -29,26 +29,33 @@ def git(source: Path, *args: str) -> subprocess.CompletedProcess:
 
 
 def validate_customization_catalog(repo: Path) -> None:
-    """Keep the owned GRIT source and its required adjacent-GRD copy identical."""
-    catalog = repo / "browser/resources/customization_strings.grdp"
-    if not catalog.is_file():
-        return
-    patch = repo / "patches/0002-customization.patch"
-    header = ("diff --git a/chrome/app/browser_final_customization_strings.grdp "
-              "b/chrome/app/browser_final_customization_strings.grdp\n")
-    text = patch.read_text(encoding="utf-8")
-    sections = text.split(header)
-    if len(sections) != 2:
-        raise ToolError("Missing or ambiguous customization GRIT catalog patch.")
-    section = sections[1].split("diff --git ", 1)[0]
-    if "new file mode " not in section:
-        raise ToolError("Customization GRIT catalog must be a reviewed added file.")
-    installed = "".join(line[1:] + "\n" for line in section.splitlines()
-                        if line.startswith("+") and not line.startswith("+++"))
-    if installed != catalog.read_text(encoding="utf-8"):
-        raise ToolError("Owned customization GRIT catalog differs from "
-                        "patches/0002-customization.patch; update both copies "
-                        "together before integration.")
+    """Keep owned GRIT catalogs identical to their adjacent-GRD patch copies."""
+    catalogs = (
+        ("customization_strings.grdp", "0002-customization.patch",
+         "browser_final_customization_strings.grdp"),
+        ("assistant_strings.grdp", "0005-blynx-experience.patch",
+         "blynx_assistant_strings.grdp"),
+    )
+    for owned, patch_name, installed_name in catalogs:
+        catalog = repo / "browser/resources" / owned
+        if not catalog.is_file():
+            continue
+        patch = repo / "patches" / patch_name
+        header = (f"diff --git a/chrome/app/{installed_name} "
+                  f"b/chrome/app/{installed_name}\n")
+        if not patch.is_file():
+            raise ToolError("Missing reviewed GRIT catalog patch: " + patch_name)
+        sections = patch.read_text(encoding="utf-8").split(header)
+        if len(sections) != 2:
+            raise ToolError("Missing or ambiguous GRIT catalog patch: " + owned)
+        section = sections[1].split("diff --git ", 1)[0]
+        if "new file mode " not in section:
+            raise ToolError("GRIT catalog must be a reviewed added file: " + owned)
+        installed = "".join(line[1:] + "\n" for line in section.splitlines()
+                            if line.startswith("+") and not line.startswith("+++"))
+        if installed != catalog.read_text(encoding="utf-8"):
+            raise ToolError("Owned GRIT catalog differs from patches/" + patch_name +
+                            "; update both copies together before integration.")
 
 
 def integrate(repo: Path, source: Path, check_only: bool = False) -> None:

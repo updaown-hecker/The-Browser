@@ -1,0 +1,8 @@
+{
+  "components/resources/default_100_percent/chromium/favicon_product.png": "icons/blynx-version-favicon-1x.png",
+  "components/resources/default_100_percent/chromium/product_logo.png": "icons/blynx-version-wordmark-1x.png",
+  "components/resources/default_100_percent/chromium/product_logo_white.png": "icons/blynx-version-wordmark-1x_white.png",
+  "components/resources/default_200_percent/chromium/favicon_product.png": "icons/blynx-version-favicon-2x.png",
+  "components/resources/default_200_percent/chromium/product_logo.png": "icons/blynx-version-wordmark-2x.png",
+  "components/resources/default_200_percent/chromium/product_logo_white.png": "icons/blynx-version-wordmark-2x_white.png"
+}

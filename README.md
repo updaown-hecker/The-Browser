@@ -5,10 +5,27 @@ browser remains C++/Views, Blink, V8, Chromium networking and sandboxed processe
 No Electron, system WebView shell, application server, or proprietary Google
 code is substituted for Chromium.
 
+Ctrl+Alt+A opens the **Blynx assistant** in a docked side panel. In Connection,
+enable it and enter either a loopback Ollama `/api/chat` URL and installed model
+name, or an HTTPS OpenAI-compatible `/v1/chat/completions` endpoint, model and API
+key. Keys are session-only and cleared when the panel is hidden; chat is not
+written to disk. Enter sends, Shift+Enter adds a line, Stop cancels, and + starts a new chat.
+No model is bundled or downloaded. Ollama requests use `keep_alive: 0` to unload
+after completed replies; the independent Ollama server controls its own memory.
+
+Tab titles/URLs and current page text are shared only when their checkboxes are
+selected. When asked, the assistant can open/switch/close web tabs,
+back/forward/reload, browser theme and vertical-tab changes. Supported actions
+run directly after native validation, without another approval prompt. It cannot
+click website controls, submit forms, run scripts, read credentials or operate on files. Its
+native composer adapts Libraries.dev segmented beams to Views, with motion during
+requests and native contrast/reduced-motion handling; it does not
+record audio or claim speech recognition. Private/guest profiles are excluded.
+
 ## Current truth
 
 This is **development source, not a daily-driver release**. Chromium source,
-dependencies and hooks have been bootstrapped, the five fork patches are
+dependencies and hooks have been bootstrapped, the seven fork patches are
 integrated, and the Linux release browser links successfully. The isolated
 identity/appearance tests pass with Chromium's Clang/libc++ and standalone CMake.
 Actual-browser smoke checks cover the Blynx new-tab canvas, `blynx://` routing,
@@ -137,3 +154,9 @@ history and session data do not transfer automatically.
 
 For organized build, launch, test, debug and troubleshooting commands, see
 [DEBUG_AND_TEST_COMMANDS.md](DEBUG_AND_TEST_COMMANDS.md).
+
+Both built-in new-tab surfaces use the Blynx canvas. Non-Google engines retain a
+visible search form routed through the profile's current default search provider;
+extension/provider-owned new tabs retain Chromium's routing. The exact English
+Chrome recommendation prompts on the official Web Store are hidden at the user's
+request; installation permissions and package verification remain upstream.

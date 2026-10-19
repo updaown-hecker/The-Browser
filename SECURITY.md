@@ -121,3 +121,42 @@ settings and private/guest writes are refused. Reading malformed data does not
 repair or overwrite it. Settings preview colors are rechecked against #RRGGBB
 before inserting CSS values. This preference contains appearance data only;
 typed queries, tab content and browsing history are not persisted by it.
+
+
+## Optional assistant boundary
+
+The assistant is disabled by default and available only in regular profiles.
+Its native side panel is not a website-to-native API. Model output is inert text;
+only a strictly validated, bounded allowlist can become a browser action.
+Supported actions requested in chat dispatch without a second approval prompt.
+HTTP(S) tab navigation continues through upstream services/policy. Tab targets are weak handles scoped to the originating
+window and checked against their captured committed URLs before dispatch. Closing
+the last tab, duplicate tab targets, internal/file/javascript URLs, arbitrary
+scripts and unsupported operations are rejected. Appearance actions use the
+existing policy/private/future-schema-aware native controller.
+
+Connection prefs contain no key. The masked API field is memory-only and clears
+on panel hide; transcripts are memory-only. A user's request and retained chat
+history go to their configured endpoint. Current page text (up to 12 KiB) and
+web tab metadata require explicit per-message sharing controls. Page data remains
+untrusted and cannot itself execute actions. Providers can retain anything the
+user sends; New chat clears the local thread, not remote retention.
+
+Ollama destinations are loopback-only. API destinations require HTTPS, with a
+loopback HTTP exception for local compatible servers. Embedded credentials, URL
+query/fragment credentials and invalid header values are refused. Requests omit
+cookies/ambient credentials and caching, reject redirects, limit response size
+and duration, and cancel on Stop/hide/disable. API response bodies and keys are
+not logged. No model download, provider signup or shell/DevTools automation is
+exposed to models. No promise is made of arbitrary website automation, prompt-
+injection immunity, model correctness or audited external-server memory release.
+
+
+User-requested Store button branding is cosmetic and top-frame-only, with exact
+HTTPS host/port checks; installation-label edits additionally require a detail route. The isolated-world script changes
+matching installation text nodes and accessible labels. It also hides the exact
+English Chrome recommendation banner/dialog and invokes only the dialog’s own
+“No thanks” dismissal to release its focus/scrim. It adds no page/native API,
+never installs, enables a disabled control or changes Store policy.
+Store identity and upstream X-Frame-Options, CSP/Trusted Types, origin, permissions
+and package-verification boundaries remain unchanged.

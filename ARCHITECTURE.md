@@ -58,6 +58,12 @@ target. This avoids `toolbar -> custom UI -> browser UI -> toolbar` cycles.
    off-the-record guard avoids querying an unavailable sign-in service while
    constructing upstream Settings localization data.
 
+6. `0006-blynx-product-branding.patch`: remaining product raster/vector/ICO/ICNS
+   resources and dark-mode WebUI eye, native extension install label and a
+   main-frame HTTPS Store-only cosmetic renderer hook. It changes matching
+   English Add-to-browser button text/accessibility labels on detail routes,
+   preserving the Store identity, DOM listeners and upstream install safeguards.
+
 Binary output names remain upstream `chrome`/`chrome.exe` in this development
 slice. The root `blynx` is an executable development launcher for the
 built Chromium binary, not a renamed or packaged browser binary. It selects
@@ -245,3 +251,43 @@ Forced contrast suppresses custom colors/decorative beams. Native focus remains
 visible when strength is zero. The WebUI uses native select/range/color/checkbox
 controls, explicit labels, a status region, guarded RGB-only preview styles and
 system-color fallbacks for forced colors.
+
+
+## Blynx assistant
+
+`browser/ai/assistant_protocol` owns the versioned keyless connection dictionary,
+endpoint checks, portable JSON proposal protocol and action validation. Defaults
+are disabled/local Ollama, with an editable installed model name. The same leaf
+PrefService target registers it without introducing a UI dependency.
+
+`browser/ui/blynx_assistant_panel` registers a lazy window-scoped SidePanelEntry
+and creates native Views controls. Ctrl+Alt+A toggles that entry; Ctrl+Space keeps
+search behavior and can find the assistant by name. The panel has its own header,
+so the entry has no toolbar/pinning ActionId. The reviewed pinning controller
+skips active/pinned state for actionless built-in entries. The entry macro and
+metrics variant are kept together. Assistant strings live in the product GRIT
+catalog to preserve engine resource-ID allocations.
+
+The panel uses the profile's browser-process network factory and bounded
+SimpleURLLoader requests for native Ollama or OpenAI-compatible JSON completions.
+No streaming or provider-specific SDK is needed. A text-only system protocol
+returns a message plus up to five proposed actions. Parsing/allowlist validation
+never executes actions; the panel validates live targets and dispatches requested
+actions directly without a second approval. Page context uses upstream
+content_extraction, not arbitrary JavaScript evaluation. The rendered conversation
+uses native selectable labels, not model-supplied HTML. Callbacks are weak and
+cancelled on Stop/disable/hide; tab handles and committed URLs prevent stale
+action retargeting. Messages use content-sized native labels in a scrolling log.
+The native Border-beam-inspired composer paints behind controls,
+animates only during a request, and stops when hidden or reduced motion is set.
+Speech capture/transcription and an in-process model runtime are not implemented.
+
+## Provider-neutral new tabs
+
+The full and third-party built-in new-tab WebUIs load the owned
+`browser/resources/blynx_new_tab.css`. The third-party page exposes one trusted
+Mojo search method to `browser/ui/blynx_new_tab_search`: it validates bounded UTF-8
+text, resolves the current TemplateURLService provider at submission time, and
+opens its HTTP(S) search through WebContents, including provider POST data when
+required. No external website receives this interface. Existing provider and
+extension new-tab routing is preserved.

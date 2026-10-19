@@ -9,6 +9,7 @@
 #include "base/task/sequenced_task_runner.h"
 #include "base/test/task_environment.h"
 #include "base/values.h"
+#include "browser/ai/assistant_protocol.h"
 #include "browser/appearance/search_appearance.h"
 #include "components/prefs/pref_registry_simple.h"
 #include "components/prefs/pref_service.h"
@@ -197,5 +198,99 @@ TEST(SearchAppearanceTest, ManagedAndFutureVersionsArePreserved) {
   prefs.SetManagedPref(kSearchAppearancePref,
                        base::Value(DefaultSearchAppearance()));
   EXPECT_FALSE(WriteSearchAppearance(prefs, DefaultSearchAppearance()));
+}
+
+TEST(AssistantProtocolTest, ConfigNeverIncludesKeyAndRequiresSecureEndpoint) {
+  auto config = DefaultAssistantConfig();
+  EXPECT_TRUE(ValidateAssistantConfig(config));
+  EXPECT_FALSE(config.FindBool("enabled").value());
+  config.Set("endpoint", "https://remote.example/api/chat");
+  EXPECT_FALSE(ValidateAssistantConfig(config));
+  config.Set("provider", "api");
+  EXPECT_TRUE(ValidateAssistantConfig(config));
+  for (const char* endpoint :
+       {"http://remote.example/chat", "https://user:secret@example.com/chat",
+        "file:///tmp/chat", "https://example.com/chat?key=secret",
+        "https://example.com/chat#secret"}) {
+    config.Set("endpoint", endpoint);
+    EXPECT_FALSE(ValidateAssistantConfig(config));
+  }
+  config.Set("endpoint", "http://127.0.0.1:1234/v1/chat/completions");
+  EXPECT_TRUE(ValidateAssistantConfig(config));
+  config.Set("api_key", "never persist this");
+  EXPECT_FALSE(ValidateAssistantConfig(config));
+}
+TEST(AssistantProtocolTest, ProposalsAreAtomicAndBounded) {
+  auto reply = ParseAssistantReply(
+      R"json({"message":"Review this","actions":[{"type":"open_tab","url":"https://example.com"},{"type":"set_theme","theme":"dark"}]})json");
+  ASSERT_TRUE(reply);
+  EXPECT_EQ(reply->FindList("actions")->size(), 2u);
+  for (
+      const char* bad :
+      {R"json({"message":"x","actions":[{"type":"open_tab","url":"javascript:alert(1)"}]})json",
+       R"json({"message":"x","actions":[{"type":"open_tab","url":"chrome://settings"}]})json",
+       R"json({"message":"x","actions":[{"type":"execute_script","code":"evil()"}]})json",
+       R"json({"message":"x","actions":[{"type":"close_tab","tab":0}]})json",
+       R"json({"message":"x","actions":[{"type":"set_vertical_tabs","enabled":"yes"}]})json",
+       R"json({"message":"x","actions":[{"type":"set_theme","theme":"dark","extra":true}]})json",
+       R"json({"message":"x","actions":[{"type":"close_tab","tab":1},{"type":"reload","tab":1}]})json"}) {
+    EXPECT_FALSE(ParseAssistantReply(bad));
+  }
+  base::ListValue actions;
+  for (int i = 0; i < 6; ++i) {
+    actions.Append(base::DictValue()
+                       .Set("type", "open_tab")
+                       .Set("url", "https://example.com"));
+  }
+  EXPECT_FALSE(ValidateAssistantActions(actions));
+}
+TEST(AssistantProtocolTest, ChatAndFencedJSONRemainPlainText) {
+  auto chat = ParseAssistantReply("<script>never execute this</script>");
+  ASSERT_TRUE(chat);
+  EXPECT_TRUE(chat->FindList("actions")->empty());
+  auto fenced = ParseAssistantReply(
+      "```json\n{\"message\":\"Hello\",\"actions\":[]}\n```");
+  ASSERT_TRUE(fenced);
+  EXPECT_EQ(*fenced->FindString("message"), "Hello");
+  EXPECT_FALSE(ParseAssistantReply(std::string(65537, 'x')));
+}
+TEST(AssistantProtocolTest, OllamaModelsAreBoundedAndDeduplicated) {
+  auto models = ParseOllamaModels(
+      R"json({"models":[{"name":"qwen2.5:0.5b"},{"name":"llama3.2:3b"}]})json");
+  ASSERT_TRUE(models);
+  ASSERT_EQ(models->size(), 2u);
+  EXPECT_EQ((*models)[0], "qwen2.5:0.5b");
+  EXPECT_EQ((*models)[1], "llama3.2:3b");
+  for (
+      const auto* invalid :
+      {R"json({"models":[{"name":"qwen2.5:0.5b"},{"name":"qwen2.5:0.5b"}]})json",
+       R"json({"models":[{"name":""}]})json",
+       R"json({"models":[{"model":"missing-name"}]})json",
+       R"json({"models":["not-a-model"]})json",
+       R"json({"models":{"name":"not-a-list"}})json"}) {
+    EXPECT_FALSE(ParseOllamaModels(invalid));
+  }
+  EXPECT_FALSE(ParseOllamaModels(std::string(512 * 1024 + 1, 'x')));
+}
+TEST(AssistantProtocolTest, ManagedAndFutureConfigsArePreserved) {
+  TestingPrefServiceSimple prefs;
+  RegisterAssistantPrefs(prefs.registry());
+  auto config = DefaultAssistantConfig();
+  config.Set("enabled", true);
+  ASSERT_TRUE(WriteAssistantConfig(prefs, config));
+  const auto saved = prefs.GetDict(kAssistantConfigPref).Clone();
+  auto invalid = config.Clone();
+  invalid.Set("key", "secret");
+  EXPECT_FALSE(WriteAssistantConfig(prefs, invalid));
+  EXPECT_EQ(prefs.GetDict(kAssistantConfigPref), saved);
+  config.Set("version", 2);
+  prefs.SetDict(kAssistantConfigPref, config.Clone());
+  EXPECT_FALSE(WriteAssistantConfig(prefs, DefaultAssistantConfig()));
+  EXPECT_EQ(prefs.GetDict(kAssistantConfigPref), config);
+  prefs.RemoveUserPref(kAssistantConfigPref);
+  prefs.SetManagedPref(kAssistantConfigPref,
+                       base::Value(DefaultAssistantConfig()));
+  EXPECT_FALSE(CanWriteAssistantConfig(prefs));
+  EXPECT_FALSE(WriteAssistantConfig(prefs, saved));
 }
 }  // namespace browser

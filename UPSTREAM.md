@@ -85,3 +85,19 @@ and fixes Views BubbleWidget palette resolution only when an explicit color-mode
 override exists. Review that branch against upstream bubble theme behavior during
 rebases. Strict versioned PrefService validation and native rendering remain owned
 under `browser/`; no React runtime or engine change is added.
+
+
+The October 17 product-resource pass adds a sixth reviewed patch,
+`0006-blynx-product-branding.patch`. It replaces remaining browser product assets,
+changes the native extension confirmation label, and connects an owned cosmetic
+renderer helper to main-frame Store documents. Its HTTPS/host/port and detail-route
+guards, unchanged Store controls and isolated-world behavior need review on rebase.
+No install verifier, Web Store API allowlist, UA or origin policy is changed.
+
+The provider-neutral new-tab/version/Store-promotion follow-on adds patch 0007.
+To keep ordered reverse checks valid, the full new-tab template/controller/style
+changes are folded into their existing patch-0003 sections, and its resource
+dependency into patch 0005. Patch 0007 owns third-party NTP Mojo/UI wiring, the
+shared CSS resource registration, components version-page assets/alt text. Owned
+search logic and Store cosmetic logic remain in `browser/`. Review default search
+provider routing, resource-ID allocations and exact Store selectors on rebase.

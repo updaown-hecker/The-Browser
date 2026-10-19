@@ -39,7 +39,8 @@ behavior applies to Windows, or that developer-mode loading proves Store access.
 
 We leave upstream install prompts/verifiers and restricted-origin rules intact.
 There is no Store scraping/downloader, Chrome-brand switch, key borrowing,
-frontend injection, allowlist bypass or package-signature workaround. The precise
+allowlist bypass or package-signature workaround. The cosmetic button-label
+change documented below does not alter installation behavior. The precise
 current limitation is **unverified integration and service/distribution approval**,
 not an invented blanket claim that all independent browsers are prohibited.
 
@@ -59,3 +60,27 @@ and install prompt. Record Store errors and platform details without bypassing t
 Do not advertise direct Store install, sync, Google OAuth, payment APIs or a
 specific extension's compatibility before its tested result. Some APIs depend on
 external services beyond Chromium's local engine.
+
+
+## Blynx installation labels
+
+Native extension confirmation now says **Add to Blynx**. At the user's request,
+an owned renderer helper also replaces exact English Add to Chrome / Chromium /
+Google Chrome button text and matching accessible labels on HTTPS
+`chromewebstore.google.com` detail pages. It runs only in the top frame at the
+standard HTTPS port, updates dynamically rendered buttons, and preserves nodes,
+listeners, disabled states, Store identity and existing permissions/verifiers.
+It exposes no native binding or installer and changes no user agent or allowlist.
+Other page text, providers, websites and untranslated labels are preserved.
+
+The local branding smoke uses a real HTTPS Store robots.txt response for its
+upstream parsed security headers, then controlled DOM buttons, plus intercepted
+non-Store documents. This validates the native label hook, not a real Store install.
+Run `python3 -B scripts/branding_smoke.py` after a completed browser build.
+
+The same exact-origin helper now suppresses the exact English “Switch to Chrome”
+recommendation banner and dialog on Store routes. It invokes only the dialog's
+existing “No thanks” button before hiding a retained dialog, allowing the site's
+normal focus/scrim cleanup. Unrelated dialogs, permission requests, warnings and
+installation controls are preserved. This presentation adapter remains sensitive
+to upstream markup/localization changes and does not establish Store compatibility.

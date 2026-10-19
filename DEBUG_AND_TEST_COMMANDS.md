@@ -692,3 +692,35 @@ Related project references: `HANDOFF.md`, `TODO.md`, `BUILD_LINUX.md`,
 `BUILD_WINDOWS.md`, `EXTENSIONS.md`, `PERFORMANCE.md`, `SECURITY.md`, `UPSTREAM.md`.
 
 Native search pointer regressions run with `python3 -B scripts/native_smoke.py --platform x11`: outside-click dismissal and real omnibox focus after Enter and reopen/Escape. Wayland baseline smoke does not synthesize these popup interactions on this host.
+
+
+### Native assistant checks (October 17)
+
+After a completed browser build, run `python3 -B scripts/assistant_smoke.py`.
+This uses a disposable X11 profile and deterministic loopback Ollama/API fixtures,
+checks conversation/history/long replies, keyboard submission, direct supported
+actions, stale targets, cancellation, credentials, restart and private exclusion.
+Results and screenshots stay in `.local/assistant-smoke/`. It does not validate
+real model quality, live Wayland input, IME composition or external API services.
+
+
+### Product branding checks (October 17)
+
+Run `python3 -B scripts/branding_smoke.py` after a completed build. It checks
+owned icon mappings and compiled resource packs, native Add to Blynx strings,
+Store-label behavior and the actual dark Extensions toolbar in a disposable
+headless profile. It reads a real HTTPS Store robots.txt response for security
+headers, then constructs fixture controls without changing CSP or installing
+extensions. Results/screenshots: `.local/branding-smoke/`. Source asset generation
+uses `python3 scripts/generate_product_icons.py`; review/refresh patch 0006 and
+reintegrate/rebuild afterward. Platform asset generation is not platform validation.
+
+### Provider-neutral new-tab checks
+
+Run `python3 -B scripts/newtab_smoke.py` after a completed build. Its disposable
+profile switches to fixture Brave/custom search providers through trusted Settings,
+checks version branding and both built-in new-tab layouts, verifies Brave query
+navigation with DNS blocked, submits to a loopback provider, and checks narrow-window overflow. Results/screenshots stay in
+`.local/newtab-smoke/`. Branding smoke additionally checks exact Store promotion
+suppression, the site's dismissal callback, and retained security/permission UI.
+No personal search preferences or real Store installations are changed.

@@ -22,6 +22,8 @@ test("browser_identity_appearance_unittests") {
 # Leaf PrefService adapter: no dependency on chrome/browser/ui or prefs:impl.
 source_set("appearance_prefs") {
   sources = [
+    "ai/assistant_protocol.cc",
+    "ai/assistant_protocol.h",
     "appearance/appearance_pref_store.cc",
     "appearance/appearance_pref_store.h",
     "appearance/search_appearance.cc",
@@ -31,6 +33,7 @@ source_set("appearance_prefs") {
     ":browser_identity_appearance",
     "//base",
     "//components/prefs",
+    "//url",
   ]
 }
 
@@ -42,6 +45,7 @@ if (!is_android) {
     sources = [
       "ui/customize_browser_dialog.h",
       "ui/blynx_command_center.h",
+      "ui/blynx_assistant_panel.h",
       "ui/native_appearance_controller.h",
     ]
     public_deps = [

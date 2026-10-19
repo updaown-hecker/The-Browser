@@ -1,6 +1,6 @@
 # Blynx — live handoff
 
-Updated October 16, 2026. Native Chromium development distribution, not a
+Updated October 17, 2026. Native Chromium development distribution, not a
 completed daily-driver release. User explicitly selected the company/product
 name **Blynx**. Preserve Chromium/Views/C++23/GN/Clang/libc++, sandbox/isolation,
 pins, OS policy, credentials and existing profiles. No Electron/WebView shell.
@@ -10,8 +10,8 @@ pins, OS policy, credentials and existing profiles. No Electron/WebView shell.
 KDE neon 24.04 x86-64, KDE Wayland, Ryzen 7 5700, 31 GiB RAM. Existing repository
 commits are preserved; session changes are unstaged. Never stage `.local/`,
 PROMPT.txt, secrets, browser data or crash dumps. No OS security change or package
-installation was made. Owned code is `browser/`; five reviewed patches in
-`patches/series`; pins in `config/`. Integration installs 40 owned files and records
+installation was made. Owned code is `browser/`; seven reviewed patches in
+`patches/series`; pins in `config/`. Integration installs 75 owned files and records
 hashes in `.local/chromium/src/.browser-final-overlay.json`.
 
 Pinned Chromium 154.0.8037.97 / `b510e9d7cd3a2fbd78d0ddc42234103206c5f78d`,
@@ -761,3 +761,230 @@ Final render/build follow-up:
   including custom surface pixels, search/navigation, dismissal and restart;
   `.local/logs/search-options-native-release.log` and
   `.local/native-smoke-x11/results.json`.
+
+## October 16 — assistant integration and launch-readiness repair
+
+The new native assistant slice was present in the workspace but had not been
+reintegrated into the ignored Chromium checkout. The launcher readiness guard
+therefore refused the desktop entry with a generic “development build may be
+incomplete” notification. The specific stale-overlay error named
+`browser/ai/assistant_protocol.cc`; the current assistant protocol/panel and one
+updated test copy were newer than the installed overlay. The build receipt was
+internally valid for the older overlay, so it was not edited or bypassed.
+
+Read-only integration preflight passed, then `python3 -B scripts/integrate.py`
+installed the four changed overlay files and reported no upstream conflicts. The
+repair build succeeded in five steps / 23.16 seconds using the existing Linux
+release output (`.local/logs/assistant-repair-build.log`). The post-build readiness
+guard passed, `scripts/integrate.py --check` reported zero pending writes, and
+`git diff --check` passed. The launcher was exercised with a fresh disposable
+profile and reached a local DevTools endpoint reporting Chrome/154.0.8037.97;
+evidence is `.local/logs/assistant-launch-smoke.log`. The launch log retains the
+known host/upstream Wayland Vulkan, GCM and GLib diagnostics; no sandbox bypass or
+OS policy change was made. Existing user windows and profiles were not edited.
+
+The complete Python tooling suite passed **98 tests**
+(`.local/logs/assistant-repair-tooling.log`). The new X11 assistant smoke was
+attempted with only a local deterministic model fixture, but stopped at its first
+connection-field focus assertion:
+`Atspi.Component.grab_focus("Chat endpoint URL")` returned false after the panel
+opened. Its report is `.local/assistant-smoke/results.json` and log is
+`.local/logs/assistant-smoke-final.log`; this is not counted as assistant feature
+validation. The browser build and launcher readiness are repaired, but assistant
+provider/action behavior, Wayland panel interaction and the AT-SPI focus issue
+remain to be investigated. Restart Blynx (or launch `./blynx`) to use the rebuilt
+binary.
+
+## October 17 — conversational assistant and direct browser actions
+
+Read the repository Markdown documentation and the current local Modern Web
+Guidance/Libraries.dev skills and beam/orb references. Preserved the native
+Views/Chromium stack; no React/npm runtime, model download, profile migration,
+pin/toolchain/OS-policy change or credential persistence was introduced.
+
+- Replaced fixed 340×64 message boxes and the fixed transcript canvas with
+  content-sized selectable messages measured at the scroll viewport width.
+  New messages scroll to the bottom after a successful compositor frame; a posted
+  task alone ran before layer geometry was ready. The smoke checks reply position.
+  User bubbles, plain assistant replies, a compact header (+ / Settings / close),
+  empty-state introduction, model caption and a bottom composer form the chat.
+  The composer has a segmented native Skia beam rim, moving only during requests;
+  hidden/reduced-motion/contrast safeguards remain. Speech is opt-in by default.
+- Enter sends and Shift+Enter inserts a newline. Chromium Textarea consumes
+  Return before TextfieldController, so an owned native subclass intercepts at
+  PreHandleKeyPressed and leaves IME composition to the native control.
+- Supported requested browser actions now validate and dispatch directly, with
+  no Run these actions/Dismiss approval surface. The system prompt reflects this.
+  Existing bounded allowlist, HTTP(S), weak/live tab URL, last-tab, regular-profile
+  and appearance-policy checks remain. Optional tab/page sharing stays explicit.
+- Updated the owned GRIT strings and their patch-0005 added-file copy together.
+  Reviewed/applied the exact three-line installed catalog delta before normal
+  scripts/integrate.py; its conflict guard was preserved. No unrelated upstream
+  edits were overwritten. All owned source updates used the integration script.
+
+Validation:
+- Final native browser build passed, 3 steps / 25.05s;
+  `.local/logs/assistant-chat-build-scroll-final.log`. Final integration preflight reports
+  zero pending writes; clang-format dry run and git diff --check passed.
+- All 98 Python tooling tests passed (`assistant-chat-tooling-final.log`).
+  All 17 focused Chromium PrefService/protocol tests passed
+  (`assistant-chat-prefs.log`); UI GN header/dependency check passed
+  (`assistant-chat-gn-final.log`).
+- All 17 actual X11 assistant checks passed against local deterministic Ollama/API
+  fixtures, including multi-turn history, Enter/Shift+Enter, 1,425-pixel long reply,
+  direct opening/switching/closing tabs, stale-target rejection, appearance actions,
+  invalid-action rejection, Stop/late response, API bearer header, redirect block,
+  hide/key undo clearing, disable/New chat, clean restart and private exclusion.
+  `.local/logs/assistant-chat-smoke-final.log`, `.local/assistant-smoke/results.json`.
+  Conversation and long-reply screenshots were visually inspected.
+- General headless browser smoke (before the final assistant-scroll-only rebuild)
+  passed all 53 checks with no page errors,
+  including restart, Settings, navigation, local MV3 fixtures and sandbox status.
+  `.local/logs/assistant-chat-runtime.log`, `.local/runtime-smoke/results.json`.
+- Earlier runs exposed a blank transcript (unbounded ScrollView contents were
+  never sized), then Return interception in upstream Textarea. Both were fixed
+  and retested. One run stopped safely on a transient fixture X11 focus refusal;
+  bounded retries preserve the verified-client focus guard. AT-SPI warnings about
+  an unrelated sandboxed application are retained in logs.
+
+No real remote API/model quality, live Wayland assistant interaction, native IME
+composition, Windows, full inherited suites, broad accessibility/performance or
+release validation is claimed. Tests used disposable profiles and fixture keys.
+Restart Blynx to load the rebuilt executable; Ctrl+Alt+A opens the panel. Existing
+personal windows/profiles were not stopped or edited.
+
+## October 17 — remaining product icons and Add to Blynx
+
+User requested replacing remaining Chromium product icons and the extension
+installation button label. The current integration now has **six** reviewed
+patches and **65** owned overlay files. Patch 0006 carries the added resource and
+renderer wiring; existing local changes, pins, GN arguments, credentials, OS
+policy and profiles were preserved.
+
+- Replaced 24 additional product resources: large/unscaled PNGs and Linux shortcut/
+  XPM icons, product/fallback SVGs, light/dark wordmarks, tray mask, Windows app/
+  document/PDF ICOs, macOS ICNS and the shared dark-mode WebUI logo. Existing
+  scaled/native eye resources remain in patch 0004. The light eye has explicit
+  24×24 intrinsic dimensions. Functional incognito/isolation glyphs and actual
+  external provider/Chrome Web Store identities are preserved.
+- `browser/resources/icons/chromium-replacements.json` maps upstream paths to
+  owned derivatives. `scripts/generate_product_icons.py` regenerates owned files
+  from existing Blynx artwork and the existing local graphics/font tools; it
+  never writes the upstream checkout. Binary patch refresh/integration is separate.
+- Native extension confirmation says Add to Blynx. The owned renderer helper in
+  `browser/renderer/` changes exact English Add to Chrome / Google Chrome /
+  Chromium button text and matching accessible labels on HTTPS Store detail
+  pages. Main-frame, exact host, port and route guards restrict it. Mutation
+  updates are coalesced once per animation frame. Nodes/listeners/disabled states,
+  descriptions, Store branding and permission/verification flows are unchanged.
+  It exposes no native binding and never clicks or installs anything. This is a
+  user-authorized cosmetic exception to earlier documentation's no-frontend-
+  modification statement, not a replacement Store or a service-identity change.
+
+Validation:
+- Browser build passed: initial 240 actions / 44.62s, final renderer polish four
+  actions / 29.78s, final dark-logo build two actions / 7.81s. The completed final
+  integration/XPM receipt refresh was a successful no-op in 6.93s.
+  `.local/logs/product-branding-build{,-final,-complete}.log`.
+- All six branding checks passed with no page errors:
+  `.local/logs/product-branding-smoke-final.log`, `.local/branding-smoke/results.json`.
+  Verified the actual native renderer hook, dynamic/SPA labels, accessible-name
+  changes, unchanged listeners/disabled controls/descriptions, lookalike/other-site
+  exclusion, the real dark Extensions toolbar and all 24 asset mappings. Parsed
+  the compiled resource packs to compare the 64/128/256/SVG/dark logo bytes and
+  native English install string. Store-fixture and Extensions screenshots were
+  visually inspected; the wide dark-mode Extensions toolbar visibly uses the eye.
+- General browser smoke passed 53 checks, no page errors, including ordinary
+  navigation, Settings, restart, local MV3 behavior and sandbox status;
+  `.local/logs/product-branding-runtime.log`, `.local/runtime-smoke/results.json`.
+- All 98 tooling tests passed (`product-branding-tooling-final.log`); renderer GN
+  dependency check, owned C++ formatting, script syntax, integration preflight
+  (zero pending writes) and git diff --check passed.
+
+The first fully synthetic Store response hit upstream GoogleURLLoaderThrottle's
+CHECK for parsed response headers. No security check was relaxed. The final smoke
+loads the real HTTPS Store robots.txt response, then builds controlled DOM nodes
+without innerHTML, preserving CSP/Trusted Types and parsed security headers.
+Other-site fixtures are intercepted; no extension is installed. Earlier harness
+assumptions about gzip SVG packs, UTF-8 locale packs and chrome-resource fetches
+were corrected. Actual image loading and resource-pack comparisons replace the
+unsupported fetch test. Source assets for Windows/macOS are not runtime evidence.
+
+Not executed: a real Store installation, external-provider compatibility, Windows/
+macOS builds/runtime/installer identity, localization of non-English Store labels,
+full inherited security/extension suites or packaging. An upstream Store layout/
+wording change may require adjusting this cosmetic adapter. Restart Blynx to use
+this build. Existing personal browser processes/profiles were not stopped/edited.
+
+## October 17 — provider-neutral canvas, version page and Store recommendations
+
+User requested removal of the two exact English Chrome recommendation prompts,
+version-page Chromium branding and the empty non-Google new-tab search area.
+Read repository Markdown/current local web guidance; kept the native Chromium
+stack, routing, pins, sandbox, profiles and credentials unchanged.
+
+- Both built-in new-tab surfaces share owned `blynx_new_tab.css`, with an eye
+  header, Aurora/Midnight/Paper canvas, browser shortcut cards, upstream top sites,
+  responsive sizing, visible focus and reduced-motion/forced-color fallbacks.
+- The third-party built-in NTP has a labeled native form and trusted Mojo search
+  handler. The owned C++ helper validates bounded UTF-8, resolves the current
+  TemplateURLService default at submission, and navigates through Chromium's
+  WebContents, supporting provider GET/POST templates. External provider/extension
+  NTP routing is preserved; no website-native search bridge is introduced.
+- Six separate components-resource version wordmarks/favicons now use Blynx;
+  logo alt text says Blynx logo. Chromium Authors copyright is retained.
+- The exact-origin/top-frame isolated-world Store helper hides only banners and
+  dialogs matching the supplied English text/structure. It invokes the matching
+  dialog's No thanks button for normal focus/scrim cleanup, never installation.
+  Existing Add to Blynx labeling remains detail-route-only.
+- Seven reviewed patches/75 owned files. Full NTP template/controller/style folded
+  into existing patch 0003, full NTP resource dependency into patch 0005; patch
+  0007 adds third-party UI/Mojo, shared resource registration and version assets.
+  Normal integration conflict guards remained intact.
+
+Validation:
+- Browser build passed: 618 actions / 11m12.70s, followed by formatting cleanup
+  (2 actions / 22.59s) and final crisp third-party logo resource polish
+  (6 actions / 19.13s). Logs `.local/logs/newtab-store-build5.log`,
+  `newtab-store-build-complete.log`, `newtab-store-build-release.log`.
+- Final Store/branding smoke passed all eight checks with no page errors. Exact
+  banner/dialog suppression, the site's No thanks callback, unrelated security/
+  permission UI retention, dynamic/category/detail routes, listeners/disabled
+  controls, other-origin exclusion and dark Extensions icon were exercised. All
+  30 source asset mappings and compiled version wordmarks/product packs match.
+  `.local/logs/newtab-store-branding-final.log`, `.local/branding-smoke/results.json`.
+- Final new-tab smoke passed all six checks and exited cleanly, no page errors:
+  version Blynx wordmark/alt text with Chromium copyright, shared Google canvas,
+  selected Brave provider/form, correctly encoded native Brave destination URL,
+  successful loopback-provider query navigation, 390px layout without horizontal
+  overflow, compiled branding. `.local/logs/newtab-search-smoke-final.log`,
+  `.local/newtab-smoke/results.json`. Desktop/narrow/version screenshots inspected.
+- All 98 tooling tests passed (`newtab-store-tooling-release.log`); both new-tab
+  GN dependency checks passed (`newtab-google-gn-verified.log`,
+  `newtab-third-party-gn-release.log`). CSS stylelint, owned/new C++ formatting,
+  script syntax, integration preflight (zero pending writes) and git diff
+  whitespace checks passed.
+- Final general browser smoke passed all 53 checks with no page errors,
+  including Settings/restart, navigation, local MV3 fixtures and Seccomp-BPF
+  sandbox status. `.local/logs/newtab-store-runtime-final.log`,
+  `.local/runtime-smoke/results.json`.
+
+Initial iterations corrected a ResourceRequestBody API call and a direct GRIT
+resource dependency. An unnecessary new string ID was removed to avoid continued
+resource-ID shifts. Own builds were interrupted cleanly before resuming; no
+concurrent builds, security-policy changes or readiness bypass occurred.
+
+The initial search harness failed to intercept native navigation and received
+Brave's bot-check page for a fixed synthetic query; the native destination URL
+was correct. The final harness blocks Brave DNS resolution and checks the native
+destination URL, then tests successful submission against a loopback HTTP
+provider. It does not claim Brave's live service accepted a query. A fixture
+HTTP preconnection initially kept Node alive after assertions; explicit tracked
+socket destruction fixed cleanup and the final process exited successfully.
+The earlier hanging process was stopped, its run was not counted as passing.
+
+Not executed: real Store installation, non-English/changed Store selectors,
+provider POST end-to-end, external provider/extension-owned NTP compatibility,
+Windows/macOS runtime, broad inherited security/accessibility/performance or
+release suites. No personal profiles/preferences, keys, existing user processes,
+pins, toolchain or OS settings were changed. Restart Blynx to load this build.

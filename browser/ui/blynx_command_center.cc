@@ -19,6 +19,7 @@
 #include "base/task/single_thread_task_runner.h"
 #include "base/time/time.h"
 #include "browser/appearance/search_appearance.h"
+#include "browser/ui/blynx_assistant_panel.h"
 #include "cc/paint/paint_filter.h"
 #include "cc/paint/paint_flags.h"
 #include "cc/paint/paint_shader.h"
@@ -33,6 +34,7 @@
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/grit/generated_resources.h"
+#include "chrome/grit/branded_strings.h"
 #include "components/prefs/pref_service.h"
 #include "content/public/browser/web_contents.h"
 #include "third_party/skia/include/core/SkPath.h"
@@ -611,6 +613,7 @@ class BlynxCommandCenter::Delegate : public views::BubbleDialogDelegate,
     int command = 0;
     base::WeakPtr<content::WebContents> tab;
     std::u16string input;
+    bool assistant = false;
   };
 
   bool HandleKeyEvent(views::Textfield*, const ui::KeyEvent& event) override {
@@ -660,6 +663,10 @@ class BlynxCommandCenter::Delegate : public views::BubbleDialogDelegate,
         }
       }
       if (!query.empty()) {
+        if (browser_->GetProfile()->IsRegularProfile() &&
+            !browser_->GetProfile()->IsOffTheRecord()) {
+          add({String(IDS_BLYNX_AI_TITLE) + u" · Ctrl+Alt+A", 0, {}, {}, true});
+        }
         add({String(IDS_BLYNX_SEARCH_CUSTOM_TITLE),
              0,
              {},
@@ -706,7 +713,7 @@ class BlynxCommandCenter::Delegate : public views::BubbleDialogDelegate,
       Refresh();
       return;
     }
-    if (!result.command && result.input.empty() &&
+    if (!result.assistant && !result.command && result.input.empty() &&
         (!result.tab || browser_->GetTabStripModel()->GetIndexOfWebContents(
                             result.tab.get()) < 0)) {
       Refresh();
@@ -717,7 +724,9 @@ class BlynxCommandCenter::Delegate : public views::BubbleDialogDelegate,
           if (!browser) {
             return;
           }
-          if (result.command) {
+          if (result.assistant) {
+            ToggleBlynxAssistant(*browser);
+          } else if (result.command) {
             if (CommandEnabled(*browser, result.command)) {
               chrome::ExecuteCommand(browser.get(), result.command);
             }

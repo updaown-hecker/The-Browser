@@ -1,5 +1,24 @@
 # Changelog
 
+## October 17, 2026 — product icons and extension installation labels
+- Replaced 24 remaining browser product resources, including larger icons,
+  shortcuts, SVG fallbacks, dark-mode WebUI logo, wordmarks and platform files.
+- Native extension confirmation and matching English Store install buttons say
+  Add to Blynx. Store identity, click behavior and installation checks remain.
+
+## October 17, 2026 — conversational assistant
+- Replaced fixed-height replies with a content-sized scrolling conversation,
+  compact header, new-chat control, model caption and rounded beam composer.
+- Enter sends, Shift+Enter inserts a line; native IME composition prevents sends.
+- Requested supported browser actions dispatch without a second approval prompt;
+  bounded action validation, live target, profile and policy guards remain.
+
+## October 16, 2026 — assistant side panel
+- Added native Ctrl+Alt+A chat with Ollama or an OpenAI-compatible API endpoint,
+  session-only API keys, optional tab/page context, cancellation and native action
+  approval for tabs and appearance. Added a Voice-inspired native composer glow.
+- No model download, microphone capture or arbitrary website scripting.
+
 ## October 16, 2026 — configurable search appearance
 
 - Added per-profile search customization under Settings → Appearance: five beam
@@ -148,3 +167,12 @@ targeted compiler and runtime status is recorded in `HANDOFF.md`.
 - Validated the Linux link, 46 runtime / 51 combined native checks, nine PrefService
   tests and 93 tooling tests; independent existing/completed/future-state native
   fixtures pass. Data import through OS selection and other release gates remain.
+
+### New-tab, version page and Store presentation (October 17)
+
+- Shared the Blynx canvas across built-in new-tab providers; added a visible
+  native-provider-backed search form for non-Google defaults such as Brave.
+- Replaced separate version-page Chromium wordmarks and favicons with Blynx
+  resources while preserving Chromium attribution.
+- Suppressed the exact English Store Chrome recommendation banner/dialog,
+  preserving permission/security dialogs and the upstream installation flow.

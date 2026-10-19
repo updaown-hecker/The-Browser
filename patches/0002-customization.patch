@@ -1026,10 +1026,10 @@ index 085b77c..458a13a 100644
    certificate_transparency::prefs::RegisterPrefs(registry);
    ChromeContentBrowserClient::RegisterProfilePrefs(registry);
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index 0ab25c63c9..a1752a4b1f 100644
+index 0ab25c63c9..44b4ed630c 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -2472,6 +2472,28 @@ static_library("ui") {
+@@ -2472,6 +2472,31 @@ static_library("ui") {
      }
    }
 
@@ -1038,12 +1038,15 @@ index 0ab25c63c9..a1752a4b1f 100644
 +  if (toolkit_views && !is_android) {
 +    sources += [
 +      "//browser/ui/blynx_command_center.cc",
++      "//browser/ui/blynx_assistant_panel.cc",
++      "//browser/ui/blynx_assistant_panel.h",
 +      "//browser/ui/customize_browser_dialog.cc",
 +      "//browser/ui/internal_page_alias.cc",
 +      "//browser/ui/internal_page_alias.h",
 +      "//browser/ui/native_appearance_controller.cc",
 +    ]
 +    deps += [
++      "//components/content_extraction/content/browser",
 +      "//browser:appearance_prefs",
 +      "//browser:customization_dialog_headers",
 +      "//chrome/app:generated_resources",

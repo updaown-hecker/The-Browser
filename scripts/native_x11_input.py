@@ -87,12 +87,14 @@ class NativeX11Input:
             self.x11.XSync(display, 0)
             self.x11.XCloseDisplay(display)
 
-    def press_key(self, symbol, control=False):
+    def press_key(self, symbol, control=False, alt=False, shift=False):
         """Send one key/chord only after focusing the verified fixture client."""
         display = self.x11.XOpenDisplay(None)
         if not display:
             raise RuntimeError("No X11 test display")
         control_code = self.x11.XKeysymToKeycode(display, 0xffe3)
+        alt_code = self.x11.XKeysymToKeycode(display, 0xffe9)
+        shift_code = self.x11.XKeysymToKeycode(display, 0xffe1)
         try:
             self.x11.XSetInputFocus(display, self.window, 2, 0)
             self.x11.XSync(display, 0)
@@ -101,14 +103,22 @@ class NativeX11Input:
             if focus.value != self.window:
                 raise RuntimeError("Refusing keyboard input without test-client focus")
             code = self.x11.XKeysymToKeycode(display, symbol)
-            if not code or (control and not control_code):
+            if not code or (control and not control_code) or (alt and not alt_code) or (shift and not shift_code):
                 raise RuntimeError("No fixture key in the X11 keyboard layout")
             if control:
                 self.xtest.XTestFakeKeyEvent(display, control_code, 1, 0)
+            if alt:
+                self.xtest.XTestFakeKeyEvent(display, alt_code, 1, 0)
+            if shift:
+                self.xtest.XTestFakeKeyEvent(display, shift_code, 1, 0)
             self.xtest.XTestFakeKeyEvent(display, code, 1, 0)
             self.xtest.XTestFakeKeyEvent(display, code, 0, 0)
             self.x11.XSync(display, 0)
         finally:
+            if shift and shift_code:
+                self.xtest.XTestFakeKeyEvent(display, shift_code, 0, 0)
+            if alt and alt_code:
+                self.xtest.XTestFakeKeyEvent(display, alt_code, 0, 0)
             if control and control_code:
                 self.xtest.XTestFakeKeyEvent(display, control_code, 0, 0)
             self.x11.XSync(display, 0)
